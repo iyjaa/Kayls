@@ -4,7 +4,7 @@ Terminal Studio Code — A terminal-based IDE with a VS Code-like experience.
 
 ## Status
 
-🚧 **v0.1.0** — Workspace setup. Actively in development.
+**Tsc-v0.1.0** — Workspace setup. Actively in development.
 
 ## Build
 

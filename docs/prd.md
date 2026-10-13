@@ -157,3 +157,30 @@ Input (crossterm) → Keybind → Command → App State → UI (ratatui) → Ter
 
 > **v1.0 first, public documentation later.**
 > Focus on solo development. Open for contributions once the foundation is stable.
+>
+> ---
+
+## 11. Versioning
+
+Tscode uses a custom versioning scheme:
+
+    Tsc-vX.Y.Z   ->  Unstable
+    Tsc-sX.Y.Z   ->  Stable
+
+| Position | Meaning |
+|----------|---------|
+| X | Major feature (planned) |
+| Y | Sub-feature (discovered during development) |
+| Z | Bug fix count |
+
+**Golden rule**: In `Tsc-v`, no new features. Only bug fixes. New features start after `Tsc-s`.
+
+See [versioning.md](versioning.md) for full details.
+See [roadmap.md](roadmap.md) for actual feature progress.
+
+---
+
+## 12. Principles
+
+> v1.0 first, public documentation later.
+> Focus on solo development. Open for contributions once the foundation is stable.

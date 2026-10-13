@@ -32,50 +32,68 @@ Personal notes during Tscode development. Not public documentation.
 - `docs/prd.md` — added section 11 (Versioning)
 - `docs/roadmap.md` — rewritten with `Tsc-v` / `Tsc-s` scheme
 
-### Examples are illustrations only
-- Examples in `versioning.md` (X=1 Terminal, X=2 LSP, X=3 AI Agent) are illustrations
-- Actual feature progress lives in `roadmap.md`
-- This is noted in `README.md`
-
 ### Next TODO
 - [ ] Dogfood 3 days, then promote `Tsc-v0.1.0` to `Tsc-s0.1.0`
-- [ ] Update `Cargo.toml` to read from `VERSION` (build.rs)
 - [ ] Start `Tsc-v0.2.0`: editor basic layout
 
 ---
 
-## 2026-10-13 — Initial Setup
+## 2026-10-14 — Tsc-v0.2.x Progress
 
 ### Done
-- Set up Rust workspace with 5 crates
-- Root `Cargo.toml` with `[workspace]`
-- Crates: tscode-core, tscode-syntax, tscode-terminal, tscode-tui, tscode
-- Git init & push to GitHub (https://github.com/iyjaa/Tscode)
-- `cargo build --workspace` succeeded
-- `cargo run -p tscode` → `Tscode v0.1.0`
+- `Tsc-s0.1.0` — promote versioning setup
+- `Tsc-v0.2.0` — layout TUI statis (tab bar, explorer, editor, status bar)
+- `Tsc-s0.2.0` — promote layout
+- `Tsc-v0.2.1` — buka file via argumen (`tscode file.rs`)
+- `Tsc-s0.2.1` — promote buka file
+- `Tsc-v0.2.2` — cursor movement (arrow keys, highlight, status posisi)
+- `Tsc-s0.2.2` — promote cursor
+- `Tsc-v0.2.3` — nomor baris di editor (in progress)
 
 ### Decisions
-- **Workspace from the start** — to scale up to v1.0
-- **Version 0.1.0** in root `[workspace.package]`, all crates use `version.workspace = true`
-- **Non-modal** — VS Code keybindings, not Vim
-- **Rust first** for syntax highlighting
+- **Workspace dari awal** — scalable sampai v1.0
+- **Non-modal** — keybinding VS Code, bukan Vim
+- **Rust first** untuk syntax highlighting
+- **`Document` di `tscode-core`** — logika file di core, rendering di tui
+- **`Cursor` terpisah** — `tscode-core/src/cursor.rs`
+- **File tree 12 kolom** (Length) — hemat ruang di layar HP
+- **Nomor baris 3 kolom** — cukup untuk 2 digit
+- **Warna `Gray`** untuk nomor baris — terang tapi tidak mengganggu
+- **Toggle explorer sementara di-skip** — karena `Ctrl+B` bentrok dengan Acode
 
-### Notes
-- `cargo new` creates `.git` & `.gitignore` inside each crate → must be removed
-- Use `--vcs none` for new crates going forward
-- First build is slow (~6 min), subsequent builds are fast
+### Known Issues
+- **Explorer masih hardcoded** — cuma teks statis, belum baca folder asli
+- **Toggle explorer tidak bekerja** di terminal Acode — `Ctrl+B` diteruskan ke Acode
+- **`Cargo.toml` versi tidak sinkron** — root masih `0.2.0`, sementara `VERSION` sudah `0.2.3`
+
+### Files Updated (v0.2.x)
+- `crates/tscode-core/src/document.rs` — `Document` struct
+- `crates/tscode-core/src/cursor.rs` — `Cursor` struct
+- `crates/tscode-core/src/lib.rs` — ekspos `Document`, `Cursor`
+- `crates/tscode-tui/src/app.rs` — `App` state, handle key
+- `crates/tscode-tui/src/ui.rs` — render editor, nomor baris
+- `crates/tscode-tui/src/lib.rs` — `run()` terima `Document`
+- `crates/tscode/src/main.rs` — parsing argumen dengan `clap`
+- `crates/tscode/build.rs` — baca `VERSION`
 
 ### Next TODO
-- [ ] Clean up `Cargo.toml` (fix email, add description)
-- [ ] `main.rs` with clap (`--version`, `--help`)
-- [ ] v0.2.0: TUI layout (tab bar, file tree, editor, status bar)
-- [ ] v0.2.0: Open file & display its contents
+- [ ] Selesaikan `Tsc-v0.2.3` — nomor baris rapi
+- [ ] Promosi `Tsc-s0.2.3`
+- [ ] `Tsc-v0.2.4` — insert karakter (editor bisa ngetik)
+- [ ] `Tsc-v0.2.5` — delete (Backspace)
+- [ ] `Tsc-v0.2.6` — save (`Ctrl+S`)
+- [ ] `Tsc-v0.3.0` — file tree fungsional
+
+### Notes
+- **Git detached HEAD** pernah terjadi saat rebase — sudah diperbaiki dengan `--force push`
+- **Tag `1`** pernah terbuat tidak sengaja — sudah dihapus
+- **Build pertama lama (~6 menit)**, selanjutnya cepat
+- **`cargo new` bikin `.git` & `.gitignore`** di tiap crate — harus dihapus, pakai `--vcs none` ke depannya
 
 ---
 
 ## Template for New Entries
 
-```markdown
 ## YYYY-MM-DD — Title
 
 ### Done

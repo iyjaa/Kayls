@@ -38,16 +38,17 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
 
     // Tentukan area editor
     let editor_area: Rect = if app.show_explorer {
+        // File tree lebih kecil: 15% biar editor lega
         let cols = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([
-                Constraint::Percentage(25),
-                Constraint::Percentage(75),
+                Constraint::Length(12),   // File tree 12 kolom
+                Constraint::Min(0),       // Editor sisa
             ])
             .split(rows[1]);
 
         frame.render_widget(
-            Paragraph::new("src/\n  main.rs\n  lib.rs")
+            Paragraph::new("src/\n  main\n  lib")
                 .block(Block::default().borders(Borders::ALL).title(" Explorer ")),
             cols[0],
         );
@@ -60,22 +61,12 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     // Editor
     match &app.document {
         Some(doc) => {
-            let lines = render_lines_with_cursor(doc);
-            frame.render_widget(
-                Paragraph::new(lines)
-                    .block(Block::default().borders(Borders::ALL).title(" Editor ")),
-                editor_area,
-            );
-
-            // Set posisi cursor di terminal
-            let cursor_x = editor_area.x + 1 + doc.cursor.col as u16;
-            let cursor_y = editor_area.y + 1 + doc.cursor.line as u16;
-            frame.set_cursor_position((cursor_x, cursor_y));
+            render_editor(frame, doc, editor_area);
         }
         None => {
             frame.render_widget(
                 Paragraph::new(
-                    "Welcome to Tscode!\n\nOpen a file: tscode <file>\nPress 'q' to quit.\nPress Ctrl+B to toggle explorer.",
+                    "Welcome to Tscode!\n\nOpen a file: tscode <file>\nPress 'q' to quit.",
                 )
                 .block(Block::default().borders(Borders::ALL).title(" Editor ")),
                 editor_area,
@@ -91,8 +82,8 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         .unwrap_or_else(|| "-:-".to_string());
 
     let status = format!(
-        " NORMAL   Tscode {}   Rust   UTF-8   {} ",
-        version, cursor_info
+        " NORMAL   {}   {}:{} ",
+        version, cursor_info, ""
     );
     frame.render_widget(
         Paragraph::new(status)
@@ -101,18 +92,53 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     );
 }
 
+fn render_editor(frame: &mut Frame, doc: &tscode_core::Document, area: Rect) {
+    // Bagi editor jadi 2: nomor baris + isi
+    let cols = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Length(3),   // nomor baris: 2 digit + spasi
+            Constraint::Min(0),      // isi file
+        ])
+        .split(area);
+
+    // Nomor baris
+    let line_count = doc.lines.len();
+    let numbers: String = (1..=line_count)
+        .map(|n| format!("{:>2} ", n))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    frame.render_widget(
+        Paragraph::new(numbers)
+            .style(Style::default().fg(Color::Gray)),
+        cols[0],
+    );
+
+    // Isi file dengan cursor
+    let lines = render_lines_with_cursor(doc);
+    frame.render_widget(
+        Paragraph::new(lines)
+            .block(Block::default().borders(Borders::ALL).title(" Editor ")),
+        cols[1],
+    );
+
+    // Posisi cursor terminal
+    let cursor_x = cols[1].x + 1 + doc.cursor.col as u16;
+    let cursor_y = cols[1].y + 1 + doc.cursor.line as u16;
+    frame.set_cursor_position((cursor_x, cursor_y));
+}
+
 fn render_lines_with_cursor(doc: &tscode_core::Document) -> Vec<Line<'_>> {
     doc.lines
         .iter()
         .enumerate()
         .map(|(i, line)| {
             if i == doc.cursor.line {
-                // Baris ini ada cursor
                 let col = doc.cursor.col;
                 let chars: Vec<char> = line.chars().collect();
 
                 if chars.is_empty() {
-                    // Baris kosong — tampilkan cursor sebagai spasi ber-highlight
                     Line::from(vec![Span::styled(
                         " ",
                         Style::default().add_modifier(Modifier::REVERSED),

@@ -1,180 +1,273 @@
 # Tscode Roadmap
 
-From v0.1.0 to v1.0.0.
+From Tsc-v0.1.0 onward.
+
+> **This is the source of truth for feature progress.**
+> Examples in other documents (like versioning.md) are illustrations only.
+
+See [versioning.md](versioning.md) for the versioning scheme.
 
 ---
 
 ## Current Status
 
-**v0.1.0** — Workspace setup, hello Tscode
+**Tsc-v0.2.3** — Editor dasar (layout, buka file, cursor, nomor baris)
 
 ---
 
 ## Milestones
 
-| Version | Focus | Target | Status |
-|---------|-------|--------|--------|
-| v0.1.0 | Workspace setup | - | Done |
-| v0.2.0 | Basic editor (open, edit, save) | Month 1 | In progress |
-| v0.3.0 | File tree + tabs | Month 2 | Planned |
-| v0.4.0 | Syntax highlighting | Month 3 | Planned |
-| v0.5.0 | Command palette | Month 4 | Planned |
-| v0.6.0 | Integrated terminal | Month 5 | Planned |
-| v0.7.0 | Configuration + themes | Month 6 | Planned |
-| v0.8.0 | Search in & across files | Month 7 | Planned |
-| v0.9.0 | Basic LSP | Month 8 | Planned |
-| v0.10.0 | Polish & dogfooding | Month 9 | Planned |
-| v1.0.0 | Stable release | Month 10 | Planned |
+| Version | Status | Focus |
+|---------|--------|-------|
+| Tsc-v0.1.0 | Done | Workspace setup |
+| Tsc-s0.1.0 | Done | Workspace setup verified |
+| Tsc-v0.2.0 | Done | Layout TUI statis |
+| Tsc-s0.2.0 | Done | Layout verified |
+| Tsc-v0.2.1 | Done | Buka file via argumen |
+| Tsc-s0.2.1 | Done | Buka file verified |
+| Tsc-v0.2.2 | Done | Cursor movement |
+| Tsc-s0.2.2 | Done | Cursor verified |
+| Tsc-v0.2.3 | In progress | Nomor baris |
+| Tsc-s0.2.3 | Planned | Nomor baris verified |
+| Tsc-v0.2.4 | Planned | Insert karakter |
+| Tsc-v0.2.5 | Planned | Delete (Backspace) |
+| Tsc-v0.2.6 | Planned | Save (Ctrl+S) |
+| Tsc-v0.3.0 | Planned | File tree fungsional |
+| Tsc-v0.4.0 | Planned | Syntax highlighting |
+| Tsc-v0.5.0 | Planned | Command palette |
+| Tsc-v1.0.0 | Planned | Terminal (X=1) |
+| Tsc-v2.0.0 | Planned | LSP (X=2) |
+| Tsc-v3.0.0 | Planned | AI agent (X=3) |
+
+---
+
+## Versioning Rules
+
+Tscode uses `Tsc-vX.Y.Z` (unstable) and `Tsc-sX.Y.Z` (stable).
+
+| Position | Meaning |
+|----------|---------|
+| X | Major feature (planned) |
+| Y | Sub-feature (discovered during development) |
+| Z | Bug fix count |
+
+**Golden rule**: In `Tsc-v`, no new features. Only bug fixes. New features start after `Tsc-s`.
+
+See [versioning.md](versioning.md) for full details.
 
 ---
 
 ## Details per Version
 
-### v0.2.0 — Basic Editor
+### Tsc-v0.1.0 — Workspace Setup
 
-**Target**: Can open, edit, and save files
+**Status**: Done (stable: Tsc-s0.1.0)
 
-**Phases**:
-- [ ] **v0.2.0-a**: Static TUI layout (tab bar, file tree, editor, status bar)
-- [ ] **v0.2.0-b**: Open file via argument (`tscode file.rs`)
-- [ ] **v0.2.0-c**: Cursor movement & scroll
-- [ ] **v0.2.0-d**: Edit & save (`Ctrl+S`)
-
-**Crates touched**: `tscode-tui`, `tscode-core`, `tscode`
+**Contents**:
+- Rust workspace with 5 crates
+- Git & GitHub setup
+- Basic `main.rs`
+- Custom versioning scheme
 
 ---
 
-### v0.3.0 — File Tree + Tabs
+### Tsc-v0.2.0 — Layout TUI Statis
 
-**Target**: Navigate folders & multiple open files
+**Status**: Done (stable: Tsc-s0.2.0)
 
-**Phases**:
-- [ ] File tree in sidebar (arrow key navigation)
-- [ ] Open file with Enter
-- [ ] Tab bar for open files
-- [ ] Switch tabs with `Ctrl+Tab`
-- [ ] Close tab with `Ctrl+W`
+**Contents**:
+- Layout dengan ratatui (tab bar, file tree, editor, status bar)
+- `q` untuk keluar
 
-**Crates**: `tscode-tui`, `tscode-core`
+**Crates touched**: `tscode-tui`, `tscode`
 
 ---
 
-### v0.4.0 — Syntax Highlighting
+### Tsc-v0.2.1 — Buka File
 
-**Target**: Code coloring with tree-sitter
+**Status**: Done (stable: Tsc-s0.2.1)
 
-**Phases**:
-- [ ] Integrate `tree-sitter` in `tscode-syntax`
-- [ ] Highlighting for Rust
-- [ ] Highlighting for other languages (Python, JS)
-- [ ] Color themes
+**Contents**:
+- `Document` struct di `tscode-core`
+- Parsing argumen dengan `clap`
+- Buka file & tampilkan isinya
+- Tab bar dinamis (nama file)
 
-**Crates**: `tscode-syntax`, `tscode-tui`
-
----
-
-### v0.5.0 — Command Palette
-
-**Target**: `Ctrl+Shift+P` to search commands
-
-**Phases**:
-- [ ] Command registry
-- [ ] Fuzzy search popup
-- [ ] Basic commands: save, open, quit, toggle sidebar
-
-**Crates**: `tscode-tui`, `tscode-core`
+**Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
 
 ---
 
-### v0.6.0 — Integrated Terminal
+### Tsc-v0.2.2 — Cursor Movement
 
-**Target**: Terminal panel below the editor
+**Status**: Done (stable: Tsc-s0.2.2)
 
-**Phases**:
-- [ ] `portable-pty` to spawn shell
-- [ ] `vte` parser for escape sequences
-- [ ] Render terminal output
-- [ ] Toggle with `Ctrl+``
+**Contents**:
+- `Cursor` struct (line, col)
+- Arrow keys untuk gerakkan cursor
+- Cursor highlight di editor (REVERSED)
+- Posisi cursor di status bar
 
-**Crates**: `tscode-terminal`, `tscode-tui`
-
----
-
-### v0.7.0 — Configuration + Themes
-
-**Target**: `config.toml` file for settings
-
-**Phases**:
-- [ ] Config schema with `serde`
-- [ ] Read `~/.config/tscode/config.toml`
-- [ ] Custom keybindings
-- [ ] Theme selection
-
-**Crates**: `tscode-core`, `tscode`
+**Crates touched**: `tscode-core`, `tscode-tui`
 
 ---
 
-### v0.8.0 — Search
+### Tsc-v0.2.3 — Nomor Baris
 
-**Target**: Search in files & across files
+**Status**: In progress
 
-**Phases**:
-- [ ] `Ctrl+F` — search in file
-- [ ] `Ctrl+Shift+F` — search across files
-- [ ] Highlight matches
-- [ ] Next/prev navigation
+**Contents**:
+- Nomor baris di kiri editor
+- Warna abu-abu (tidak mengganggu)
+- Lebar tetap (3 kolom, 2 digit)
 
-**Crates**: `tscode-core`, `tscode-tui`
+**Crates touched**: `tscode-tui`
 
----
-
-### v0.9.0 — Basic LSP
-
-**Target**: Autocomplete & diagnostics
-
-**Phases**:
-- [ ] LSP client with `tower-lsp`
-- [ ] Connect to `rust-analyzer`
-- [ ] Autocomplete popup
-- [ ] Diagnostics (error underline)
-
-**Crates**: `tscode-core`, `tscode-tui`
+**Known issue**:
+- Explorer masih teks statis (belum fungsional)
+- Toggle explorer belum bekerja di terminal Acode
 
 ---
 
-### v0.10.0 — Polish
+### Tsc-v0.2.4 — Insert Karakter
 
-**Target**: Ready for v1.0
+**Status**: Planned
 
-**Phases**:
-- [ ] Bug fixes from dogfooding
-- [ ] Performance tuning
-- [ ] Unit tests for buffer & cursor
-- [ ] Complete internal documentation
+**Contents**:
+- `Document::insert_char()`
+- Handle `KeyCode::Char(c)` di `App`
+- Ketik huruf → muncul di posisi cursor
 
----
+**Crates touched**: `tscode-core`, `tscode-tui`
 
-### v1.0.0 — Stable Release
-
-**Target**: Ready to use & open for contributions
-
-**Criteria**:
-- [ ] All P0 & P1 features complete
-- [ ] Dogfooding for 1 month without switching editors
-- [ ] Complete README, CONTRIBUTING, ARCHITECTURE
-- [ ] CI (automated build & test)
-- [ ] Open for public contributions
+**Note**: No new features in this phase until stable.
 
 ---
 
-## Versioning Rules (SemVer)
+### Tsc-v0.2.5 — Delete (Backspace)
 
-- **v0.x.0** — new features / breaking changes
-- **v0.x.y** — bug fixes
-- After v1.0.0:
-  - **vX.0.0** — breaking changes
-  - **vX.Y.0** — new features
-  - **vX.Y.Z** — bug fixes
+**Status**: Planned
+
+**Contents**:
+- `Document::delete_char()`
+- Handle `KeyCode::Backspace`
+- Hapus karakter di kiri cursor
+
+**Crates touched**: `tscode-core`, `tscode-tui`
+
+**Note**: No new features in this phase until stable.
+
+---
+
+### Tsc-v0.2.6 — Save
+
+**Status**: Planned
+
+**Contents**:
+- `Document::save()`
+- Handle `Ctrl+S`
+- Dirty flag (indikator file belum disave)
+
+**Crates touched**: `tscode-core`, `tscode-tui`
+
+**Note**: No new features in this phase until stable.
+
+---
+
+### Tsc-v0.3.0 — File Tree Fungsional
+
+**Status**: Planned
+
+**Contents**:
+- Baca folder asli (bukan hardcoded)
+- Navigasi dengan arrow keys
+- Buka file dengan Enter
+- Expand/collapse folder
+
+**Crates touched**: `tscode-core`, `tscode-tui`
+
+---
+
+### Tsc-v0.4.0 — Syntax Highlighting
+
+**Status**: Planned
+
+**Contents**:
+- Integrate `tree-sitter` in `tscode-syntax`
+- Highlight for Rust
+- Highlight for Python, JavaScript
+- Color theme (dark)
+
+**Crates touched**: `tscode-syntax`, `tscode-tui`
+
+---
+
+### Tsc-v0.5.0 — Command Palette
+
+**Status**: Planned
+
+**Contents**:
+- `Ctrl+Shift+P` to open palette
+- Fuzzy search for commands
+- Basic commands: save, open, quit, toggle sidebar
+
+**Crates touched**: `tscode-tui`
+
+---
+
+### Tsc-v1.0.0 — Terminal (X=1)
+
+**Status**: Planned
+
+**Major feature**: Integrated terminal
+
+**Sub-features** (discovered during development):
+
+| Y | Sub-feature |
+|---|-------------|
+| 1 | Spawn shell |
+| 2 | Send input |
+| 3 | Display output |
+| 4 | Resize terminal |
+| 5 | Multiple terminal tabs |
+
+The number of sub-features is not fixed. It is determined by the minimum needed for the feature to work.
+
+**Crates touched**: `tscode-terminal`, `tscode-tui`
+
+---
+
+### Tsc-v2.0.0 — LSP (X=2)
+
+**Status**: Planned
+
+**Major feature**: Language Server Protocol integration
+
+**Sub-features** (to be discovered):
+
+- LSP client
+- Connect to `rust-analyzer`
+- Autocomplete popup
+- Diagnostics (error underline)
+- Go-to-definition
+- Hover information
+
+**Crates touched**: `tscode-core`, `tscode-tui`
+
+---
+
+### Tsc-v3.0.0 — AI Agent (X=3)
+
+**Status**: Planned
+
+**Major feature**: AI agent integration
+
+**Sub-features** (to be discovered):
+
+- AI project understanding (read project structure)
+- AI type provider (select model: GPT, Claude, Gemini)
+- AI provider integration (connect to ChatGPT, Claude, etc.)
+
+**Crates touched**: TBD
 
 ---
 
@@ -183,6 +276,6 @@ From v0.1.0 to v1.0.0.
 > Make it work, make it right, make it fast.
 > — Kent Beck
 
-1. **Work** — v0.1.0 to v0.5.0: features first
-2. **Right** — v0.6.0 to v0.9.0: clean architecture
-3. **Fast** — v0.10.0 to v1.0.0: optimization & polish
+1. **Work** — Tsc-v0.1.0 to Tsc-s0.5.0: features work first
+2. **Right** — Tsc-v1.0.0 to Tsc-s2.0.0: solid foundation
+3. **Fast** — Tsc-v3.0.0 onward: optimization and advanced features

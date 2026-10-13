@@ -4,20 +4,15 @@ Terminal Studio Code — A terminal-based IDE with a VS Code-like experience.
 
 ## Status
 
-<<<<<<< HEAD
-**Tsc-v0.1.0** — Workspace setup. Actively in development.
-=======
-**Tsc-v0.1.0** — Workspace setup. Unstable, in development.
+**Tsc-v0.2.3** — Editor dasar: layout, buka file, cursor, nomor baris. Unstable, in development.
 
 See [versioning.md](docs/versioning.md) for the versioning scheme.
->>>>>>> 5a374d2 (chore: adopt Tsc-v/Tsc-s versioning scheme, read version from VERSION file)
 
 ## Build
 
-  ```
-     cargo build --workspace
-     cargo run -p tscode
-  ```
+    cargo build --workspace
+    cargo run -p tscode
+
 ## Structure
 
 Rust workspace with 5 crates:

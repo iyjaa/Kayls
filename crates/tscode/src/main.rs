@@ -1,3 +1,3 @@
 fn main() {
-    println!("Tscode v0.1.0");
+    println!("Tscode v{}", env!("CARGO_PKG_VERSION"));
 }

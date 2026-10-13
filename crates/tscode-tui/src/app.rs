@@ -1,13 +1,16 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
+use tscode_core::Document;
 
 pub struct App {
     pub should_quit: bool,
+    pub document: Option<Document>,
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new(document: Option<Document>) -> Self {
         Self {
             should_quit: false,
+            document,
         }
     }
 

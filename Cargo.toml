@@ -5,7 +5,7 @@ resolver = "2"
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["izra mulya putra G. < izramulyaputra@gmail.com >"]
+authors = ["izra mulya putra G. <izramulyaputra@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/iyjaa/Tscode"
 

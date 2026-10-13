@@ -1,0 +1,19 @@
+[package]
+name = "tscode"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "tscode"
+path = "src/main.rs"
+
+[dependencies]
+tscode-core = { path = "../tscode-core" }
+tscode-syntax = { path = "../tscode-syntax" }
+tscode-terminal = { path = "../tscode-terminal" }
+tscode-tui = { path = "../tscode-tui" }
+anyhow = { workspace = true }
+clap = { workspace = true }

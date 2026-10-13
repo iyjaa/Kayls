@@ -1,0 +1,11 @@
+[package]
+name = "tscode-syntax"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+tscode-core = { path = "../tscode-core" }
+thiserror = { workspace = true }

@@ -1,99 +1,158 @@
 # PRD: Tscode
 
-**Terminal Studio Code — A terminal-based IDE with a VS Code-like experience**
+**Terminal Studio Code — A terminal-based IDE inspired by VS Code**
 
 | Field | Value |
 |-------|-------|
 | Project Name | Tscode |
 | Tagline | Terminal Studio Code |
-| Document Version | 1.0 |
-| Date | 2026-10-13 |
+| Document Version | 2.0 |
+| Date | 2026-10-14 |
 | Status | Active |
+| License | MIT |
 
 ---
 
 ## 1. Background
 
 ### 1.1 Problem
+
 - Existing terminal editors (Vim, Nano, Helix) have a steep learning curve or feel unfamiliar to VS Code users.
 - VS Code is heavy, requires a GUI, and cannot run in a pure terminal environment (SSH, Termux, server).
-- There is no terminal editor that **feels** like VS Code — with a file tree, tabs, command palette, and integrated terminal.
+- There is no terminal editor that combines VS Code's layout with terminal efficiency.
 
 ### 1.2 Vision
-> Tscode is a terminal-based IDE that delivers a VS Code-like experience in a single lightweight Rust binary that runs anywhere.
+
+> Tscode is a terminal-based IDE inspired by VS Code's layout and workflow. It supports two keybinding modes: VS Code (Ctrl+key) and Vim (Esc then key). The default mode adapts to the terminal environment.
 
 ---
 
 ## 2. Goals
 
 ### 2.1 Primary Goals (v1.0)
-- A terminal editor that works out of the box with no complex configuration
-- Keybindings & layout familiar to VS Code users
+
+- A terminal editor that works out of the box
+- Layout familiar to VS Code users (tab bar, file tree, editor, status bar)
+- Two keybinding modes: VS Code and Vim
 - Lightweight & fast on Termux and desktop
-- A stable foundation for open-source contributions after v1.0
+- A stable foundation for open-source contributions
 
 ### 2.2 Non-Goals (v1.0)
--  Not a full VS Code replacement
-- Not a modal editor (not a Vim clone)
--  Not a GUI
--  Not an editor for all languages (Rust first)
+
+- Not a full VS Code replacement
+- Not a modal-only editor (Vim mode is optional)
+- Not a GUI
+- Not an editor for all languages (Rust first)
 
 ---
 
 ## 3. Target Users
 
 ### 3.1 Primary Persona — Mobile Developer
-- Codes on Android via Termux
+
+- Codes on Android via Termux or Acode terminal
 - Needs a comfortable editor on a small screen
 - Pain point: Vim is hard, VS Code can't run
 
 ### 3.2 Secondary Persona — Remote Developer
+
 - Works via SSH to a server
 - Needs a lightweight IDE without a GUI
 
 ### 3.3 Anti-Persona
+
 - Users who need a visual debugger, extension marketplace, or full GUI → use VS Code
 
 ---
 
 ## 4. Features
 
-### 4.1 v1.0 Features (Required)
+### 4.1 v1.0 Features
 
-| ID | Feature | Priority |
-|----|---------|----------|
-| F-01 | Basic editor (open, edit, save) | P0 |
-| F-02 | File tree | P0 |
-| F-03 | Multiple file tabs | P0 |
-| F-04 | Syntax highlighting (Rust first) | P0 |
-| F-05 | Status bar | P0 |
-| F-06 | Command palette | P1 |
-| F-07 | Integrated terminal | P1 |
-| F-08 | Configuration (config.toml) | P1 |
-| F-09 | Themes (dark, light) | P1 |
-| F-10 | Search in file | P2 |
-| F-11 | Search across files | P2 |
-| F-12 | Basic LSP | P2 |
+| ID | Feature | Priority | Status |
+|----|---------|----------|--------|
+| F-01 | Open, edit, save file | P0 | Done |
+| F-02 | File tree (recursive) | P0 | Done |
+| F-03 | Syntax highlighting | P0 | Done |
+| F-04 | Cursor movement | P0 | Done |
+| F-05 | Line numbers | P0 | Done |
+| F-06 | Focus system (editor/explorer) | P0 | Done |
+| F-07 | Mode system (Normal/Command/Prompt) | P0 | Done |
+| F-08 | Save with hint | P0 | Done |
+| F-09 | Expand/collapse folder | P0 | Done |
+| F-10 | Multiple file tabs | P1 | Planned |
+| F-11 | Search in file | P1 | Planned |
+| F-12 | Command palette | P2 | Planned |
+| F-13 | VS Code keybinding mode | P1 | Planned |
+| F-14 | Config file | P1 | Planned |
 
-### 4.2 Post-v1.0
-- Multi-cursor, split editor, Git integration, WASM plugins, remote development, debugger
+### 4.2 Post-v1.0 Features
+
+- Integrated terminal
+- LSP integration
+- AI agent
+- Multi-cursor
+- Split editor
+- Git integration
+- Plugin system
 
 ---
 
-## 5. Keybindings (VS Code Familiar)
+## 5. Keybindings
+
+Tscode supports two keybinding modes. **Currently only Vim mode is implemented.** VS Code mode is planned.
+
+### 5.1 VS Code Mode (Planned, not yet implemented)
 
 | Action | Keybinding |
 |--------|------------|
-| Command palette | Ctrl+Shift+P |
-| Open file | Ctrl+O |
 | Save | Ctrl+S |
-| Close tab | Ctrl+W |
-| Switch tab | Ctrl+Tab |
-| Toggle file tree | Ctrl+B |
-| Toggle terminal | Ctrl+` |
-| Search in file | Ctrl+F |
-| Undo / Redo | Ctrl+Z / Ctrl+Y |
+| Open file | Ctrl+O |
 | Quit | Ctrl+Q |
+| Toggle explorer | Ctrl+B |
+| Find | Ctrl+F |
+| Undo | Ctrl+Z |
+| Redo | Ctrl+Y |
+| Copy | Ctrl+C |
+| Paste | Ctrl+V |
+| Cut | Ctrl+X |
+| Select all | Ctrl+A |
+| Duplicate line | Ctrl+D |
+| Delete line | Ctrl+K |
+
+**Note**: Some `Ctrl+key` combinations may not work on Android terminals (especially Acode). Testing required.
+
+### 5.2 Vim Mode (Implemented)
+
+| Action | Keybinding |
+|--------|------------|
+| Move cursor | Arrow keys |
+| Insert character | Any character key |
+| Delete character | Backspace |
+| New line | Enter |
+| Indent | Tab |
+| Undo | Ctrl+Z |
+| Redo | Ctrl+Y |
+| Copy | Ctrl+C |
+| Paste | Ctrl+V |
+| Cut | Ctrl+X |
+| Select all | Ctrl+A |
+| Duplicate line | Ctrl+D |
+| Delete line | Ctrl+K |
+| Enter command mode | Esc |
+| Open file | Esc then o |
+| Save file | Esc then w |
+| Toggle explorer | Esc then e |
+| Cancel command | Esc then Esc |
+| Quit | Alt+Q |
+
+### 5.3 Mode Selection
+
+- Default mode: depends on terminal environment (planned)
+- User can override via `config.toml` (planned, Tsc-v1.1.0)
+
+    [keybindings]
+    mode = "vscode"   # or "vim"
 
 ---
 
@@ -101,16 +160,14 @@
 
 | Component | Technology |
 |-----------|------------|
-| Language | Rust 2024 |
-| TUI rendering | ratatui |
-| Input | crossterm |
-| Text buffer | ropey |
-| Syntax | tree-sitter |
-| LSP | tower-lsp |
-| Integrated terminal | portable-pty + vte |
-| Config | serde + toml |
-| CLI | clap |
-| Error | anyhow + thiserror |
+| Language | Rust 2021 |
+| TUI framework | ratatui 0.30 |
+| Input | crossterm 0.29 |
+| Editor engine | ratatui-code-editor 0.0.6 |
+| Syntax | tree-sitter (via ratatui-code-editor) |
+| CLI | clap 4 |
+| Error | anyhow 1, thiserror 2 |
+| Config | serde 1, toml 0.8 |
 
 ---
 
@@ -120,14 +177,39 @@
 
 | Crate | Responsibility |
 |-------|----------------|
-| tscode-core | Text buffer, cursor, editing |
-| tscode-syntax | Syntax highlighting (tree-sitter) |
-| tscode-terminal | PTY, shell integration |
-| tscode-tui | Ratatui rendering |
-| tscode | Main binary |
+| tscode-core | FileTree, Document |
+| tscode-terminal | PTY, shell integration (planned) |
+| tscode-tui | App state, UI rendering |
+| tscode | Main binary, CLI parsing |
 
 ### 7.2 Data Flow
-Input (crossterm) → Keybind → Command → App State → UI (ratatui) → Terminal
+
+    Input (crossterm)
+        ↓
+    Keybind handler (App)
+        ↓
+    Mode handler (Normal / Command / Prompt)
+        ↓
+    Focus handler (Editor / Explorer)
+        ↓
+    Action (edit, navigate tree, save, quit)
+        ↓
+    State update
+        ↓
+    Render (ui.rs)
+        ↓
+    Terminal
+
+### 7.3 Key Modules
+
+| Module | Location | Responsibility |
+|--------|----------|----------------|
+| `filetree` | `tscode-core` | Recursive file tree |
+| `document` | `tscode-core` | File path, content (legacy cursor) |
+| `cursor` | `tscode-core` | Cursor position (legacy) |
+| `app` | `tscode-tui` | App state, key handling |
+| `ui` | `tscode-tui` | TUI rendering |
+| `lib` | `tscode-tui` | Main loop |
 
 ---
 
@@ -135,11 +217,11 @@ Input (crossterm) → Keybind → Command → App State → UI (ratatui) → Ter
 
 | Risk | Mitigation |
 |------|------------|
-| Scope creep | Stick to v1.0 non-goals |
-| Rust learning curve | Learn by building |
+| Scope creep | Stick to versioning golden rule |
+| Editor library limits | Accept trade-off for speed |
 | Performance on Termux | Test at every milestone |
 | LSP complexity | LSP optional, post-v1.0 |
-| Loss of motivation | Dogfooding, celebrate milestones |
+| Loss of motivation | Open-source, community support |
 
 ---
 
@@ -148,8 +230,8 @@ Input (crossterm) → Keybind → Command → App State → UI (ratatui) → Ter
 - Startup < 100ms
 - Input latency < 16ms
 - Binary < 20 MB
-- Dogfooding for 1 month without switching editors
-- Unit tests for buffer & cursor
+- Dogfooding for 1 week without switching editors
+- At least 1 external contributor
 
 ---
 
@@ -157,8 +239,15 @@ Input (crossterm) → Keybind → Command → App State → UI (ratatui) → Ter
 
 > **v1.0 first, public documentation later.**
 > Focus on solo development. Open for contributions once the foundation is stable.
->
-> ---
+
+> **Make it work, make it right, make it fast.**
+> — Kent Beck
+
+1. Work — v0.1.0 to v1.0.0: features work first
+2. Right — v2.0.0 to v3.0.0: solid foundation
+3. Fast — v4.0.0 onward: optimization
+
+---
 
 ## 11. Versioning
 
@@ -170,7 +259,7 @@ Tscode uses a custom versioning scheme:
 | Position | Meaning |
 |----------|---------|
 | X | Major feature (planned) |
-| Y | Sub-feature (discovered during development) |
+| Y | Sub-feature (discovered) |
 | Z | Bug fix count |
 
 **Golden rule**: In `Tsc-v`, no new features. Only bug fixes. New features start after `Tsc-s`.
@@ -180,7 +269,33 @@ See [roadmap.md](roadmap.md) for actual feature progress.
 
 ---
 
-## 12. Principles
+## 12. Contributing
 
-> v1.0 first, public documentation later.
-> Focus on solo development. Open for contributions once the foundation is stable.
+Tscode is open for contributions. The workflow:
+
+1. **Discuss first** — open an issue to discuss the feature/bug before coding
+2. **Get approval** — wait for maintainer approval
+3. **Fork & branch** — create a branch for your change
+4. **Submit PR** — reference the issue in your PR
+5. **Review** — maintainer reviews and merges
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
+
+**Areas that need help**:
+
+- VS Code keybinding mode (F-13)
+- Config file (F-14)
+- Multiple file tabs (F-10)
+- Search in file (F-11)
+- Documentation improvements
+- Bug fixes
+
+---
+
+## 13. Current Status
+
+- **Version**: Tsc-v1.0.0 (unstable)
+- **Phase**: Editor integration complete, open-source ready
+- **Crates**: 4 (tscode, tscode-core, tscode-terminal, tscode-tui)
+- **Next milestone**: Tsc-s1.0.0 (after dogfooding)
+- **Open for contributions**: Yes

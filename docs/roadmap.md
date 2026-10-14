@@ -11,7 +11,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Current Status
 
-**Tsc-s0.3.3** — Open file from explorer with Enter
+**Tsc-v1.0.0** — Editor integration complete. Unstable, in development.
 
 ---
 
@@ -21,31 +21,30 @@ See [versioning.md](versioning.md) for the versioning scheme.
 |---------|--------|-------|
 | Tsc-v0.1.0 | Done | Workspace setup |
 | Tsc-s0.1.0 | Done | Workspace setup verified |
-| Tsc-v0.2.0 | Done | Layout TUI statis |
+| Tsc-v0.2.0 | Done | Static TUI layout |
 | Tsc-s0.2.0 | Done | Layout verified |
-| Tsc-v0.2.1 | Done | Buka file via argumen |
-| Tsc-s0.2.1 | Done | Buka file verified |
+| Tsc-v0.2.1 | Done | Open file via argument |
+| Tsc-s0.2.1 | Done | Open file verified |
 | Tsc-v0.2.2 | Done | Cursor movement |
 | Tsc-s0.2.2 | Done | Cursor verified |
-| Tsc-v0.2.3 | Done | Nomor baris |
-| Tsc-s0.2.3 | Done | Nomor baris verified |
+| Tsc-v0.2.3 | Done | Line numbers |
+| Tsc-s0.2.3 | Done | Line numbers verified |
 | Tsc-v0.2.4 | Done | Insert, delete, save, mode, hint |
-| Tsc-s0.2.4 | Done | Editor dasar verified |
-| Tsc-v0.3.0 | Done | Baca folder (FileTree) |
-| Tsc-s0.3.0 | Done | Baca folder verified |
+| Tsc-s0.2.4 | Done | Basic editor verified |
+| Tsc-v0.3.0 | Done | Read folder (FileTree) |
+| Tsc-s0.3.0 | Done | Read folder verified |
 | Tsc-v0.3.1 | Done | Render file tree |
 | Tsc-s0.3.1 | Done | Render file tree verified |
 | Tsc-v0.3.2 | Done | Focus system + arrow navigation |
 | Tsc-s0.3.2 | Done | Focus system verified |
-| Tsc-v0.3.3 | Done | Buka file dengan Enter |
-| Tsc-s0.3.3 | Done | Buka file verified |
-| Tsc-v0.3.4 | Planned | Expand/collapse folder |
-| Tsc-v0.3.5 | Planned | Toggle explorer (Esc then e) |
-| Tsc-v0.4.0 | Planned | Syntax highlighting |
-| Tsc-v0.5.0 | Planned | Command palette |
-| Tsc-v1.0.0 | Planned | Terminal (X=1) |
-| Tsc-v2.0.0 | Planned | LSP (X=2) |
-| Tsc-v3.0.0 | Planned | AI agent (X=3) |
+| Tsc-v0.3.3 | Done | Open file with Enter |
+| Tsc-s0.3.3 | Done | Open file verified |
+| Tsc-v1.0.0 | Done | Editor integration (X=1) |
+| Tsc-s1.0.0 | Planned | Editor integration stable |
+| Tsc-v1.1.0 | Planned | Editor polish |
+| Tsc-v2.0.0 | Planned | Integrated terminal (X=2) |
+| Tsc-v3.0.0 | Planned | LSP (X=3) |
+| Tsc-v4.0.0 | Planned | AI agent (X=4) |
 
 ---
 
@@ -81,27 +80,27 @@ See [versioning.md](versioning.md) for full details.
 
 ---
 
-### Tsc-v0.2.0 — Layout TUI Statis
+### Tsc-v0.2.0 — Static TUI Layout
 
 **Status**: Done (stable: Tsc-s0.2.0)
 
 **Contents**:
-- Layout dengan ratatui (tab bar, file tree, editor, status bar)
-- `q` untuk keluar
+- TUI layout with ratatui (tab bar, file tree, editor, status bar)
+- `q` to quit
 
 **Crates touched**: `tscode-tui`, `tscode`
 
 ---
 
-### Tsc-v0.2.1 — Buka File
+### Tsc-v0.2.1 — Open File
 
 **Status**: Done (stable: Tsc-s0.2.1)
 
 **Contents**:
-- `Document` struct di `tscode-core`
-- Parsing argumen dengan `clap`
-- Buka file & tampilkan isinya
-- Tab bar dinamis (nama file)
+- `Document` struct in `tscode-core`
+- Argument parsing with `clap`
+- Open file & display contents
+- Dynamic tab bar (file name)
 
 **Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
 
@@ -113,58 +112,57 @@ See [versioning.md](versioning.md) for full details.
 
 **Contents**:
 - `Cursor` struct (line, col)
-- Arrow keys untuk gerakkan cursor
-- Cursor highlight di editor (REVERSED)
-- Posisi cursor di status bar
-- Scroll vertikal & horizontal
+- Arrow keys to move cursor
+- Cursor highlight in editor (REVERSED)
+- Cursor position in status bar
+- Vertical & horizontal scroll
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
 ---
 
-### Tsc-v0.2.3 — Nomor Baris
+### Tsc-v0.2.3 — Line Numbers
 
 **Status**: Done (stable: Tsc-s0.2.3)
 
 **Contents**:
-- Nomor baris di kiri editor
-- Warna abu-abu (tidak mengganggu)
-- Lebar tetap (3 kolom, 2 digit)
-- Sejajar dengan isi file (border TOP + RIGHT)
+- Line numbers on the left of the editor
+- Gray color (non-intrusive)
+- Fixed width (3 columns, 2 digits)
+- Aligned with file content (border TOP + RIGHT)
 
 **Crates touched**: `tscode-tui`
 
 ---
 
-### Tsc-v0.2.4 — Editor Dasar Selesai
+### Tsc-v0.2.4 — Basic Editor Complete
 
 **Status**: Done (stable: Tsc-s0.2.4)
 
 **Contents**:
-- Insert karakter (`Document::insert_char`)
-- Delete karakter (`Document::delete_char`)
-- Save (`Document::save`)
-- Mode Normal / Command / Prompt
+- Insert character
+- Delete character
+- Save
+- Modes: Normal / Command / Prompt
 - Vim-style command: `Esc` -> `o` (open), `w` (write)
-- Status bar dengan warna per mode
-- Hint 2 detik setelah save
+- Status bar with per-mode colors
+- 2-second hint after save
 - Quit via `Alt+Q`
-- Autoresize terminal
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
 ---
 
-### Tsc-v0.3.0 — Baca Folder (FileTree)
+### Tsc-v0.3.0 — Read Folder (FileTree)
 
 **Status**: Done (stable: Tsc-s0.3.0)
 
 **Contents**:
-- `FileTree` struct di `tscode-core`
-- `Entry` struct (path, name, is_dir, depth, expanded)
-- `FileTree::from_path()` baca isi folder
-- Urutkan: folder dulu, lalu file, alfabetis
-- `fs::canonicalize()` untuk resolve path absolut
+- `FileTree` struct in `tscode-core`
+- `Entry` struct (path, name, is_dir)
+- `FileTree::from_path()` reads folder contents
+- Sort: folders first, then files, alphabetical
+- `fs::canonicalize()` to resolve absolute path
 
 **Crates touched**: `tscode-core`
 
@@ -175,13 +173,12 @@ See [versioning.md](versioning.md) for full details.
 **Status**: Done (stable: Tsc-s0.3.1)
 
 **Contents**:
-- `App` punya field `file_tree: Option<FileTree>`
-- `load_file_tree()` baca folder dari parent document
-- Fallback ke current directory kalau parent kosong
-- `ui.rs` render file tree asli di explorer
-- Folder icon `+`, file tanpa icon
-- Marker `>` untuk item terpilih
-- Explorer lebar 20 kolom
+- `App` has `file_tree: Option<FileTree>` field
+- `load_file_tree()` reads folder
+- `ui.rs` renders actual file tree in explorer
+- Folder icon `+`, file without icon
+- `>` marker for selected item
+- Explorer width 20 columns
 
 **Crates touched**: `tscode-tui`
 
@@ -193,47 +190,71 @@ See [versioning.md](versioning.md) for full details.
 
 **Contents**:
 - `Focus` enum (Editor / Explorer)
-- Field `focus` di `App`
-- `Esc` -> `e` toggle explorer + switch focus
-- Arrow keys berpengaruh tergantung focus:
-  - `Focus::Editor` -> gerak cursor
-  - `Focus::Explorer` -> gerak selection
-- `FileTree::move_up()` dan `move_down()`
-- Border kuning + title `[*]` di panel yang fokus
-- Status bar nampilkan `[EDITOR]` / `[EXPLORER]`
+- `focus` field in `App`
+- `Esc` -> `e` toggles explorer + switches focus
+- Arrow keys affect editor or explorer based on focus
+- Yellow border + `[*]` title on focused panel
+- Status bar shows `[EDITOR]` / `[EXPLORER]`
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
 ---
 
-### Tsc-v0.3.3 — Buka File dengan Enter
+### Tsc-v0.3.3 — Open File with Enter
 
 **Status**: Done (stable: Tsc-s0.3.3)
 
 **Contents**:
-- Enter di file tree -> buka file
+- Enter in file tree -> open file
 - `open_selected_from_tree()` method
-- Ambil `tree.selected_entry()`
-- Kalau file -> `Document::open(path)`
-- Update `self.document`
-- Reset scroll offset
-- Reload file tree (parent baru)
-- Pindah focus ke Editor
-- Kalau folder -> tampilkan pesan (expand nanti di v0.3.4)
+- Get `tree.selected_entry()`
+- If file -> `Document::open(path)`
+- Switch focus to Editor
+- If folder -> show message
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
 ---
 
-### Tsc-v0.3.4 — Expand/Collapse Folder
+### Tsc-v1.0.0 — Editor Integration (X=1)
+
+**Status**: Done (stable: Tsc-s1.0.0 planned)
+
+**Major feature**: Full editor integration with recursive file tree
+
+**Contents**:
+- Integrate `ratatui-code-editor` for editing
+- Syntax highlighting (tree-sitter, built-in)
+- Visible cursor (`get_visible_cursor`)
+- Undo/redo, copy/paste, cut, duplicate
+- Code folding
+- Recursive file tree (tree structure)
+- Expand/collapse folder with Enter
+- Stable root (current directory)
+- Remove `tscode-syntax` (redundant)
+- Save via `editor.get_content()`
+
+**Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
+
+**Known issues**:
+- Editor 100% from library — less control
+- `Document.cursor` no longer used — can be removed
+
+**Next**: Dogfooding, then `Tsc-s1.0.0`.
+
+---
+
+### Tsc-v1.1.0 — Editor Polish (Y=1)
 
 **Status**: Planned
 
-**Contents**:
-- Enter di folder -> expand/collapse
-- Rekursif baca isi subfolder
-- Update indentasi untuk nested entries
-- Tandai folder expanded dengan icon berbeda
+**Contents** (to be discovered):
+- Multiple file tabs
+- Search in file
+- Go to line
+- Better status bar
+- Theme selection
+- Keybinding customization
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
@@ -241,53 +262,7 @@ See [versioning.md](versioning.md) for full details.
 
 ---
 
-### Tsc-v0.3.5 — Toggle Explorer
-
-**Status**: Planned
-
-**Contents**:
-- `Esc` -> `e` sudah bekerja (dari `Tsc-v0.3.2`)
-- Sempurnakan: simpan state `show_explorer`
-- Editor full width saat explorer hidden
-
-**Crates touched**: `tscode-tui`
-
-**Note**: No new features in this phase until stable.
-
----
-
-### Tsc-v0.4.0 — Syntax Highlighting
-
-**Status**: Planned
-
-**Contents**:
-- Integrate `tree-sitter` in `tscode-syntax`
-- Highlight for Rust
-- Highlight for Python, JavaScript
-- Color theme (dark)
-
-**Crates touched**: `tscode-syntax`, `tscode-tui`
-
-**Note**: No new features in this phase until stable.
-
----
-
-### Tsc-v0.5.0 — Command Palette
-
-**Status**: Planned
-
-**Contents**:
-- `Ctrl+Shift+P` to open palette
-- Fuzzy search for commands
-- Basic commands: save, open, quit, toggle sidebar
-
-**Crates touched**: `tscode-tui`
-
-**Note**: No new features in this phase until stable.
-
----
-
-### Tsc-v1.0.0 — Terminal (X=1)
+### Tsc-v2.0.0 — Integrated Terminal (X=2)
 
 **Status**: Planned
 
@@ -309,7 +284,7 @@ The number of sub-features is not fixed. It is determined by the minimum needed 
 
 ---
 
-### Tsc-v2.0.0 — LSP (X=2)
+### Tsc-v3.0.0 — LSP (X=3)
 
 **Status**: Planned
 
@@ -328,7 +303,7 @@ The number of sub-features is not fixed. It is determined by the minimum needed 
 
 ---
 
-### Tsc-v3.0.0 — AI Agent (X=3)
+### Tsc-v4.0.0 — AI Agent (X=4)
 
 **Status**: Planned
 
@@ -349,6 +324,6 @@ The number of sub-features is not fixed. It is determined by the minimum needed 
 > Make it work, make it right, make it fast.
 > — Kent Beck
 
-1. **Work** — Tsc-v0.1.0 to Tsc-s0.5.0: features work first
-2. **Right** — Tsc-v1.0.0 to Tsc-s2.0.0: solid foundation
-3. **Fast** — Tsc-v3.0.0 onward: optimization and advanced features
+1. **Work** — Tsc-v0.1.0 to Tsc-s1.1.0: features work first
+2. **Right** — Tsc-v2.0.0 to Tsc-s3.0.0: solid foundation
+3. **Fast** — Tsc-v4.0.0 onward: optimization and advanced features

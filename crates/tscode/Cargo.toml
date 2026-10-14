@@ -13,7 +13,6 @@ path = "src/main.rs"
 
 [dependencies]
 tscode-core = { path = "../tscode-core" }
-tscode-syntax = { path = "../tscode-syntax" }
 tscode-terminal = { path = "../tscode-terminal" }
 tscode-tui = { path = "../tscode-tui" }
 anyhow = { workspace = true }

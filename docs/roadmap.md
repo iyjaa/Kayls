@@ -11,7 +11,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Current Status
 
-**Tsc-s0.3.2** — Focus system (Editor/Explorer), arrow navigation in file tree
+**Tsc-s0.3.3** — Open file from explorer with Enter
 
 ---
 
@@ -37,7 +37,8 @@ See [versioning.md](versioning.md) for the versioning scheme.
 | Tsc-s0.3.1 | Done | Render file tree verified |
 | Tsc-v0.3.2 | Done | Focus system + arrow navigation |
 | Tsc-s0.3.2 | Done | Focus system verified |
-| Tsc-v0.3.3 | Planned | Buka file dengan Enter |
+| Tsc-v0.3.3 | Done | Buka file dengan Enter |
+| Tsc-s0.3.3 | Done | Buka file verified |
 | Tsc-v0.3.4 | Planned | Expand/collapse folder |
 | Tsc-v0.3.5 | Planned | Toggle explorer (Esc then e) |
 | Tsc-v0.4.0 | Planned | Syntax highlighting |
@@ -200,7 +201,6 @@ See [versioning.md](versioning.md) for full details.
 - `FileTree::move_up()` dan `move_down()`
 - Border kuning + title `[*]` di panel yang fokus
 - Status bar nampilkan `[EDITOR]` / `[EXPLORER]`
-- `handle_normal` delegasi ke `handle_editor_keys` / `handle_explorer_keys`
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
@@ -208,18 +208,20 @@ See [versioning.md](versioning.md) for full details.
 
 ### Tsc-v0.3.3 — Buka File dengan Enter
 
-**Status**: Planned
+**Status**: Done (stable: Tsc-s0.3.3)
 
 **Contents**:
 - Enter di file tree -> buka file
+- `open_selected_from_tree()` method
 - Ambil `tree.selected_entry()`
 - Kalau file -> `Document::open(path)`
+- Update `self.document`
+- Reset scroll offset
 - Reload file tree (parent baru)
-- Update editor
+- Pindah focus ke Editor
+- Kalau folder -> tampilkan pesan (expand nanti di v0.3.4)
 
 **Crates touched**: `tscode-core`, `tscode-tui`
-
-**Note**: No new features in this phase until stable.
 
 ---
 

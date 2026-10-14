@@ -2129,7 +2129,7 @@ dependencies = [
 
 [[package]]
 name = "tscode"
-version = "0.3.2"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -2141,7 +2141,7 @@ dependencies = [
 
 [[package]]
 name = "tscode-core"
-version = "0.3.2"
+version = "1.0.0"
 dependencies = [
  "ropey",
  "thiserror 2.0.21",
@@ -2149,7 +2149,7 @@ dependencies = [
 
 [[package]]
 name = "tscode-syntax"
-version = "0.3.2"
+version = "1.0.0"
 dependencies = [
  "thiserror 2.0.21",
  "tscode-core",
@@ -2157,14 +2157,14 @@ dependencies = [
 
 [[package]]
 name = "tscode-terminal"
-version = "0.3.2"
+version = "1.0.0"
 dependencies = [
  "anyhow",
 ]
 
 [[package]]
 name = "tscode-tui"
-version = "0.3.2"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "crossterm",

@@ -6,7 +6,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::{App, Mode};
+use crate::app::{App, Focus, Mode};
 
 pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let rows = Layout::default()
@@ -43,11 +43,29 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             .constraints([Constraint::Length(20), Constraint::Min(0)])
             .split(rows[1]);
 
-        // Render file tree
+        // Render file tree — border beda kalau fokus
         let tree_content = render_file_tree(app);
+        let explorer_focused = app.focus == Focus::Explorer;
+
+        let border_style = if explorer_focused {
+            Style::default().fg(Color::Yellow)
+        } else {
+            Style::default().fg(Color::DarkGray)
+        };
+
+        let explorer_title = if explorer_focused {
+            " Explorer [*] "
+        } else {
+            " Explorer "
+        };
+
         frame.render_widget(
-            Paragraph::new(tree_content)
-                .block(Block::default().borders(Borders::ALL).title(" Explorer ")),
+            Paragraph::new(tree_content).block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title(explorer_title)
+                    .border_style(border_style),
+            ),
             cols[0],
         );
 
@@ -59,12 +77,15 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     // Editor
     match &app.document {
         Some(doc) => {
+            let editor_focused = app.focus == Focus::Editor && app.show_explorer;
+
             render_editor(
                 frame,
                 doc,
                 editor_area,
                 app.scroll_offset,
                 app.scroll_offset_x,
+                editor_focused,
             );
         }
         None => {
@@ -85,6 +106,11 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         .map(|d| format!("{}:{}", d.cursor.line + 1, d.cursor.col + 1))
         .unwrap_or_else(|| "-:-".to_string());
 
+    let focus_label = match app.focus {
+        Focus::Editor => "EDITOR",
+        Focus::Explorer => "EXPLORER",
+    };
+
     let (status, status_style) = match app.mode {
         Mode::Normal => {
             if let Some(msg) = &app.status_message {
@@ -95,8 +121,12 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             } else {
                 (
                     format!(
-                        " NORMAL   {}   {}   v:{} h:{} ",
-                        version, cursor_info, app.scroll_offset, app.scroll_offset_x
+                        " NORMAL [{}]   {}   {}   v:{} h:{} ",
+                        focus_label,
+                        version,
+                        cursor_info,
+                        app.scroll_offset,
+                        app.scroll_offset_x
                     ),
                     Style::default().bg(Color::DarkGray).fg(Color::White),
                 )
@@ -105,7 +135,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         Mode::Command => (
             format!(
                 " COMMAND   {} ",
-                app.status_message.as_deref().unwrap_or("(o)pen (w)rite (Esc)cancel")
+                app.status_message
+                    .as_deref()
+                    .unwrap_or("(o)pen (w)rite (e)xplorer (Esc)cancel")
             ),
             Style::default().bg(Color::Yellow).fg(Color::Black),
         ),
@@ -146,6 +178,7 @@ fn render_editor(
     area: Rect,
     scroll_y: usize,
     scroll_x: usize,
+    focused: bool,
 ) {
     let cols = Layout::default()
         .direction(Direction::Horizontal)
@@ -174,17 +207,38 @@ fn render_editor(
 
     // Isi file dengan horizontal scroll
     let lines = render_lines_with_cursor(doc, start, end, scroll_x, viewport_width);
+
+    // Border editor — beda kalau fokus
+    let editor_border_style = if focused {
+        Style::default().fg(Color::Yellow)
+    } else {
+        Style::default().fg(Color::DarkGray)
+    };
+
+    let editor_title = if focused {
+        " Editor [*] "
+    } else {
+        " Editor "
+    };
+
     frame.render_widget(
-        Paragraph::new(lines).block(Block::default().borders(Borders::ALL).title(" Editor ")),
+        Paragraph::new(lines).block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(editor_title)
+                .border_style(editor_border_style),
+        ),
         cols[1],
     );
 
-    // Posisi cursor
-    let cursor_screen_line = doc.cursor.line.saturating_sub(scroll_y);
-    let cursor_screen_col = doc.cursor.col.saturating_sub(scroll_x);
-    let cursor_x = cols[1].x + 1 + cursor_screen_col as u16;
-    let cursor_y = cols[1].y + 1 + cursor_screen_line as u16;
-    frame.set_cursor_position((cursor_x, cursor_y));
+    // Posisi cursor terminal — hanya kalau editor fokus
+    if focused {
+        let cursor_screen_line = doc.cursor.line.saturating_sub(scroll_y);
+        let cursor_screen_col = doc.cursor.col.saturating_sub(scroll_x);
+        let cursor_x = cols[1].x + 1 + cursor_screen_col as u16;
+        let cursor_y = cols[1].y + 1 + cursor_screen_line as u16;
+        frame.set_cursor_position((cursor_x, cursor_y));
+    }
 }
 
 fn render_lines_with_cursor(
@@ -200,7 +254,6 @@ fn render_lines_with_cursor(
         .skip(start)
         .take(end - start)
         .map(|(i, line)| {
-            // Potong baris: dari scroll_x, sepanjang viewport_width
             let chars: Vec<char> = line.chars().collect();
             let visible: Vec<char> = chars
                 .iter()
@@ -210,11 +263,9 @@ fn render_lines_with_cursor(
                 .collect();
 
             if i == doc.cursor.line {
-                // Cursor di baris ini
                 let cursor_col_in_view = doc.cursor.col.saturating_sub(scroll_x);
 
                 if visible.is_empty() || cursor_col_in_view >= visible.len() {
-                    // Cursor di akhir atau di luar
                     let text: String = visible.iter().collect();
                     Line::from(vec![
                         Span::raw(text),

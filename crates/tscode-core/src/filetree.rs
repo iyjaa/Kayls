@@ -96,4 +96,18 @@ impl FileTree {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
+
+    /// Pindah selection ke atas
+    pub fn move_up(&mut self) {
+        if self.selected > 0 {
+            self.selected -= 1;
+        }
+    }
+
+    /// Pindah selection ke bawah
+    pub fn move_down(&mut self) {
+        if self.selected + 1 < self.entries.len() {
+            self.selected += 1;
+        }
+    }
 }

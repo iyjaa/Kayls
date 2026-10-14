@@ -9,11 +9,18 @@ pub enum Mode {
     Prompt,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Focus {
+    Editor,
+    Explorer,
+}
+
 pub struct App {
     pub should_quit: bool,
     pub document: Option<Document>,
     pub file_tree: Option<FileTree>,
     pub show_explorer: bool,
+    pub focus: Focus,
     pub scroll_offset: usize,
     pub scroll_offset_x: usize,
     pub editor_height: u16,
@@ -31,6 +38,7 @@ impl App {
             document,
             file_tree: None,
             show_explorer: true,
+            focus: Focus::Editor,
             scroll_offset: 0,
             scroll_offset_x: 0,
             editor_height: 0,
@@ -103,6 +111,14 @@ impl App {
             return;
         }
 
+        // Arrow keys: tergantung focus
+        match self.focus {
+            Focus::Editor => self.handle_editor_keys(key),
+            Focus::Explorer => self.handle_explorer_keys(key),
+        }
+    }
+
+    fn handle_editor_keys(&mut self, key: KeyEvent) {
         if let Some(doc) = self.document.as_mut() {
             match key.code {
                 KeyCode::Up => {
@@ -149,6 +165,22 @@ impl App {
         }
     }
 
+    fn handle_explorer_keys(&mut self, key: KeyEvent) {
+        if let Some(tree) = self.file_tree.as_mut() {
+            match key.code {
+                KeyCode::Up => {
+                    tree.move_up();
+                    return;
+                }
+                KeyCode::Down => {
+                    tree.move_down();
+                    return;
+                }
+                _ => {}
+            }
+        }
+    }
+
     fn handle_command(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
@@ -173,6 +205,21 @@ impl App {
                         }
                     }
                 }
+                self.mode = Mode::Normal;
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Char('e') => {
+                // Toggle explorer + switch focus
+                self.show_explorer = !self.show_explorer;
+
+                if self.show_explorer {
+                    self.focus = Focus::Explorer;
+                    self.status_message = Some("Explorer ON".to_string());
+                } else {
+                    self.focus = Focus::Editor;
+                    self.status_message = Some("Explorer OFF".to_string());
+                }
+
                 self.mode = Mode::Normal;
                 self.status_time = Some(Instant::now());
             }

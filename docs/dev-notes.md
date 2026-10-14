@@ -96,8 +96,8 @@ Personal notes during Tscode development. Not public documentation.
 - `Tsc-s0.2.4` — promote editor dasar
 
 ### Decisions
-- **Workspace dari awal** — scalable sampai v1.0
-- **Non-modal** — keybinding VS Code, bukan Vim
+- **Workspace dari awal** — scalable sampai v1.0.0
+- **Non-modal** — Vim
 - **Rust first** untuk syntax highlighting
 - **`Document` di `tscode-core`** — logika file di core, rendering di tui
 - **`Cursor` terpisah** — `tscode-core/src/cursor.rs`

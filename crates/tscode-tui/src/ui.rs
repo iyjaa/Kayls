@@ -40,11 +40,13 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let editor_area: Rect = if app.show_explorer {
         let cols = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([Constraint::Length(12), Constraint::Min(0)])
+            .constraints([Constraint::Length(20), Constraint::Min(0)])
             .split(rows[1]);
 
+        // Render file tree
+        let tree_content = render_file_tree(app);
         frame.render_widget(
-            Paragraph::new("src/\n  main\n  lib")
+            Paragraph::new(tree_content)
                 .block(Block::default().borders(Borders::ALL).title(" Explorer ")),
             cols[0],
         );
@@ -86,7 +88,6 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let (status, status_style) = match app.mode {
         Mode::Normal => {
             if let Some(msg) = &app.status_message {
-                // Hint — warna hijau
                 (
                     format!(" {} ", msg),
                     Style::default().bg(Color::Green).fg(Color::Black),
@@ -115,6 +116,28 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     };
 
     frame.render_widget(Paragraph::new(status).style(status_style), rows[2]);
+}
+
+fn render_file_tree(app: &App) -> String {
+    let Some(tree) = app.file_tree.as_ref() else {
+        return "(no file tree)".to_string();
+    };
+
+    if tree.is_empty() {
+        return "(empty)".to_string();
+    }
+
+    tree.entries
+        .iter()
+        .enumerate()
+        .map(|(i, entry)| {
+            let indent = "  ".repeat(entry.depth);
+            let icon = if entry.is_dir { "+" } else { " " };
+            let marker = if i == tree.selected { ">" } else { " " };
+            format!("{}{}{} {}", marker, indent, icon, entry.name)
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn render_editor(

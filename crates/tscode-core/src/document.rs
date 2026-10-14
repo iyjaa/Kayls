@@ -14,6 +14,7 @@ pub struct Document {
 impl Document {
     pub fn open<P: AsRef<Path>>(path: P) -> std::io::Result<Self> {
         let path = path.as_ref().to_path_buf();
+        let path = fs::canonicalize(&path)?;
         let content = fs::read_to_string(&path)?;
         let mut lines: Vec<String> = content.lines().map(String::from).collect();
 

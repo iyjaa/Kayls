@@ -29,19 +29,17 @@ fn run_loop(
         let size = terminal.size()?;
         let editor_height = size.height.saturating_sub(4);
         let editor_width = if app.show_explorer {
-            size.width.saturating_sub(17)
+            size.width.saturating_sub(25)
         } else {
             size.width.saturating_sub(5)
         };
         app.editor_height = editor_height;
         app.editor_width = editor_width;
 
-        // Tick — clear status message kalau expired
         app.tick();
 
         terminal.draw(|frame| ui::render(frame, &app, version))?;
 
-        // Poll dengan timeout 100ms — supaya tick() jalan rutin
         if event::poll(Duration::from_millis(100))? {
             match event::read()? {
                 Event::Key(key) => {

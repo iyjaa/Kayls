@@ -1,6 +1,6 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::time::Instant;
-use tscode_core::Document;
+use tscode_core::{Document, FileTree};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Mode {
@@ -12,6 +12,7 @@ pub enum Mode {
 pub struct App {
     pub should_quit: bool,
     pub document: Option<Document>,
+    pub file_tree: Option<FileTree>,
     pub show_explorer: bool,
     pub scroll_offset: usize,
     pub scroll_offset_x: usize,
@@ -25,10 +26,11 @@ pub struct App {
 
 impl App {
     pub fn new(document: Option<Document>) -> Self {
-        Self {
+        let mut app = Self {
             should_quit: false,
             document,
-            show_explorer: false,
+            file_tree: None,
+            show_explorer: true,
             scroll_offset: 0,
             scroll_offset_x: 0,
             editor_height: 0,
@@ -37,6 +39,39 @@ impl App {
             input_buffer: String::new(),
             status_message: None,
             status_time: None,
+        };
+
+        app.load_file_tree();
+        app
+    }
+
+    fn load_file_tree(&mut self) {
+        let Some(doc) = self.document.as_ref() else {
+            return;
+        };
+
+        let parent = if doc.path.is_file() {
+            doc.path
+                .parent()
+                .filter(|p| !p.as_os_str().is_empty())
+                .map(|p| p.to_path_buf())
+        } else if doc.path.is_dir() {
+            Some(doc.path.clone())
+        } else {
+            None
+        };
+
+        let parent = parent.or_else(|| std::env::current_dir().ok());
+
+        if let Some(parent) = parent {
+            match FileTree::from_path(&parent) {
+                Ok(tree) => {
+                    self.file_tree = Some(tree);
+                }
+                Err(e) => {
+                    self.status_message = Some(format!("FileTree error: {}", e));
+                }
+            }
         }
     }
 
@@ -165,6 +200,7 @@ impl App {
                         self.scroll_offset = 0;
                         self.scroll_offset_x = 0;
                         self.status_message = Some(format!("Opened: {}", path));
+                        self.load_file_tree();
                     }
                     Err(e) => {
                         self.status_message = Some(format!("Error: {}", e));
@@ -184,7 +220,6 @@ impl App {
         }
     }
 
-    /// Clear status message kalau sudah lebih dari 2 detik
     pub fn tick(&mut self) {
         if let Some(t) = self.status_time {
             if t.elapsed().as_secs() >= 2 {

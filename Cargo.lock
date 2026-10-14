@@ -597,7 +597,7 @@ dependencies = [
 
 [[package]]
 name = "tscode"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -609,7 +609,7 @@ dependencies = [
 
 [[package]]
 name = "tscode-core"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "ropey",
  "thiserror",
@@ -617,7 +617,7 @@ dependencies = [
 
 [[package]]
 name = "tscode-syntax"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "thiserror",
  "tscode-core",
@@ -625,14 +625,14 @@ dependencies = [
 
 [[package]]
 name = "tscode-terminal"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "anyhow",
 ]
 
 [[package]]
 name = "tscode-tui"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "crossterm",

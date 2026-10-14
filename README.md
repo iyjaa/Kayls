@@ -4,7 +4,7 @@ Terminal Studio Code — A terminal-based IDE with a VS Code-like experience.
 
 ## Status
 
-**Tsc-s0.2.4** — Editor dasar selesai: layout, buka file, cursor, scroll, nomor baris, insert, delete, save. Stable.
+**Tsc-s0.3.1** — File tree renders actual directory. Editor basic functional. Stable.
 
 See [versioning.md](docs/versioning.md) for the versioning scheme.
 
@@ -15,10 +15,10 @@ See [versioning.md](docs/versioning.md) for the versioning scheme.
 
 ## Usage
 
-    # Buka file
+    # Open file
     cargo run -p tscode Cargo.toml
 
-    # Buka tanpa file
+    # Open without file
     cargo run -p tscode
 
 ### Keybindings
@@ -39,7 +39,7 @@ Rust workspace with 5 crates:
 
 | Crate | Purpose |
 |-------|---------|
-| `tscode-core` | Text buffer, cursor, editing |
+| `tscode-core` | Text buffer, cursor, editing, file tree |
 | `tscode-syntax` | Syntax highlighting |
 | `tscode-terminal` | PTY, shell integration |
 | `tscode-tui` | Ratatui rendering |

@@ -11,7 +11,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Current Status
 
-**Tsc-s0.2.4** — Editor dasar selesai (layout, buka file, cursor, nomor baris, insert, delete, save)
+**Tsc-s0.3.1** — File tree renders actual directory. Editor basic functional.
 
 ---
 
@@ -31,7 +31,14 @@ See [versioning.md](versioning.md) for the versioning scheme.
 | Tsc-s0.2.3 | Done | Nomor baris verified |
 | Tsc-v0.2.4 | Done | Insert, delete, save, mode, hint |
 | Tsc-s0.2.4 | Done | Editor dasar verified |
-| Tsc-v0.3.0 | Planned | File tree fungsional |
+| Tsc-v0.3.0 | Done | Baca folder (FileTree) |
+| Tsc-s0.3.0 | Done | Baca folder verified |
+| Tsc-v0.3.1 | Done | Render file tree |
+| Tsc-s0.3.1 | Done | Render file tree verified |
+| Tsc-v0.3.2 | Planned | Navigasi arrow di file tree |
+| Tsc-v0.3.3 | Planned | Buka file dengan Enter |
+| Tsc-v0.3.4 | Planned | Expand/collapse folder |
+| Tsc-v0.3.5 | Planned | Toggle explorer (Esc then e) |
 | Tsc-v0.4.0 | Planned | Syntax highlighting |
 | Tsc-v0.5.0 | Planned | Command palette |
 | Tsc-v1.0.0 | Planned | Terminal (X=1) |
@@ -136,33 +143,110 @@ See [versioning.md](versioning.md) for full details.
 - Delete karakter (`Document::delete_char`)
 - Save (`Document::save`)
 - Mode Normal / Command / Prompt
-- Vim-style command: `Esc` → `o` (open), `w` (write)
+- Vim-style command: `Esc` -> `o` (open), `w` (write)
 - Status bar dengan warna per mode
 - Hint 2 detik setelah save
 - Quit via `Alt+Q`
-- Explorer default hidden
 - Autoresize terminal
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
 **Known issues**:
 - Explorer masih teks statis (belum fungsional)
-- Toggle explorer belum ada keybinding (sengaja, karena explorer default hidden)
 
 ---
 
-### Tsc-v0.3.0 — File Tree Fungsional
+### Tsc-v0.3.0 — Baca Folder (FileTree)
+
+**Status**: Done (stable: Tsc-s0.3.0)
+
+**Contents**:
+- `FileTree` struct di `tscode-core`
+- `Entry` struct (path, name, is_dir, depth, expanded)
+- `FileTree::from_path()` baca isi folder
+- Urutkan: folder dulu, lalu file, alfabetis
+- `fs::canonicalize()` untuk resolve path absolut
+
+**Crates touched**: `tscode-core`
+
+---
+
+### Tsc-v0.3.1 — Render File Tree
+
+**Status**: Done (stable: Tsc-s0.3.1)
+
+**Contents**:
+- `App` punya field `file_tree: Option<FileTree>`
+- `load_file_tree()` baca folder dari parent document
+- Fallback ke current directory kalau parent kosong
+- `ui.rs` render file tree asli di explorer
+- Folder icon `+`, file tanpa icon
+- Marker `>` untuk item terpilih
+- Explorer lebar 20 kolom
+
+**Crates touched**: `tscode-tui`
+
+**Known issues**:
+- Belum bisa navigasi (arrow keys masih untuk editor)
+- Belum bisa buka file dari tree
+
+---
+
+### Tsc-v0.3.2 — Navigasi Arrow di File Tree
 
 **Status**: Planned
 
 **Contents**:
-- Baca folder asli (bukan hardcoded)
-- Navigasi dengan arrow keys
-- Buka file dengan Enter
-- Expand/collapse folder
-- Toggle explorer via `Esc` → `e`
+- Arrow atas/bawah -> pindah item di file tree
+- Butuh state: focus (Editor / Explorer)
+- Tab atau keybinding untuk switch focus
+
+**Crates touched**: `tscode-tui`
+
+**Note**: No new features in this phase until stable.
+
+---
+
+### Tsc-v0.3.3 — Buka File dengan Enter
+
+**Status**: Planned
+
+**Contents**:
+- Enter di file tree -> buka file
+- Enter di folder -> expand (sementara)
+- Update document & editor
 
 **Crates touched**: `tscode-core`, `tscode-tui`
+
+**Note**: No new features in this phase until stable.
+
+---
+
+### Tsc-v0.3.4 — Expand/Collapse Folder
+
+**Status**: Planned
+
+**Contents**:
+- Enter di folder -> expand/collapse
+- Rekursif baca isi subfolder
+- Update indentasi untuk nested entries
+
+**Crates touched**: `tscode-core`, `tscode-tui`
+
+**Note**: No new features in this phase until stable.
+
+---
+
+### Tsc-v0.3.5 — Toggle Explorer
+
+**Status**: Planned
+
+**Contents**:
+- `Esc` -> `e` -> toggle explorer
+- Simpan state `show_explorer`
+- Editor full width saat explorer hidden
+
+**Crates touched**: `tscode-tui`
 
 **Note**: No new features in this phase until stable.
 

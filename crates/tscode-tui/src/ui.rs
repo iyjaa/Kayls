@@ -6,7 +6,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::App;
+use crate::app::{App, Mode};
 
 pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let rows = Layout::default()
@@ -38,13 +38,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
 
     // Tentukan area editor
     let editor_area: Rect = if app.show_explorer {
-        // File tree lebih kecil: 15% biar editor lega
         let cols = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([
-                Constraint::Length(12),   // File tree 12 kolom
-                Constraint::Min(0),       // Editor sisa
-            ])
+            .constraints([Constraint::Length(12), Constraint::Min(0)])
             .split(rows[1]);
 
         frame.render_widget(
@@ -61,12 +57,18 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     // Editor
     match &app.document {
         Some(doc) => {
-            render_editor(frame, doc, editor_area);
+            render_editor(
+                frame,
+                doc,
+                editor_area,
+                app.scroll_offset,
+                app.scroll_offset_x,
+            );
         }
         None => {
             frame.render_widget(
                 Paragraph::new(
-                    "Welcome to Tscode!\n\nOpen a file: tscode <file>\nPress 'q' to quit.",
+                    "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.",
                 )
                 .block(Block::default().borders(Borders::ALL).title(" Editor ")),
                 editor_area,
@@ -81,72 +83,127 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         .map(|d| format!("{}:{}", d.cursor.line + 1, d.cursor.col + 1))
         .unwrap_or_else(|| "-:-".to_string());
 
-    let status = format!(
-        " NORMAL   {}   {}:{} ",
-        version, cursor_info, ""
-    );
-    frame.render_widget(
-        Paragraph::new(status)
-            .style(Style::default().bg(Color::DarkGray).fg(Color::White)),
-        rows[2],
-    );
+    let (status, status_style) = match app.mode {
+        Mode::Normal => {
+            if let Some(msg) = &app.status_message {
+                // Hint — warna hijau
+                (
+                    format!(" {} ", msg),
+                    Style::default().bg(Color::Green).fg(Color::Black),
+                )
+            } else {
+                (
+                    format!(
+                        " NORMAL   {}   {}   v:{} h:{} ",
+                        version, cursor_info, app.scroll_offset, app.scroll_offset_x
+                    ),
+                    Style::default().bg(Color::DarkGray).fg(Color::White),
+                )
+            }
+        }
+        Mode::Command => (
+            format!(
+                " COMMAND   {} ",
+                app.status_message.as_deref().unwrap_or("(o)pen (w)rite (Esc)cancel")
+            ),
+            Style::default().bg(Color::Yellow).fg(Color::Black),
+        ),
+        Mode::Prompt => (
+            format!(" Open file: {}_ ", app.input_buffer),
+            Style::default().bg(Color::Cyan).fg(Color::Black),
+        ),
+    };
+
+    frame.render_widget(Paragraph::new(status).style(status_style), rows[2]);
 }
 
-fn render_editor(frame: &mut Frame, doc: &tscode_core::Document, area: Rect) {
-    // Bagi editor jadi 2: nomor baris + isi
+fn render_editor(
+    frame: &mut Frame,
+    doc: &tscode_core::Document,
+    area: Rect,
+    scroll_y: usize,
+    scroll_x: usize,
+) {
     let cols = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Length(3),   // nomor baris: 2 digit + spasi
-            Constraint::Min(0),      // isi file
-        ])
+        .constraints([Constraint::Length(3), Constraint::Min(0)])
         .split(area);
 
+    // Viewport dimensi (kurangi border)
+    let viewport_height = area.height.saturating_sub(2) as usize;
+    let viewport_width = cols[1].width.saturating_sub(2) as usize;
+
+    let start = scroll_y;
+    let end = (scroll_y + viewport_height).min(doc.lines.len());
+
     // Nomor baris
-    let line_count = doc.lines.len();
-    let numbers: String = (1..=line_count)
+    let numbers: String = (start + 1..=end)
         .map(|n| format!("{:>2} ", n))
         .collect::<Vec<_>>()
         .join("\n");
 
     frame.render_widget(
         Paragraph::new(numbers)
-            .style(Style::default().fg(Color::Gray)),
+            .style(Style::default().fg(Color::Gray))
+            .block(Block::default().borders(Borders::TOP | Borders::RIGHT)),
         cols[0],
     );
 
-    // Isi file dengan cursor
-    let lines = render_lines_with_cursor(doc);
+    // Isi file dengan horizontal scroll
+    let lines = render_lines_with_cursor(doc, start, end, scroll_x, viewport_width);
     frame.render_widget(
-        Paragraph::new(lines)
-            .block(Block::default().borders(Borders::ALL).title(" Editor ")),
+        Paragraph::new(lines).block(Block::default().borders(Borders::ALL).title(" Editor ")),
         cols[1],
     );
 
-    // Posisi cursor terminal
-    let cursor_x = cols[1].x + 1 + doc.cursor.col as u16;
-    let cursor_y = cols[1].y + 1 + doc.cursor.line as u16;
+    // Posisi cursor
+    let cursor_screen_line = doc.cursor.line.saturating_sub(scroll_y);
+    let cursor_screen_col = doc.cursor.col.saturating_sub(scroll_x);
+    let cursor_x = cols[1].x + 1 + cursor_screen_col as u16;
+    let cursor_y = cols[1].y + 1 + cursor_screen_line as u16;
     frame.set_cursor_position((cursor_x, cursor_y));
 }
 
-fn render_lines_with_cursor(doc: &tscode_core::Document) -> Vec<Line<'_>> {
+fn render_lines_with_cursor(
+    doc: &tscode_core::Document,
+    start: usize,
+    end: usize,
+    scroll_x: usize,
+    viewport_width: usize,
+) -> Vec<Line<'_>> {
     doc.lines
         .iter()
         .enumerate()
+        .skip(start)
+        .take(end - start)
         .map(|(i, line)| {
-            if i == doc.cursor.line {
-                let col = doc.cursor.col;
-                let chars: Vec<char> = line.chars().collect();
+            // Potong baris: dari scroll_x, sepanjang viewport_width
+            let chars: Vec<char> = line.chars().collect();
+            let visible: Vec<char> = chars
+                .iter()
+                .skip(scroll_x)
+                .take(viewport_width)
+                .copied()
+                .collect();
 
-                if chars.is_empty() {
-                    Line::from(vec![Span::styled(
-                        " ",
-                        Style::default().add_modifier(Modifier::REVERSED),
-                    )])
+            if i == doc.cursor.line {
+                // Cursor di baris ini
+                let cursor_col_in_view = doc.cursor.col.saturating_sub(scroll_x);
+
+                if visible.is_empty() || cursor_col_in_view >= visible.len() {
+                    // Cursor di akhir atau di luar
+                    let text: String = visible.iter().collect();
+                    Line::from(vec![
+                        Span::raw(text),
+                        Span::styled(" ", Style::default().add_modifier(Modifier::REVERSED)),
+                    ])
                 } else {
-                    let before: String = chars.iter().take(col).collect();
-                    let at: String = chars.get(col).map(|c| c.to_string()).unwrap_or_default();
-                    let after: String = chars.iter().skip(col + 1).collect();
+                    let before: String = visible.iter().take(cursor_col_in_view).collect();
+                    let at: String = visible
+                        .get(cursor_col_in_view)
+                        .map(|c| c.to_string())
+                        .unwrap_or_default();
+                    let after: String = visible.iter().skip(cursor_col_in_view + 1).collect();
 
                     Line::from(vec![
                         Span::raw(before),
@@ -158,7 +215,7 @@ fn render_lines_with_cursor(doc: &tscode_core::Document) -> Vec<Line<'_>> {
                     ])
                 }
             } else {
-                Line::from(line.clone())
+                Line::from(visible.into_iter().collect::<String>())
             }
         })
         .collect()

@@ -52,4 +52,54 @@ impl Document {
     pub fn content_as_string(&self) -> String {
         self.lines.join("\n")
     }
+
+    pub fn insert_char(&mut self, c: char) {
+        let line = self.cursor.line;
+        let col = self.cursor.col;
+
+        if let Some(current) = self.lines.get_mut(line) {
+            let char_count = current.chars().count();
+
+            if col >= char_count {
+                current.push(c);
+            } else {
+                let byte_idx = current
+                    .char_indices()
+                    .nth(col)
+                    .map(|(i, _)| i)
+                    .unwrap_or(current.len());
+                current.insert(byte_idx, c);
+            }
+
+            self.cursor.col += 1;
+            self.dirty = true;
+        }
+    }
+
+    pub fn delete_char(&mut self) {
+        let line = self.cursor.line;
+        let col = self.cursor.col;
+
+        if col == 0 {
+            return;
+        }
+
+        if let Some(current) = self.lines.get_mut(line) {
+            let byte_idx = current
+                .char_indices()
+                .nth(col - 1)
+                .map(|(i, _)| i)
+                .unwrap_or(current.len());
+            current.remove(byte_idx);
+            self.cursor.col -= 1;
+            self.dirty = true;
+        }
+    }
+
+    pub fn save(&mut self) -> std::io::Result<()> {
+        let content = self.content_as_string();
+        fs::write(&self.path, content)?;
+        self.dirty = false;
+        Ok(())
+    }
 }

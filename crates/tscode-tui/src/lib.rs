@@ -6,6 +6,7 @@ pub use app::App;
 use anyhow::Result;
 use crossterm::event::{self, Event};
 use ratatui::DefaultTerminal;
+use std::time::Duration;
 use tscode_core::Document;
 
 pub fn run(version: &str, document: Option<Document>) -> Result<()> {
@@ -23,10 +24,32 @@ fn run_loop(
     let mut app = App::new(document);
 
     while !app.should_quit {
+        terminal.autoresize()?;
+
+        let size = terminal.size()?;
+        let editor_height = size.height.saturating_sub(4);
+        let editor_width = if app.show_explorer {
+            size.width.saturating_sub(17)
+        } else {
+            size.width.saturating_sub(5)
+        };
+        app.editor_height = editor_height;
+        app.editor_width = editor_width;
+
+        // Tick — clear status message kalau expired
+        app.tick();
+
         terminal.draw(|frame| ui::render(frame, &app, version))?;
 
-        if let Event::Key(key) = event::read()? {
-            app.handle_key(key);
+        // Poll dengan timeout 100ms — supaya tick() jalan rutin
+        if event::poll(Duration::from_millis(100))? {
+            match event::read()? {
+                Event::Key(key) => {
+                    app.handle_key(key);
+                }
+                Event::Resize(_, _) => {}
+                _ => {}
+            }
         }
     }
 

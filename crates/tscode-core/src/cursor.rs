@@ -28,7 +28,7 @@ impl Cursor {
     }
 
     pub fn move_right(&mut self, max_col: usize) {
-        if self.col + 1 < max_col {
+        if self.col < max_col {
             self.col += 1;
         }
     }

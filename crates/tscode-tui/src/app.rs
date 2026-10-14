@@ -166,6 +166,12 @@ impl App {
     }
 
     fn handle_explorer_keys(&mut self, key: KeyEvent) {
+        // Enter — buka file yang dipilih
+        if let KeyCode::Enter = key.code {
+            self.open_selected_from_tree();
+            return;
+        }
+
         if let Some(tree) = self.file_tree.as_mut() {
             match key.code {
                 KeyCode::Up => {
@@ -177,6 +183,47 @@ impl App {
                     return;
                 }
                 _ => {}
+            }
+        }
+    }
+
+    fn open_selected_from_tree(&mut self) {
+        let Some(tree) = self.file_tree.as_ref() else {
+            return;
+        };
+
+        let Some(entry) = tree.selected_entry() else {
+            return;
+        };
+
+        let path = entry.path.clone();
+        let is_dir = entry.is_dir;
+
+        if is_dir {
+            // Folder — belum diimplementasi (Tsc-v0.3.4)
+            self.status_message = Some(format!("Folder: {}", path.display()));
+            self.status_time = Some(Instant::now());
+            return;
+        }
+
+        // Buka file
+        match Document::open(&path) {
+            Ok(doc) => {
+                self.document = Some(doc);
+                self.scroll_offset = 0;
+                self.scroll_offset_x = 0;
+                self.status_message = Some(format!("Opened: {}", path.display()));
+                self.status_time = Some(Instant::now());
+
+                // Reload file tree (parent baru)
+                self.load_file_tree();
+
+                // Pindah focus ke Editor
+                self.focus = Focus::Editor;
+            }
+            Err(e) => {
+                self.status_message = Some(format!("Error: {}", e));
+                self.status_time = Some(Instant::now());
             }
         }
     }

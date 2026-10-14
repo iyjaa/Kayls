@@ -11,7 +11,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Current Status
 
-**Tsc-v0.2.3** — Editor dasar (layout, buka file, cursor, nomor baris)
+**Tsc-s0.2.4** — Editor dasar selesai (layout, buka file, cursor, nomor baris, insert, delete, save)
 
 ---
 
@@ -27,11 +27,10 @@ See [versioning.md](versioning.md) for the versioning scheme.
 | Tsc-s0.2.1 | Done | Buka file verified |
 | Tsc-v0.2.2 | Done | Cursor movement |
 | Tsc-s0.2.2 | Done | Cursor verified |
-| Tsc-v0.2.3 | In progress | Nomor baris |
-| Tsc-s0.2.3 | Planned | Nomor baris verified |
-| Tsc-v0.2.4 | Planned | Insert karakter |
-| Tsc-v0.2.5 | Planned | Delete (Backspace) |
-| Tsc-v0.2.6 | Planned | Save (Ctrl+S) |
+| Tsc-v0.2.3 | Done | Nomor baris |
+| Tsc-s0.2.3 | Done | Nomor baris verified |
+| Tsc-v0.2.4 | Done | Insert, delete, save, mode, hint |
+| Tsc-s0.2.4 | Done | Editor dasar verified |
 | Tsc-v0.3.0 | Planned | File tree fungsional |
 | Tsc-v0.4.0 | Planned | Syntax highlighting |
 | Tsc-v0.5.0 | Planned | Command palette |
@@ -68,6 +67,8 @@ See [versioning.md](versioning.md) for full details.
 - Git & GitHub setup
 - Basic `main.rs`
 - Custom versioning scheme
+
+**Crates touched**: all
 
 ---
 
@@ -106,6 +107,7 @@ See [versioning.md](versioning.md) for full details.
 - Arrow keys untuk gerakkan cursor
 - Cursor highlight di editor (REVERSED)
 - Posisi cursor di status bar
+- Scroll vertikal & horizontal
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
@@ -113,63 +115,39 @@ See [versioning.md](versioning.md) for full details.
 
 ### Tsc-v0.2.3 — Nomor Baris
 
-**Status**: In progress
+**Status**: Done (stable: Tsc-s0.2.3)
 
 **Contents**:
 - Nomor baris di kiri editor
 - Warna abu-abu (tidak mengganggu)
 - Lebar tetap (3 kolom, 2 digit)
+- Sejajar dengan isi file (border TOP + RIGHT)
 
 **Crates touched**: `tscode-tui`
 
-**Known issue**:
+---
+
+### Tsc-v0.2.4 — Editor Dasar Selesai
+
+**Status**: Done (stable: Tsc-s0.2.4)
+
+**Contents**:
+- Insert karakter (`Document::insert_char`)
+- Delete karakter (`Document::delete_char`)
+- Save (`Document::save`)
+- Mode Normal / Command / Prompt
+- Vim-style command: `Esc` → `o` (open), `w` (write)
+- Status bar dengan warna per mode
+- Hint 2 detik setelah save
+- Quit via `Alt+Q`
+- Explorer default hidden
+- Autoresize terminal
+
+**Crates touched**: `tscode-core`, `tscode-tui`
+
+**Known issues**:
 - Explorer masih teks statis (belum fungsional)
-- Toggle explorer belum bekerja di terminal Acode
-
----
-
-### Tsc-v0.2.4 — Insert Karakter
-
-**Status**: Planned
-
-**Contents**:
-- `Document::insert_char()`
-- Handle `KeyCode::Char(c)` di `App`
-- Ketik huruf → muncul di posisi cursor
-
-**Crates touched**: `tscode-core`, `tscode-tui`
-
-**Note**: No new features in this phase until stable.
-
----
-
-### Tsc-v0.2.5 — Delete (Backspace)
-
-**Status**: Planned
-
-**Contents**:
-- `Document::delete_char()`
-- Handle `KeyCode::Backspace`
-- Hapus karakter di kiri cursor
-
-**Crates touched**: `tscode-core`, `tscode-tui`
-
-**Note**: No new features in this phase until stable.
-
----
-
-### Tsc-v0.2.6 — Save
-
-**Status**: Planned
-
-**Contents**:
-- `Document::save()`
-- Handle `Ctrl+S`
-- Dirty flag (indikator file belum disave)
-
-**Crates touched**: `tscode-core`, `tscode-tui`
-
-**Note**: No new features in this phase until stable.
+- Toggle explorer belum ada keybinding (sengaja, karena explorer default hidden)
 
 ---
 
@@ -182,8 +160,11 @@ See [versioning.md](versioning.md) for full details.
 - Navigasi dengan arrow keys
 - Buka file dengan Enter
 - Expand/collapse folder
+- Toggle explorer via `Esc` → `e`
 
 **Crates touched**: `tscode-core`, `tscode-tui`
+
+**Note**: No new features in this phase until stable.
 
 ---
 
@@ -199,6 +180,8 @@ See [versioning.md](versioning.md) for full details.
 
 **Crates touched**: `tscode-syntax`, `tscode-tui`
 
+**Note**: No new features in this phase until stable.
+
 ---
 
 ### Tsc-v0.5.0 — Command Palette
@@ -211,6 +194,8 @@ See [versioning.md](versioning.md) for full details.
 - Basic commands: save, open, quit, toggle sidebar
 
 **Crates touched**: `tscode-tui`
+
+**Note**: No new features in this phase until stable.
 
 ---
 

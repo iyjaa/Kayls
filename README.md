@@ -4,7 +4,7 @@ Terminal Studio Code — A terminal-based IDE with a VS Code-like experience.
 
 ## Status
 
-**Tsc-v0.2.3** — Editor dasar: layout, buka file, cursor, nomor baris. Unstable, in development.
+**Tsc-s0.2.4** — Editor dasar selesai: layout, buka file, cursor, scroll, nomor baris, insert, delete, save. Stable.
 
 See [versioning.md](docs/versioning.md) for the versioning scheme.
 
@@ -12,6 +12,26 @@ See [versioning.md](docs/versioning.md) for the versioning scheme.
 
     cargo build --workspace
     cargo run -p tscode
+
+## Usage
+
+    # Buka file
+    cargo run -p tscode Cargo.toml
+
+    # Buka tanpa file
+    cargo run -p tscode
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| Arrow keys | Move cursor |
+| Any char | Insert character |
+| Backspace | Delete character |
+| Esc then o | Open file |
+| Esc then w | Save file |
+| Esc then Esc | Cancel command |
+| Alt+Q | Quit |
 
 ## Structure
 

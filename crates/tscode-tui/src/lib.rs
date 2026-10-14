@@ -5,6 +5,7 @@ pub use app::App;
 
 use anyhow::Result;
 use crossterm::event::{self, Event};
+use ratatui::layout::Rect;
 use ratatui::DefaultTerminal;
 use std::time::Duration;
 use tscode_core::Document;
@@ -35,6 +36,17 @@ fn run_loop(
         };
         app.editor_height = editor_height;
         app.editor_width = editor_width;
+
+        // Hitung editor_area untuk ratatui-code-editor
+        // x: explorer (20) + nomor baris (3) + border editor (1)
+        // y: tab bar (1) + border editor (1)
+        let area = Rect {
+            x: if app.show_explorer { 24 } else { 4 },
+            y: 2,
+            width: editor_width,
+            height: editor_height,
+        };
+        app.editor_area = area;
 
         app.tick();
 

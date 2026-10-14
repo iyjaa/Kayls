@@ -1,7 +1,6 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
-    text::{Line, Span},
+    style::{Color, Style},
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
@@ -43,7 +42,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             .constraints([Constraint::Length(20), Constraint::Min(0)])
             .split(rows[1]);
 
-        // Render file tree — border beda kalau fokus
+        // Render file tree
         let tree_content = render_file_tree(app);
         let explorer_focused = app.focus == Focus::Explorer;
 
@@ -75,28 +74,54 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     };
 
     // Editor
-    match &app.document {
-        Some(doc) => {
-            let editor_focused = app.focus == Focus::Editor && app.show_explorer;
+    let editor_focused = app.focus == Focus::Editor;
 
-            render_editor(
-                frame,
-                doc,
-                editor_area,
-                app.scroll_offset,
-                app.scroll_offset_x,
-                editor_focused,
-            );
+    let editor_border_style = if editor_focused {
+        Style::default().fg(Color::Yellow)
+    } else {
+        Style::default().fg(Color::DarkGray)
+    };
+
+    let editor_title = if editor_focused {
+        " Editor [*] "
+    } else {
+        " Editor "
+    };
+
+    // Render editor dari ratatui-code-editor
+    if let Some(editor) = app.editor.as_ref() {
+        let inner = Block::default()
+            .borders(Borders::ALL)
+            .title(editor_title)
+            .border_style(editor_border_style);
+
+        let inner_area = inner.inner(editor_area);
+
+        frame.render_widget(inner, editor_area);
+        frame.render_widget(editor, inner_area);
+
+        // Set posisi cursor terminal
+        if editor_focused {
+            if let Some((cx, cy)) = editor.get_visible_cursor(&inner_area) {
+                frame.set_cursor_position((cx, cy));
+            }
         }
-        None => {
-            frame.render_widget(
-                Paragraph::new(
-                    "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.",
-                )
-                .block(Block::default().borders(Borders::ALL).title(" Editor ")),
-                editor_area,
-            );
-        }
+    } else {
+        // Fallback kalau editor belum di-load
+        let content = match &app.document {
+            Some(doc) => doc.content_as_string(),
+            None => "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string(),
+        };
+
+        frame.render_widget(
+            Paragraph::new(content).block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title(editor_title)
+                    .border_style(editor_border_style),
+            ),
+            editor_area,
+        );
     }
 
     // Status bar
@@ -170,127 +195,4 @@ fn render_file_tree(app: &App) -> String {
         })
         .collect::<Vec<_>>()
         .join("\n")
-}
-
-fn render_editor(
-    frame: &mut Frame,
-    doc: &tscode_core::Document,
-    area: Rect,
-    scroll_y: usize,
-    scroll_x: usize,
-    focused: bool,
-) {
-    let cols = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([Constraint::Length(3), Constraint::Min(0)])
-        .split(area);
-
-    // Viewport dimensi (kurangi border)
-    let viewport_height = area.height.saturating_sub(2) as usize;
-    let viewport_width = cols[1].width.saturating_sub(2) as usize;
-
-    let start = scroll_y;
-    let end = (scroll_y + viewport_height).min(doc.lines.len());
-
-    // Nomor baris
-    let numbers: String = (start + 1..=end)
-        .map(|n| format!("{:>2} ", n))
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    frame.render_widget(
-        Paragraph::new(numbers)
-            .style(Style::default().fg(Color::Gray))
-            .block(Block::default().borders(Borders::TOP | Borders::RIGHT)),
-        cols[0],
-    );
-
-    // Isi file dengan horizontal scroll
-    let lines = render_lines_with_cursor(doc, start, end, scroll_x, viewport_width);
-
-    // Border editor — beda kalau fokus
-    let editor_border_style = if focused {
-        Style::default().fg(Color::Yellow)
-    } else {
-        Style::default().fg(Color::DarkGray)
-    };
-
-    let editor_title = if focused {
-        " Editor [*] "
-    } else {
-        " Editor "
-    };
-
-    frame.render_widget(
-        Paragraph::new(lines).block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(editor_title)
-                .border_style(editor_border_style),
-        ),
-        cols[1],
-    );
-
-    // Posisi cursor terminal — hanya kalau editor fokus
-    if focused {
-        let cursor_screen_line = doc.cursor.line.saturating_sub(scroll_y);
-        let cursor_screen_col = doc.cursor.col.saturating_sub(scroll_x);
-        let cursor_x = cols[1].x + 1 + cursor_screen_col as u16;
-        let cursor_y = cols[1].y + 1 + cursor_screen_line as u16;
-        frame.set_cursor_position((cursor_x, cursor_y));
-    }
-}
-
-fn render_lines_with_cursor(
-    doc: &tscode_core::Document,
-    start: usize,
-    end: usize,
-    scroll_x: usize,
-    viewport_width: usize,
-) -> Vec<Line<'_>> {
-    doc.lines
-        .iter()
-        .enumerate()
-        .skip(start)
-        .take(end - start)
-        .map(|(i, line)| {
-            let chars: Vec<char> = line.chars().collect();
-            let visible: Vec<char> = chars
-                .iter()
-                .skip(scroll_x)
-                .take(viewport_width)
-                .copied()
-                .collect();
-
-            if i == doc.cursor.line {
-                let cursor_col_in_view = doc.cursor.col.saturating_sub(scroll_x);
-
-                if visible.is_empty() || cursor_col_in_view >= visible.len() {
-                    let text: String = visible.iter().collect();
-                    Line::from(vec![
-                        Span::raw(text),
-                        Span::styled(" ", Style::default().add_modifier(Modifier::REVERSED)),
-                    ])
-                } else {
-                    let before: String = visible.iter().take(cursor_col_in_view).collect();
-                    let at: String = visible
-                        .get(cursor_col_in_view)
-                        .map(|c| c.to_string())
-                        .unwrap_or_default();
-                    let after: String = visible.iter().skip(cursor_col_in_view + 1).collect();
-
-                    Line::from(vec![
-                        Span::raw(before),
-                        Span::styled(
-                            if at.is_empty() { " ".to_string() } else { at },
-                            Style::default().add_modifier(Modifier::REVERSED),
-                        ),
-                        Span::raw(after),
-                    ])
-                }
-            } else {
-                Line::from(visible.into_iter().collect::<String>())
-            }
-        })
-        .collect()
 }

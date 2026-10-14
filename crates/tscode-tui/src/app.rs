@@ -1,4 +1,7 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use ratatui::layout::Rect;
+use ratatui_code_editor::editor::Editor;
+use ratatui_code_editor::theme::vesper;
 use std::time::Instant;
 use tscode_core::{Document, FileTree};
 
@@ -18,6 +21,8 @@ pub enum Focus {
 pub struct App {
     pub should_quit: bool,
     pub document: Option<Document>,
+    pub editor: Option<Editor>,
+    pub editor_area: Rect,
     pub file_tree: Option<FileTree>,
     pub show_explorer: bool,
     pub focus: Focus,
@@ -36,6 +41,8 @@ impl App {
         let mut app = Self {
             should_quit: false,
             document,
+            editor: None,
+            editor_area: Rect::default(),
             file_tree: None,
             show_explorer: true,
             focus: Focus::Editor,
@@ -50,6 +57,7 @@ impl App {
         };
 
         app.load_file_tree();
+        app.load_editor();
         app
     }
 
@@ -83,6 +91,25 @@ impl App {
         }
     }
 
+    fn load_editor(&mut self) {
+        let Some(doc) = self.document.as_ref() else {
+            return;
+        };
+
+        let content = doc.content_as_string();
+        let lang = detect_language(&doc.path);
+
+        match Editor::new(lang, &content, vesper()) {
+            Ok(ed) => {
+                self.editor = Some(ed);
+            }
+            Err(e) => {
+                self.status_message = Some(format!("Editor error: {}", e));
+                self.status_time = Some(Instant::now());
+            }
+        }
+    }
+
     pub fn handle_key(&mut self, key: KeyEvent) {
         if key.kind != KeyEventKind::Press {
             return;
@@ -111,7 +138,6 @@ impl App {
             return;
         }
 
-        // Arrow keys: tergantung focus
         match self.focus {
             Focus::Editor => self.handle_editor_keys(key),
             Focus::Explorer => self.handle_explorer_keys(key),
@@ -119,54 +145,16 @@ impl App {
     }
 
     fn handle_editor_keys(&mut self, key: KeyEvent) {
-        if let Some(doc) = self.document.as_mut() {
-            match key.code {
-                KeyCode::Up => {
-                    doc.cursor.move_up();
-                    Self::clamp_cursor(doc);
-                    self.ensure_cursor_visible();
-                    return;
-                }
-                KeyCode::Down => {
-                    doc.cursor.move_down(doc.line_count());
-                    Self::clamp_cursor(doc);
-                    self.ensure_cursor_visible();
-                    return;
-                }
-                KeyCode::Left => {
-                    doc.cursor.move_left();
-                    self.ensure_cursor_visible();
-                    return;
-                }
-                KeyCode::Right => {
-                    doc.cursor.move_right(doc.current_line_len());
-                    self.ensure_cursor_visible();
-                    return;
-                }
-                KeyCode::Backspace => {
-                    doc.delete_char();
-                    self.ensure_cursor_visible();
-                    return;
-                }
-                KeyCode::Enter => {
-                    return;
-                }
-                _ => {}
-            }
-        }
-
-        if key.modifiers.is_empty() {
-            if let KeyCode::Char(c) = key.code {
-                if let Some(doc) = self.document.as_mut() {
-                    doc.insert_char(c);
-                }
-                self.ensure_cursor_visible();
+        if let Some(editor) = self.editor.as_mut() {
+            let area = self.editor_area;
+            if let Err(e) = editor.input(key, &area) {
+                self.status_message = Some(format!("Editor error: {}", e));
+                self.status_time = Some(Instant::now());
             }
         }
     }
 
     fn handle_explorer_keys(&mut self, key: KeyEvent) {
-        // Enter — buka file yang dipilih
         if let KeyCode::Enter = key.code {
             self.open_selected_from_tree();
             return;
@@ -200,13 +188,11 @@ impl App {
         let is_dir = entry.is_dir;
 
         if is_dir {
-            // Folder — belum diimplementasi (Tsc-v0.3.4)
             self.status_message = Some(format!("Folder: {}", path.display()));
             self.status_time = Some(Instant::now());
             return;
         }
 
-        // Buka file
         match Document::open(&path) {
             Ok(doc) => {
                 self.document = Some(doc);
@@ -215,10 +201,9 @@ impl App {
                 self.status_message = Some(format!("Opened: {}", path.display()));
                 self.status_time = Some(Instant::now());
 
-                // Reload file tree (parent baru)
                 self.load_file_tree();
+                self.load_editor();
 
-                // Pindah focus ke Editor
                 self.focus = Focus::Editor;
             }
             Err(e) => {
@@ -242,10 +227,13 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('w') => {
-                if let Some(doc) = self.document.as_mut() {
-                    match doc.save() {
+                if let (Some(doc), Some(editor)) = (self.document.as_ref(), self.editor.as_ref()) {
+                    let content = editor.get_content();
+                    let path = doc.path.clone();
+
+                    match std::fs::write(&path, content) {
                         Ok(_) => {
-                            self.status_message = Some(format!("Saved: {}", doc.path.display()));
+                            self.status_message = Some(format!("Saved: {}", path.display()));
                         }
                         Err(e) => {
                             self.status_message = Some(format!("Error: {}", e));
@@ -256,7 +244,6 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('e') => {
-                // Toggle explorer + switch focus
                 self.show_explorer = !self.show_explorer;
 
                 if self.show_explorer {
@@ -295,6 +282,7 @@ impl App {
                         self.scroll_offset_x = 0;
                         self.status_message = Some(format!("Opened: {}", path));
                         self.load_file_tree();
+                        self.load_editor();
                     }
                     Err(e) => {
                         self.status_message = Some(format!("Error: {}", e));
@@ -322,44 +310,24 @@ impl App {
             }
         }
     }
+}
 
-    fn clamp_cursor(doc: &mut Document) {
-        let max = doc.current_line_len();
-        if doc.cursor.col > max {
-            doc.cursor.col = max;
-        }
-    }
-
-    pub fn ensure_cursor_visible(&mut self) {
-        if self.editor_height == 0 {
-            return;
-        }
-
-        let Some(doc) = self.document.as_ref() else {
-            return;
-        };
-
-        let cursor_line = doc.cursor.line;
-        let cursor_col = doc.cursor.col;
-        let h = self.editor_height as usize;
-        let w = self.editor_width as usize;
-
-        if cursor_line < self.scroll_offset {
-            self.scroll_offset = cursor_line;
-        }
-        let bottom = self.scroll_offset + h;
-        if cursor_line >= bottom {
-            self.scroll_offset = cursor_line - h + 1;
-        }
-
-        if w > 0 {
-            if cursor_col < self.scroll_offset_x {
-                self.scroll_offset_x = cursor_col;
-            }
-            let right = self.scroll_offset_x + w;
-            if cursor_col >= right {
-                self.scroll_offset_x = cursor_col - w + 1;
-            }
-        }
+fn detect_language(path: &std::path::Path) -> &'static str {
+    match path.extension().and_then(|e| e.to_str()) {
+        Some("rs") => "rust",
+        Some("py") => "python",
+        Some("js") => "javascript",
+        Some("ts") => "typescript",
+        Some("go") => "go",
+        Some("c") => "c",
+        Some("cpp") | Some("cc") | Some("cxx") => "cpp",
+        Some("h") | Some("hpp") => "cpp",
+        Some("toml") => "toml",
+        Some("json") => "json",
+        Some("md") => "markdown",
+        Some("html") => "html",
+        Some("css") => "css",
+        Some("sh") | Some("bash") => "bash",
+        _ => "text",
     }
 }

@@ -11,7 +11,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Current Status
 
-**Tsc-s0.3.1** — File tree renders actual directory. Editor basic functional.
+**Tsc-s0.3.2** — Focus system (Editor/Explorer), arrow navigation in file tree
 
 ---
 
@@ -35,7 +35,8 @@ See [versioning.md](versioning.md) for the versioning scheme.
 | Tsc-s0.3.0 | Done | Baca folder verified |
 | Tsc-v0.3.1 | Done | Render file tree |
 | Tsc-s0.3.1 | Done | Render file tree verified |
-| Tsc-v0.3.2 | Planned | Navigasi arrow di file tree |
+| Tsc-v0.3.2 | Done | Focus system + arrow navigation |
+| Tsc-s0.3.2 | Done | Focus system verified |
 | Tsc-v0.3.3 | Planned | Buka file dengan Enter |
 | Tsc-v0.3.4 | Planned | Expand/collapse folder |
 | Tsc-v0.3.5 | Planned | Toggle explorer (Esc then e) |
@@ -151,9 +152,6 @@ See [versioning.md](versioning.md) for full details.
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
-**Known issues**:
-- Explorer masih teks statis (belum fungsional)
-
 ---
 
 ### Tsc-v0.3.0 — Baca Folder (FileTree)
@@ -186,24 +184,25 @@ See [versioning.md](versioning.md) for full details.
 
 **Crates touched**: `tscode-tui`
 
-**Known issues**:
-- Belum bisa navigasi (arrow keys masih untuk editor)
-- Belum bisa buka file dari tree
-
 ---
 
-### Tsc-v0.3.2 — Navigasi Arrow di File Tree
+### Tsc-v0.3.2 — Focus System + Arrow Navigation
 
-**Status**: Planned
+**Status**: Done (stable: Tsc-s0.3.2)
 
 **Contents**:
-- Arrow atas/bawah -> pindah item di file tree
-- Butuh state: focus (Editor / Explorer)
-- Tab atau keybinding untuk switch focus
+- `Focus` enum (Editor / Explorer)
+- Field `focus` di `App`
+- `Esc` -> `e` toggle explorer + switch focus
+- Arrow keys berpengaruh tergantung focus:
+  - `Focus::Editor` -> gerak cursor
+  - `Focus::Explorer` -> gerak selection
+- `FileTree::move_up()` dan `move_down()`
+- Border kuning + title `[*]` di panel yang fokus
+- Status bar nampilkan `[EDITOR]` / `[EXPLORER]`
+- `handle_normal` delegasi ke `handle_editor_keys` / `handle_explorer_keys`
 
-**Crates touched**: `tscode-tui`
-
-**Note**: No new features in this phase until stable.
+**Crates touched**: `tscode-core`, `tscode-tui`
 
 ---
 
@@ -213,8 +212,10 @@ See [versioning.md](versioning.md) for full details.
 
 **Contents**:
 - Enter di file tree -> buka file
-- Enter di folder -> expand (sementara)
-- Update document & editor
+- Ambil `tree.selected_entry()`
+- Kalau file -> `Document::open(path)`
+- Reload file tree (parent baru)
+- Update editor
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
@@ -230,6 +231,7 @@ See [versioning.md](versioning.md) for full details.
 - Enter di folder -> expand/collapse
 - Rekursif baca isi subfolder
 - Update indentasi untuk nested entries
+- Tandai folder expanded dengan icon berbeda
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
@@ -242,8 +244,8 @@ See [versioning.md](versioning.md) for full details.
 **Status**: Planned
 
 **Contents**:
-- `Esc` -> `e` -> toggle explorer
-- Simpan state `show_explorer`
+- `Esc` -> `e` sudah bekerja (dari `Tsc-v0.3.2`)
+- Sempurnakan: simpan state `show_explorer`
 - Editor full width saat explorer hidden
 
 **Crates touched**: `tscode-tui`

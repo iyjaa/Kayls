@@ -184,14 +184,24 @@ fn render_file_tree(app: &App) -> String {
         return "(empty)".to_string();
     }
 
-    tree.entries
+    let visible = tree.visible_entries();
+    let selected = tree.selected_path.as_ref();
+
+    visible
         .iter()
-        .enumerate()
-        .map(|(i, entry)| {
-            let indent = "  ".repeat(entry.depth);
-            let icon = if entry.is_dir { "+" } else { " " };
-            let marker = if i == tree.selected { ">" } else { " " };
-            format!("{}{}{} {}", marker, indent, icon, entry.name)
+        .map(|(path, name, is_dir, depth, expanded)| {
+            let indent = "  ".repeat(*depth);
+            let icon = if *is_dir {
+                if *expanded {
+                    "-"
+                } else {
+                    "+"
+                }
+            } else {
+                " "
+            };
+            let marker = if Some(path) == selected { ">" } else { " " };
+            format!("{}{}{} {}", marker, indent, icon, name)
         })
         .collect::<Vec<_>>()
         .join("\n")

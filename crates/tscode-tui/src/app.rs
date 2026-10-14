@@ -62,25 +62,11 @@ impl App {
     }
 
     fn load_file_tree(&mut self) {
-        let Some(doc) = self.document.as_ref() else {
-            return;
-        };
+        // Root = current directory (tidak berubah tiap buka file)
+        let root = std::env::current_dir().ok();
 
-        let parent = if doc.path.is_file() {
-            doc.path
-                .parent()
-                .filter(|p| !p.as_os_str().is_empty())
-                .map(|p| p.to_path_buf())
-        } else if doc.path.is_dir() {
-            Some(doc.path.clone())
-        } else {
-            None
-        };
-
-        let parent = parent.or_else(|| std::env::current_dir().ok());
-
-        if let Some(parent) = parent {
-            match FileTree::from_path(&parent) {
+        if let Some(root) = root {
+            match FileTree::from_path(&root) {
                 Ok(tree) => {
                     self.file_tree = Some(tree);
                 }
@@ -155,44 +141,34 @@ impl App {
     }
 
     fn handle_explorer_keys(&mut self, key: KeyEvent) {
-        if let KeyCode::Enter = key.code {
-            self.open_selected_from_tree();
+        let Some(tree) = self.file_tree.as_mut() else {
             return;
-        }
+        };
 
-        if let Some(tree) = self.file_tree.as_mut() {
-            match key.code {
-                KeyCode::Up => {
-                    tree.move_up();
-                    return;
-                }
-                KeyCode::Down => {
-                    tree.move_down();
-                    return;
-                }
-                _ => {}
+        match key.code {
+            KeyCode::Up => {
+                tree.move_up();
             }
+            KeyCode::Down => {
+                tree.move_down();
+            }
+            KeyCode::Enter => {
+                let is_dir = tree.selected_entry().map(|e| e.is_dir).unwrap_or(false);
+
+                if is_dir {
+                    tree.toggle_expand_selected();
+                } else {
+                    let path = tree.selected_entry().map(|e| e.path.clone());
+                    if let Some(path) = path {
+                        self.open_file_from_path(path);
+                    }
+                }
+            }
+            _ => {}
         }
     }
 
-    fn open_selected_from_tree(&mut self) {
-        let Some(tree) = self.file_tree.as_ref() else {
-            return;
-        };
-
-        let Some(entry) = tree.selected_entry() else {
-            return;
-        };
-
-        let path = entry.path.clone();
-        let is_dir = entry.is_dir;
-
-        if is_dir {
-            self.status_message = Some(format!("Folder: {}", path.display()));
-            self.status_time = Some(Instant::now());
-            return;
-        }
-
+    fn open_file_from_path(&mut self, path: std::path::PathBuf) {
         match Document::open(&path) {
             Ok(doc) => {
                 self.document = Some(doc);
@@ -201,7 +177,7 @@ impl App {
                 self.status_message = Some(format!("Opened: {}", path.display()));
                 self.status_time = Some(Instant::now());
 
-                self.load_file_tree();
+                // TIDAK reload file tree — biar root tetap
                 self.load_editor();
 
                 self.focus = Focus::Editor;
@@ -281,7 +257,7 @@ impl App {
                         self.scroll_offset = 0;
                         self.scroll_offset_x = 0;
                         self.status_message = Some(format!("Opened: {}", path));
-                        self.load_file_tree();
+                        // TIDAK reload file tree — biar root tetap
                         self.load_editor();
                     }
                     Err(e) => {

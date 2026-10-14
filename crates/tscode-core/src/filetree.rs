@@ -1,18 +1,20 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-/// Satu entry di file tree (bisa file atau folder)
+const SKIP_DIRS: &[&str] = &[".git", "target", "node_modules"];
+
 #[derive(Debug, Clone)]
 pub struct Entry {
     pub path: PathBuf,
     pub name: String,
     pub is_dir: bool,
-    pub depth: usize,
     pub expanded: bool,
+    pub loaded: bool,
+    pub children: Vec<Entry>,
 }
 
 impl Entry {
-    pub fn new(path: PathBuf, is_dir: bool, depth: usize) -> Self {
+    pub fn new(path: PathBuf, is_dir: bool) -> Self {
         let name = path
             .file_name()
             .map(|n| n.to_string_lossy().to_string())
@@ -22,22 +24,78 @@ impl Entry {
             path,
             name,
             is_dir,
-            depth,
             expanded: false,
+            loaded: false,
+            children: Vec::new(),
         }
+    }
+
+    /// Load children kalau folder dan belum loaded
+    fn ensure_loaded(&mut self) {
+        if !self.is_dir || self.loaded {
+            return;
+        }
+
+        self.children = read_dir_entries(&self.path);
+        self.loaded = true;
+    }
+
+    /// Toggle expand/collapse
+    pub fn toggle_expand(&mut self) {
+        if !self.is_dir {
+            return;
+        }
+
+        self.ensure_loaded();
+        self.expanded = !self.expanded;
     }
 }
 
-/// File tree: root + daftar entry (rekursif, hanya yang expanded)
-#[derive(Debug)]
+fn read_dir_entries(dir: &Path) -> Vec<Entry> {
+    let Ok(read) = fs::read_dir(dir) else {
+        return Vec::new();
+    };
+
+    let mut items: Vec<(PathBuf, bool)> = Vec::new();
+
+    for entry in read {
+        let Ok(entry) = entry else {
+            continue;
+        };
+
+        let path = entry.path();
+        let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+
+        // Skip dirs yang tidak perlu
+        if path.is_dir() && SKIP_DIRS.contains(&name) {
+            continue;
+        }
+
+        let is_dir = path.is_dir();
+        items.push((path, is_dir));
+    }
+
+    // Urutkan: folder dulu, lalu alfabetis
+    items.sort_by(|a, b| match (a.1, b.1) {
+        (true, false) => std::cmp::Ordering::Less,
+        (false, true) => std::cmp::Ordering::Greater,
+        _ => a.0.file_name().cmp(&b.0.file_name()),
+    });
+
+    items
+        .into_iter()
+        .map(|(path, is_dir)| Entry::new(path, is_dir))
+        .collect()
+}
+
 pub struct FileTree {
     pub root: PathBuf,
-    pub entries: Vec<Entry>,
-    pub selected: usize,
+    pub root_entry: Entry,
+    pub selected_path: Option<PathBuf>,
+    pub flat: Vec<PathBuf>,
 }
 
 impl FileTree {
-    /// Baca folder root, load entries level 1
     pub fn from_path<P: AsRef<Path>>(root: P) -> std::io::Result<Self> {
         let root = root.as_ref().to_path_buf();
 
@@ -48,66 +106,167 @@ impl FileTree {
             ));
         }
 
+        let mut root_entry = Entry::new(root.clone(), true);
+        root_entry.ensure_loaded();
+        root_entry.expanded = true;
+
         let mut tree = Self {
-            root: root.clone(),
-            entries: Vec::new(),
-            selected: 0,
+            root,
+            root_entry,
+            selected_path: None,
+            flat: Vec::new(),
         };
 
-        tree.load_entries(&root, 0)?;
+        tree.rebuild_flat();
+
+        // Pilih item pertama
+        if let Some(first) = tree.flat.first() {
+            tree.selected_path = Some(first.clone());
+        }
+
         Ok(tree)
     }
 
-    /// Baca isi folder, tambahkan ke entries
-    fn load_entries(&mut self, dir: &Path, depth: usize) -> std::io::Result<()> {
-        let mut items: Vec<(PathBuf, bool)> = Vec::new();
-
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
-            let path = entry.path();
-            let is_dir = path.is_dir();
-            items.push((path, is_dir));
-        }
-
-        // Urutkan: folder dulu, lalu alfabetis
-        items.sort_by(|a, b| {
-            match (a.1, b.1) {
-                (true, false) => std::cmp::Ordering::Less,
-                (false, true) => std::cmp::Ordering::Greater,
-                _ => a.0.file_name().cmp(&b.0.file_name()),
-            }
-        });
-
-        for (path, is_dir) in items {
-            self.entries.push(Entry::new(path, is_dir, depth));
-        }
-
-        Ok(())
-    }
-
-    pub fn selected_entry(&self) -> Option<&Entry> {
-        self.entries.get(self.selected)
+    /// Rebuild cache flat (urutan tampilan)
+    pub fn rebuild_flat(&mut self) {
+        self.flat.clear();
+        flatten(&self.root_entry, &mut self.flat);
     }
 
     pub fn len(&self) -> usize {
-        self.entries.len()
+        self.flat.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.entries.is_empty()
+        self.flat.is_empty()
     }
 
-    /// Pindah selection ke atas
+    /// Cari entry berdasarkan path (di tree)
+    pub fn find_entry(&self, path: &Path) -> Option<&Entry> {
+        find_in_entry(&self.root_entry, path)
+    }
+
+    pub fn find_entry_mut(&mut self, path: &Path) -> Option<&mut Entry> {
+        find_in_entry_mut(&mut self.root_entry, path)
+    }
+
+    pub fn selected_index(&self) -> Option<usize> {
+        let sel = self.selected_path.as_ref()?;
+        self.flat.iter().position(|p| p == sel)
+    }
+
     pub fn move_up(&mut self) {
-        if self.selected > 0 {
-            self.selected -= 1;
+        if let Some(idx) = self.selected_index() {
+            if idx > 0 {
+                self.selected_path = Some(self.flat[idx - 1].clone());
+            }
         }
     }
 
-    /// Pindah selection ke bawah
     pub fn move_down(&mut self) {
-        if self.selected + 1 < self.entries.len() {
-            self.selected += 1;
+        if let Some(idx) = self.selected_index() {
+            if idx + 1 < self.flat.len() {
+                self.selected_path = Some(self.flat[idx + 1].clone());
+            }
         }
     }
+
+    /// Toggle expand pada folder yang dipilih
+    pub fn toggle_expand_selected(&mut self) -> bool {
+        let Some(sel) = self.selected_path.clone() else {
+            return false;
+        };
+
+        let Some(entry) = self.find_entry_mut(&sel) else {
+            return false;
+        };
+
+        if !entry.is_dir {
+            return false;
+        }
+
+        entry.toggle_expand();
+
+        // Kalau folder di-collapse, dan selected ada di dalamnya, pindah ke folder
+        if !entry.expanded {
+            self.rebuild_flat();
+            // Pastikan selected masih di flat
+            if !self.flat.contains(&sel) {
+                self.selected_path = Some(sel);
+            }
+        } else {
+            self.rebuild_flat();
+        }
+
+        true
+    }
+
+    pub fn selected_entry(&self) -> Option<&Entry> {
+        let sel = self.selected_path.as_ref()?;
+        self.find_entry(sel)
+    }
+
+    /// Info untuk render: (path, name, is_dir, depth, expanded)
+    pub fn visible_entries(&self) -> Vec<(PathBuf, String, bool, usize, bool)> {
+        let mut result = Vec::new();
+        collect_visible(&self.root_entry, 0, &mut result);
+        result
+    }
+}
+
+fn flatten(entry: &Entry, out: &mut Vec<PathBuf>) {
+    for child in &entry.children {
+        out.push(child.path.clone());
+        if child.is_dir && child.expanded {
+            flatten(child, out);
+        }
+    }
+}
+
+fn collect_visible(
+    entry: &Entry,
+    depth: usize,
+    out: &mut Vec<(PathBuf, String, bool, usize, bool)>,
+) {
+    for child in &entry.children {
+        out.push((
+            child.path.clone(),
+            child.name.clone(),
+            child.is_dir,
+            depth,
+            child.expanded,
+        ));
+
+        if child.is_dir && child.expanded {
+            collect_visible(child, depth + 1, out);
+        }
+    }
+}
+
+fn find_in_entry<'a>(entry: &'a Entry, path: &Path) -> Option<&'a Entry> {
+    if entry.path == path {
+        return Some(entry);
+    }
+
+    for child in &entry.children {
+        if let Some(found) = find_in_entry(child, path) {
+            return Some(found);
+        }
+    }
+
+    None
+}
+
+fn find_in_entry_mut<'a>(entry: &'a mut Entry, path: &Path) -> Option<&'a mut Entry> {
+    if entry.path == path {
+        return Some(entry);
+    }
+
+    for child in &mut entry.children {
+        if let Some(found) = find_in_entry_mut(child, path) {
+            return Some(found);
+        }
+    }
+
+    None
 }

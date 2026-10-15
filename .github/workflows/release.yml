@@ -28,15 +28,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install cargo-deb
-        run: cargo install cargo-deb --locked
+      - name: Install cargo-deb (prebuilt)
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf \
+            https://github.com/kornelski/cargo-deb/releases/latest/download/cargo-deb-amd64-unknown-linux-gnu.tar.gz \
+            | tar xz -C /usr/local/bin
+          cargo-deb --version
 
       - name: Build release binary
         run: cargo build --release --target x86_64-unknown-linux-gnu -p tscode

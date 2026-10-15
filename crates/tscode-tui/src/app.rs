@@ -86,7 +86,8 @@ impl App {
         let lang = detect_language(&doc.path);
 
         match Editor::new(lang, &content, vesper()) {
-            Ok(ed) => {
+            Ok(mut ed) => {
+                ed.show_line_numbers(true);
                 self.editor = Some(ed);
             }
             Err(e) => {
@@ -95,7 +96,6 @@ impl App {
             }
         }
     }
-
     pub fn handle_key(&mut self, key: KeyEvent) {
         if key.kind != KeyEventKind::Press {
             return;

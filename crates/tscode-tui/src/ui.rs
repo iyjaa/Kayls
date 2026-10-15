@@ -110,7 +110,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         // Fallback kalau editor belum di-load
         let content = match &app.document {
             Some(doc) => doc.content_as_string(),
-            None => "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string(),
+            None => {
+                "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string()
+            }
         };
 
         frame.render_widget(
@@ -147,11 +149,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                 (
                     format!(
                         " NORMAL [{}]   {}   {}   v:{} h:{} ",
-                        focus_label,
-                        version,
-                        cursor_info,
-                        app.scroll_offset,
-                        app.scroll_offset_x
+                        focus_label, version, cursor_info, app.scroll_offset, app.scroll_offset_x
                     ),
                     Style::default().bg(Color::DarkGray).fg(Color::White),
                 )

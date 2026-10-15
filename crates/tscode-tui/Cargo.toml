@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-ratatui-code-editor = { git = "https://github.com/iyjaa/ratatui-code-editor", rev = "da751ef", features = ["crossterm"] }
+ratatui-code-editor = { git = "https://github.com/iyjaa/ratatui-code-editor", rev = "b1a8a2e", features = ["crossterm"] }
 tscode-core = { path = "../tscode-core" }
 ratatui = { workspace = true }
 crossterm = { workspace = true }

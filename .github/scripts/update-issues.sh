@@ -21,28 +21,25 @@ echo "Updating $OUTPUT for repo: $REPO"
 # Fetch issues
 # -----------------------------------------------------------------------------
 
-# Open issues (not assigned)
 OPEN_ISSUES=$(gh issue list \
     --repo "$REPO" \
     --state open \
     --limit 100 \
-    --json number,title,labels,assignees \
+    --json number,title,labels,assignees,createdAt \
     --jq '[.[] | select(.assignees | length == 0)]')
 
-# In progress issues (has assignee, is open)
 IN_PROGRESS=$(gh issue list \
     --repo "$REPO" \
     --state open \
     --limit 100 \
-    --json number,title,labels,assignees \
+    --json number,title,labels,assignees,createdAt \
     --jq '[.[] | select(.assignees | length > 0)]')
 
-# Closed issues
 CLOSED_ISSUES=$(gh issue list \
     --repo "$REPO" \
     --state closed \
     --limit 100 \
-    --json number,title,labels,closedAt,url \
+    --json number,title,labels,closedAt,url,assignees \
     --jq 'sort_by(.closedAt) | reverse')
 
 # -----------------------------------------------------------------------------
@@ -63,16 +60,6 @@ get_type() {
     fi
 }
 
-# Format assignees
-format_assignees() {
-    local assignees="$1"
-    if [ "$assignees" = "[]" ] || [ -z "$assignees" ]; then
-        echo "—"
-    else
-        echo "$assignees" | jq -r '.[] | "@" + .login' | paste -sd ", " -
-    fi
-}
-
 # -----------------------------------------------------------------------------
 # Generate sections
 # -----------------------------------------------------------------------------
@@ -88,11 +75,8 @@ generate_open_table() {
     fi
 
     echo "$data" | jq -r '.[] |
-        "| #\(.number) | \(.title) | \(.labels | map(.name) | join(", ")) | \(.createdAt // "—") |"
-    ' | while IFS= read -r line; do
-        # Replace label list with type
-        echo "$line"
-    done
+        "| #\(.number) | \(.title) | \(if (.labels | map(.name) | any(. == "bug")) then "Bug" elif (.labels | map(.name) | any(. == "feature")) then "Feature" elif (.labels | map(.name) | any(. == "docs")) then "Docs" else "Other" end) | \(.createdAt[0:10]) |"
+    '
 }
 
 generate_in_progress_table() {
@@ -106,7 +90,7 @@ generate_in_progress_table() {
     fi
 
     echo "$data" | jq -r '.[] |
-        "| #\(.number) | \(.title) | \(.labels | map(.name) | join(", ")) | \(.assignees | map("@" + .login) | join(", ")) |"
+        "| #\(.number) | \(.title) | \(if (.labels | map(.name) | any(. == "bug")) then "Bug" elif (.labels | map(.name) | any(. == "feature")) then "Feature" elif (.labels | map(.name) | any(. == "docs")) then "Docs" else "Other" end) | \(.assignees | map("@" + .login) | join(", ")) |"
     '
 }
 
@@ -121,7 +105,7 @@ generate_fixed_table() {
     fi
 
     echo "$data" | jq -r '.[] |
-        "| #\(.number) | \(.title) | \(.labels | map(.name) | join(", ")) | \(.assignees // [] | map("@" + .login) | join(", ")) | \(.closedAt // "—") |"
+        "| #\(.number) | \(.title) | \(if (.labels | map(.name) | any(. == "bug")) then "Bug" elif (.labels | map(.name) | any(. == "feature")) then "Feature" elif (.labels | map(.name) | any(. == "docs")) then "Docs" else "Other" end) | \(.assignees // [] | map("@" + .login) | join(", ")) | \(.closedAt[0:10] // "—") |"
     '
 }
 
@@ -245,6 +229,3 @@ EOF
 } > "$OUTPUT"
 
 echo "Done. $OUTPUT updated."
-
-# Make executable
-chmod +x .github/scripts/update-issues.sh

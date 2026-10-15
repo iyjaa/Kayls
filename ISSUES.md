@@ -3,7 +3,7 @@
 > Summary of issues from [GitHub Issues](https://github.com/iyjaa/Tscode/issues).
 > For the full list, see GitHub.
 
-**Last updated**: 2026-10-14
+**Last updated**: 2026-10-15
 
 ---
 
@@ -13,7 +13,7 @@ Issues that have been reported but not yet fixed.
 
 | ID | Title | Type | Reported |
 |----|-------|------|----------|
-| #1 | testing for workflow |  | — |
+| #1 | testing for workflow | Other | 2026-10-14 |
 
 ---
 

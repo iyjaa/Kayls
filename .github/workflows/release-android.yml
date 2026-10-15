@@ -24,6 +24,15 @@ jobs:
         with:
           targets: aarch64-linux-android
 
+      - name: Configure cargo git fetch
+        run: |
+          mkdir -p ~/.cargo
+          cat > ~/.cargo/config.toml << 'EOF'
+          [net]
+          git-fetch-with-cli = true
+          EOF
+          cat ~/.cargo/config.toml
+
       - name: Cache cargo
         uses: actions/cache@v4
         with:

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="20" fill="#1e1e2e"/>
+  
+  <!-- Bayangan -->
+  <ellipse cx="50" cy="88" rx="35" ry="4" fill="#000000" opacity="0.3"/>
+  
+  <!-- Badan -->
+  <ellipse cx="55" cy="72" rx="30" ry="16" fill="#e8a45a" transform="rotate(-5 55 72)"/>
+  <ellipse cx="55" cy="68" rx="20" ry="6" fill="#f6c99f" opacity="0.5"/>
+  
+  <!-- Ekor -->
+  <path d="M 82 70 Q 98 60 92 38 Q 88 50 82 60" fill="#e8a45a"/>
+  <path d="M 82 70 Q 96 60 92 42" stroke="#f6c99f" stroke-width="3" fill="none" opacity="0.5"/>
+  <ellipse cx="92" cy="40" rx="5" ry="4" fill="#ffffff"/>
+  
+  <!-- Kepala -->
+  <circle cx="38" cy="55" r="24" fill="#e8a45a"/>
+  
+  <!-- Highlight kepala -->
+  <ellipse cx="34" cy="46" rx="12" ry="8" fill="#f6c99f" opacity="0.4"/>
+  
+  <!-- Telinga kiri -->
+  <polygon points="18,42 14,20 32,40" fill="#e8a45a"/>
+  <polygon points="20,40 17,25 30,40" fill="#1e1e2e"/>
+  <polygon points="19,38 17,28 26,38" fill="#a5fcb6" opacity="0.3"/>
+  
+  <!-- Telinga kanan -->
+  <polygon points="58,42 62,20 44,40" fill="#e8a45a"/>
+  <polygon points="56,40 59,25 46,40" fill="#1e1e2e"/>
+  <polygon points="57,38 59,28 50,38" fill="#a5fcb6" opacity="0.3"/>
+  
+  <!-- Moncong putih — DI DALAM kepala, simetris -->
+  <ellipse cx="36" cy="66" rx="12" ry="9" fill="#ffffff"/>
+  
+  <!-- Mata setengah tertutup -->
+  <path d="M 25 54 Q 29 50 33 54" stroke="#1e1e2e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M 41 54 Q 45 50 49 54" stroke="#1e1e2e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Bulu mata -->
+  <line x1="25" y1="54" x2="23" y2="52" stroke="#1e1e2e" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="49" y1="54" x2="51" y2="52" stroke="#1e1e2e" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Pipi merona -->
+  <ellipse cx="24" cy="60" rx="4" ry="2.5" fill="#ff9999" opacity="0.5"/>
+  <ellipse cx="50" cy="60" rx="4" ry="2.5" fill="#ff9999" opacity="0.5"/>
+  
+  <!-- Hidung — di tengah moncong -->
+  <ellipse cx="36" cy="64" rx="2.5" ry="2" fill="#1e1e2e"/>
+  <ellipse cx="35.5" cy="63.5" rx="0.8" ry="0.6" fill="#ffffff" opacity="0.9"/>
+  
+  <!-- Mulut -->
+  <path d="M 34 67 Q 36 69 38 67" stroke="#1e1e2e" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Kumis kiri -->
+  <line x1="22" y1="64" x2="28" y2="65" stroke="#1e1e2e" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+  <line x1="22" y1="68" x2="28" y2="67" stroke="#1e1e2e" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+  
+  <!-- Kumis kanan -->
+  <line x1="50" y1="64" x2="44" y2="65" stroke="#1e1e2e" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+  <line x1="50" y1="68" x2="44" y2="67" stroke="#1e1e2e" stroke-width="0.8" stroke-linecap="round" opacity="0.6"/>
+  
+  <!-- Aksen vesper -->
+  <circle cx="92" cy="40" r="2" fill="#a5fcb6" opacity="0.7"/>
+</svg>

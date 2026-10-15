@@ -1204,7 +1204,7 @@ dependencies = [
 [[package]]
 name = "ratatui-code-editor"
 version = "0.0.6"
-source = "git+https://github.com/iyjaa/ratatui-code-editor?rev=b1a8a2e#b1a8a2e2a82309df3e9e87570755e459aa12ca54"
+source = "git+https://github.com/iyjaa/ratatui-code-editor?rev=d8f4e46#d8f4e46f2f35e0321ba716edc5d0fe0b7d8a55fd"
 dependencies = [
  "anyhow",
  "crossterm",

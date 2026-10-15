@@ -5,6 +5,7 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "Terminal Studio Code — A terminal-based IDE inspired by VS Code"
 build = "build.rs"
 
 [[bin]]
@@ -17,3 +18,24 @@ tscode-terminal = { path = "../tscode-terminal" }
 tscode-tui = { path = "../tscode-tui" }
 anyhow = { workspace = true }
 clap = { workspace = true }
+
+[package.metadata.deb]
+maintainer = "izra mulya putra G. <izramulyaputra@gmail.com>"
+copyright = "2026, izra mulya putra G."
+license-file = ["../../LICENSE", "0"]
+extended-description = """\
+Terminal Studio Code — A terminal-based IDE inspired by VS Code.
+
+Features:
+- Editor with syntax highlighting (tree-sitter)
+- Recursive file tree with expand/collapse
+- Vim-style command mode
+- Support for multiple languages
+"""
+section = "utils"
+priority = "optional"
+assets = [
+    ["target/release/tscode", "usr/bin/", "755"],
+    ["../../README.md", "usr/share/doc/tscode/README.md", "644"],
+    ["../../LICENSE", "usr/share/doc/tscode/LICENSE", "644"],
+]

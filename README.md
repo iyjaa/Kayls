@@ -1,60 +1,148 @@
 # Tscode
 
-Terminal Studio Code — A terminal-based IDE with a VS Code-like experience.
+> Terminal Studio Code — A terminal-based IDE inspired by VS Code.
+
+[![Release](https://img.shields.io/github/v/release/iyjaa/Tscode?include_prereleases&label=release)](https://github.com/iyjaa/Tscode/releases)
+[![License](https://img.shields.io/github/license/iyjaa/Tscode)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/iyjaa/Tscode)](https://github.com/iyjaa/Tscode/issues)
+
+Tscode is a terminal-based IDE with a VS Code-inspired layout. It runs in any terminal — desktop, SSH, Termux, or Acode — and uses a single lightweight Rust binary.
 
 ## Status
 
-**Tsc-s0.3.1** — File tree renders actual directory. Editor basic functional. Stable.
+**Tsc-v1.0.0** — Editor integration complete. Unstable, in development.
 
-See [versioning.md](docs/versioning.md) for the versioning scheme.
+See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
 
-## Build
+## Features
 
-    cargo build --workspace
-    cargo run -p tscode
+- **Editor** — syntax highlighting via tree-sitter, undo/redo, copy/paste, code folding
+- **File tree** — recursive, expand/collapse folders
+- **Focus system** — switch between editor and explorer
+- **Command mode** — Vim-style commands (`Esc` then key)
+- **Multi-language** — Rust, Python, JavaScript, TypeScript, Go, C/C++, TOML, JSON, Markdown, HTML, CSS, Bash
+- **Lightweight** — small binary, fast startup
+- **Portable** — runs on desktop, SSH, Termux, Acode
+
+## Install
+
+### Download binary (Linux x86_64)
+
+    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-x86_64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
+    tar xzf tscode.tar.gz
+    sudo mv tscode /usr/local/bin/
+    tscode --version
+
+### Build from source
+
+Requirements: Rust 1.70+ and Git.
+
+    git clone https://github.com/iyjaa/Tscode
+    cd Tscode
+    cargo build --release
+    sudo cp target/release/tscode /usr/local/bin/
+
+**For Termux / Acode (Android):**
+
+    pkg install rust git
+    git clone https://github.com/iyjaa/Tscode
+    cd Tscode
+    cargo build --release
+    cp target/release/tscode $PREFIX/bin/
 
 ## Usage
 
-    # Open file
-    cargo run -p tscode Cargo.toml
+    # Open a file
+    tscode Cargo.toml
 
-    # Open without file
-    cargo run -p tscode
+    # Open without a file
+    tscode
 
-### Keybindings
+    # Show version
+    tscode --version
+
+    # Show help
+    tscode --help
+
+## Keybindings
+
+Tscode uses Vim-style command mode. In normal mode, keys go to the editor. Press `Esc` to enter command mode.
+
+### Editing (Normal Mode)
 
 | Key | Action |
 |-----|--------|
 | Arrow keys | Move cursor |
-| Any char | Insert character |
+| Any character | Insert character |
 | Backspace | Delete character |
-| Esc then o | Open file |
-| Esc then w | Save file |
-| Esc then Esc | Cancel command |
-| Alt+Q | Quit |
+| Enter | New line |
+| Tab | Indent |
+| `Ctrl+Z` | Undo |
+| `Ctrl+Y` | Redo |
+| `Ctrl+C` | Copy |
+| `Ctrl+V` | Paste |
+| `Ctrl+X` | Cut |
+| `Ctrl+A` | Select all |
+| `Ctrl+D` | Duplicate line |
+| `Ctrl+K` | Delete line |
 
-## Structure
+### Command Mode (after `Esc`)
 
-Rust workspace with 5 crates:
+| Key | Action |
+|-----|--------|
+| `o` | Open file |
+| `w` | Save file |
+| `e` | Toggle explorer |
+| `Esc` | Cancel |
+
+### Global
+
+| Key | Action |
+|-----|--------|
+| `Esc` | Enter command mode |
+| `Alt+Q` | Quit |
+
+**Note**: A VS Code keybinding mode (`Ctrl+S`, `Ctrl+O`, `Ctrl+B`, etc.) is planned. See [docs/roadmap.md](docs/roadmap.md).
+
+## Project Structure
+
+Tscode is a Rust workspace with 4 crates:
 
 | Crate | Purpose |
 |-------|---------|
-| `tscode-core` | Text buffer, cursor, editing, file tree |
-| `tscode-syntax` | Syntax highlighting |
-| `tscode-terminal` | PTY, shell integration |
-| `tscode-tui` | Ratatui rendering |
-| `tscode` | Main binary |
+| `tscode-core` | FileTree, Document |
+| `tscode-terminal` | PTY, shell integration (planned) |
+| `tscode-tui` | App state, UI rendering |
+| `tscode` | Main binary, CLI parsing |
 
 ## Documentation
 
-- [PRD](docs/prd.md) — Product Requirements Document
+- [PRD](docs/prd.md) — Product requirements
+- [Roadmap](docs/roadmap.md) — Feature progress
 - [Versioning](docs/versioning.md) — Version scheme
-- [Roadmap](docs/roadmap.md) — Actual feature progress
-- [Dev Notes](docs/dev-notes.md) — Development notes
+- [Issues](ISSUES.md) — Summary of GitHub issues
+- [Contributing](CONTRIBUTING.md) — How to contribute
 
-> **Note**: Examples in [versioning.md](docs/versioning.md) (like X=1 Terminal, X=2 LSP, X=3 AI Agent) are **illustrations only** to explain the versioning scheme.
-> For the **actual** feature progress, see [roadmap.md](docs/roadmap.md).
+## Contributing
+
+Tscode is open for contributions. The workflow:
+
+1. **Discuss first** — open an issue before coding
+2. **Get approval** — wait for maintainer feedback
+3. **Fork & branch** — `feature/your-feature` or `fix/your-bug`
+4. **Submit PR** — reference the issue
+5. **Review** — maintainer reviews and merges
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+**Areas that need help:**
+
+- VS Code keybinding mode
+- Config file support
+- Multiple file tabs
+- Search in file
+- Bug fixes and documentation
 
 ## License
 
-MIT
+[MIT](LICENSE)

@@ -11,7 +11,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Current Status
 
-**Tsc-v1.0.0** — Editor integration complete. Unstable, in development.
+**Tsc-s1.0.1** — Editor integration stable. Binary available for Linux x86_64 and Android ARM64.
 
 ---
 
@@ -40,8 +40,15 @@ See [versioning.md](versioning.md) for the versioning scheme.
 | Tsc-v0.3.3 | Done | Open file with Enter |
 | Tsc-s0.3.3 | Done | Open file verified |
 | Tsc-v1.0.0 | Done | Editor integration (X=1) |
-| Tsc-s1.0.0 | Planned | Editor integration stable |
-| Tsc-v1.1.0 | Planned | Editor polish |
+| Tsc-s1.0.0 | Done | Editor integration verified |
+| Tsc-v1.0.1 | Done | Cross-platform binary release |
+| Tsc-s1.0.1 | Done | Binary release verified |
+| Tsc-v1.1.0 | In progress | Editor polish (auto-pair, auto-indent) |
+| Tsc-v1.1.1 | Planned | Multi-tabs |
+| Tsc-v1.1.2 | Planned | Search in file |
+| Tsc-v1.1.3 | Planned | Go to line |
+| Tsc-v1.1.4 | Planned | Theme selection |
+| Tsc-v1.1.5 | Planned | Config file + keybinding |
 | Tsc-v2.0.0 | Planned | Integrated terminal (X=2) |
 | Tsc-v3.0.0 | Planned | LSP (X=3) |
 | Tsc-v4.0.0 | Planned | AI agent (X=4) |
@@ -218,7 +225,7 @@ See [versioning.md](versioning.md) for full details.
 
 ### Tsc-v1.0.0 — Editor Integration (X=1)
 
-**Status**: Done (stable: Tsc-s1.0.0 planned)
+**Status**: Done (stable: Tsc-s1.0.0)
 
 **Major feature**: Full editor integration with recursive file tree
 
@@ -236,29 +243,103 @@ See [versioning.md](versioning.md) for full details.
 
 **Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
 
-**Known issues**:
-- Editor 100% from library — less control
-- `Document.cursor` no longer used — can be removed
+---
 
-**Next**: Dogfooding, then `Tsc-s1.0.0`.
+### Tsc-v1.0.1 — Cross-Platform Binary Release
+
+**Status**: Done (stable: Tsc-s1.0.1)
+
+**Contents**:
+- Binary release for Linux x86_64
+- Binary release for Android ARM64
+- GitHub Actions workflows (Linux + Android)
+- Fork `ratatui-code-editor` (remove `arboard` for Android compatibility)
+- `git-fetch-with-cli` in workflows
+- Lazy fox icon
+
+**Crates touched**: none (CI/assets only)
 
 ---
 
 ### Tsc-v1.1.0 — Editor Polish (Y=1)
 
-**Status**: Planned
+**Status**: In progress
 
-**Contents** (to be discovered):
-- Multiple file tabs
-- Search in file
-- Go to line
-- Better status bar
-- Theme selection
-- Keybinding customization
+**Contents**:
+- Auto-pair: `()` `{}` `[]` `""` `''` `` ` ``
+- Auto-indent: after `{`, `(`, and on new line
+- Skip closing: type `)` when `)` already ahead
+- Backspace pair: delete `()` together
+- All paired syntax auto-closes
 
-**Crates touched**: `tscode-core`, `tscode-tui`
+**Implementation**: Fork `ratatui-code-editor` (editor engine)
+
+**Crates touched**: fork `ratatui-code-editor`, `tscode-tui`
 
 **Note**: No new features in this phase until stable.
+
+---
+
+### Tsc-v1.1.1 — Multi-Tabs
+
+**Status**: Planned
+
+**Contents**:
+- Multiple file tabs
+- Switch with `Ctrl+Tab`
+- Close with `Ctrl+W`
+
+**Crates touched**: `tscode-tui`
+
+---
+
+### Tsc-v1.1.2 — Search in File
+
+**Status**: Planned
+
+**Contents**:
+- `Ctrl+F` search
+- Highlight matches
+- Next/prev navigation
+
+**Crates touched**: fork `ratatui-code-editor`, `tscode-tui`
+
+---
+
+### Tsc-v1.1.3 — Go to Line
+
+**Status**: Planned
+
+**Contents**:
+- `Ctrl+G` to go to line
+- Input line number
+
+**Crates touched**: `tscode-tui`
+
+---
+
+### Tsc-v1.1.4 — Theme Selection
+
+**Status**: Planned
+
+**Contents**:
+- Multiple themes (vesper, custom)
+- Select via command
+
+**Crates touched**: fork `ratatui-code-editor`, `tscode-tui`
+
+---
+
+### Tsc-v1.1.5 — Config File + Keybinding
+
+**Status**: Planned
+
+**Contents**:
+- `config.toml` for settings
+- Custom keybindings
+- VS Code keybinding mode
+
+**Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
 
 ---
 

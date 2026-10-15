@@ -10,7 +10,7 @@ Tscode is a terminal-based IDE with a VS Code-inspired layout. It runs in any te
 
 ## Status
 
-**Tsc-v1.0.0** — Editor integration complete. Unstable, in development.
+**Tsc-v1.0.1** — Editor integration complete. Binary available for Linux x86_64 and Android ARM64. Unstable, in development.
 
 See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
 
@@ -21,17 +21,32 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 - **Focus system** — switch between editor and explorer
 - **Command mode** — Vim-style commands (`Esc` then key)
 - **Multi-language** — Rust, Python, JavaScript, TypeScript, Go, C/C++, TOML, JSON, Markdown, HTML, CSS, Bash
-- **Lightweight** — small binary, fast startup
+- **Lightweight** — ~2.4 MB binary, fast startup
 - **Portable** — runs on desktop, SSH, Termux, Acode
 
 ## Install
 
-### Download binary (Linux x86_64)
+### Linux x86_64
 
     curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-x86_64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
     tar xzf tscode.tar.gz
     sudo mv tscode /usr/local/bin/
     tscode --version
+
+### Android (Termux / Acode, ARM64)
+
+    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-linux-android.tar.gz -o tscode.tar.gz
+    tar xzf tscode.tar.gz
+    chmod +x tscode
+    ./tscode --version
+
+For **Termux**, move to `$PREFIX/bin`:
+
+    mv tscode $PREFIX/bin/
+
+For **Acode terminal**, run from current directory or move to `~/bin`:
+
+    mv tscode ~/bin/
 
 ### Build from source
 
@@ -42,13 +57,7 @@ Requirements: Rust 1.70+ and Git.
     cargo build --release
     sudo cp target/release/tscode /usr/local/bin/
 
-**For Termux / Acode (Android):**
-
-    pkg install rust git
-    git clone https://github.com/iyjaa/Tscode
-    cd Tscode
-    cargo build --release
-    cp target/release/tscode $PREFIX/bin/
+**Note**: Tscode uses a custom fork of `ratatui-code-editor` (with `arboard` removed for Android compatibility). The fork is pulled automatically via `git-fetch-with-cli`.
 
 ## Usage
 

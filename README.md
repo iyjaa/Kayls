@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon.png" width="128" alt="Tscode">
+</p>
+
 # Tscode
 
 > Terminal Studio Code — A terminal-based IDE inspired by VS Code.

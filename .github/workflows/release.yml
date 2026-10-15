@@ -34,18 +34,8 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install cargo-deb (prebuilt)
-        run: |
-          curl -L --proto '=https' --tlsv1.2 -sSf \
-            https://github.com/kornelski/cargo-deb/releases/latest/download/cargo-deb-amd64-unknown-linux-gnu.tar.gz \
-            | tar xz -C /usr/local/bin
-          cargo-deb --version
-
       - name: Build release binary
         run: cargo build --release --target x86_64-unknown-linux-gnu -p tscode
-
-      - name: Build .deb package
-        run: cargo deb -p tscode --no-build --target x86_64-unknown-linux-gnu
 
       - name: Package binary (tar.gz)
         run: |
@@ -56,9 +46,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-x86_64
-          path: |
-            tscode-x86_64-unknown-linux-gnu.tar.gz
-            target/x86_64-unknown-linux-gnu/debian/*.deb
+          path: tscode-x86_64-unknown-linux-gnu.tar.gz
 
   release:
     name: Create Release
@@ -77,16 +65,12 @@ jobs:
           path: artifacts
 
       - name: List artifacts
-        run: |
-          echo "=== Artifacts ==="
-          find artifacts -type f
+        run: find artifacts -type f
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            artifacts/**/*.tar.gz
-            artifacts/**/*.deb
+          files: artifacts/**/*.tar.gz
           generate_release_notes: true
           draft: false
           prerelease: false

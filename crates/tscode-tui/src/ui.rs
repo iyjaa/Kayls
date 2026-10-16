@@ -1,6 +1,7 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Style},
+    style::{Color, Modifier, Style},
+    text::{Line, Span, Text},
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
@@ -30,8 +31,11 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         .unwrap_or_else(|| "[No File]".to_string());
 
     frame.render_widget(
-        Paragraph::new(format!(" {} ", tab_title))
-            .style(Style::default().bg(Color::Blue).fg(Color::White)),
+        Paragraph::new(format!(" {} ", tab_title)).style(
+            Style::default()
+                .bg(tab_bg_color(app.theme))
+                .fg(tab_fg_color(app.theme)),
+        ),
         rows[0],
     );
 
@@ -39,7 +43,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let editor_area: Rect = if app.show_explorer {
         let cols = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([Constraint::Length(20), Constraint::Min(0)])
+            .constraints([Constraint::Length(25), Constraint::Min(0)])
             .split(rows[1]);
 
         // Render file tree
@@ -47,7 +51,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         let explorer_focused = app.focus == Focus::Explorer;
 
         let border_style = if explorer_focused {
-            Style::default().fg(Color::Yellow)
+            Style::default().fg(focus_color(app.theme))
         } else {
             Style::default().fg(Color::DarkGray)
         };
@@ -59,7 +63,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         };
 
         frame.render_widget(
-            Paragraph::new(tree_content).block(
+            Paragraph::new(Text::from(tree_content)).block(
                 Block::default()
                     .borders(Borders::ALL)
                     .title(explorer_title)
@@ -77,7 +81,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let editor_focused = app.focus == Focus::Editor;
 
     let editor_border_style = if editor_focused {
-        Style::default().fg(Color::Yellow)
+        Style::default().fg(focus_color(app.theme))
     } else {
         Style::default().fg(Color::DarkGray)
     };
@@ -141,7 +145,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             if let Some(msg) = &app.status_message {
                 (
                     format!(" {} ", msg),
-                    Style::default().bg(Color::Green).fg(Color::Black),
+                    Style::default()
+                        .bg(Color::Rgb(60, 90, 60))
+                        .fg(Color::Rgb(200, 230, 200)),
                 )
             } else {
                 (
@@ -153,7 +159,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                         app.scroll_offset,
                         app.scroll_offset_x
                     ),
-                    Style::default().bg(Color::DarkGray).fg(Color::White),
+                    Style::default()
+                        .bg(Color::Rgb(50, 50, 70))
+                        .fg(Color::Rgb(200, 200, 220)),
                 )
             }
         }
@@ -164,19 +172,27 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                     "(o)pen (n)ew file (v)new folder (d)elete (w)rite (e)xplorer (Esc)cancel"
                 )
             ),
-            Style::default().bg(Color::Yellow).fg(Color::Black),
+            Style::default()
+                .bg(Color::Rgb(90, 80, 40))
+                .fg(Color::Rgb(230, 220, 180)),
         ),
         Mode::Prompt => (
             format!(" Open file: {}_ ", app.input_buffer),
-            Style::default().bg(Color::Cyan).fg(Color::Black),
+            Style::default()
+                .bg(Color::Rgb(50, 70, 90))
+                .fg(Color::Rgb(200, 220, 240)),
         ),
         Mode::PromptNewFile => (
             format!(" New file: {}_ ", app.input_buffer),
-            Style::default().bg(Color::Magenta).fg(Color::Black),
+            Style::default()
+                .bg(Color::Rgb(70, 50, 90))
+                .fg(Color::Rgb(220, 200, 240)),
         ),
         Mode::PromptNewFolder => (
             format!(" New folder: {}_ ", app.input_buffer),
-            Style::default().bg(Color::Magenta).fg(Color::Black),
+            Style::default()
+                .bg(Color::Rgb(70, 50, 90))
+                .fg(Color::Rgb(220, 200, 240)),
         ),
         Mode::ConfirmDelete => {
             let name = app
@@ -187,7 +203,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                 .unwrap_or_else(|| "?".to_string());
             (
                 format!(" Delete '{}'? (y/n) ", name),
-                Style::default().bg(Color::Red).fg(Color::White),
+                Style::default()
+                    .bg(Color::Rgb(90, 50, 50))
+                    .fg(Color::Rgb(240, 200, 200)),
             )
         }
     };
@@ -195,14 +213,42 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     frame.render_widget(Paragraph::new(status).style(status_style), rows[2]);
 }
 
-fn render_file_tree(app: &App) -> String {
+fn render_file_tree(app: &App) -> Vec<Line<'static>> {
+    use crate::app::Theme;
+
     let Some(tree) = app.file_tree.as_ref() else {
-        return "(no file tree)".to_string();
+        return vec![Line::from("(no file tree)")];
     };
 
     if tree.is_empty() {
-        return "(empty)".to_string();
+        return vec![Line::from("(empty)")];
     }
+
+    // Warna soft berdasarkan theme
+    let (color_file, color_folder, color_nested) = match app.theme {
+        Theme::Vesper => (
+            Color::Rgb(184, 212, 184), // #b8d4b8 (hijau soft)
+            Color::Rgb(224, 192, 144), // #e0c090 (orange soft)
+            Color::Rgb(192, 168, 224), // #c0a8e0 (ungu soft)
+        ),
+        Theme::Gruvbox => (
+            Color::Rgb(184, 187, 38),  // #b8bb26 (hijau soft)
+            Color::Rgb(250, 189, 47),  // #fabd2f (kuning soft)
+            Color::Rgb(142, 192, 124), // #8ec07c (hijau mint)
+        ),
+        Theme::Dracula => (
+            Color::Rgb(127, 212, 160), // #7fd4a0 (hijau soft)
+            Color::Rgb(212, 160, 200), // #d4a0c8 (pink soft)
+            Color::Rgb(184, 160, 224), // #b8a0e0 (ungu soft)
+        ),
+        Theme::Nord => (
+            Color::Rgb(168, 200, 168), // #a8c8a8 (hijau soft)
+            Color::Rgb(168, 192, 216), // #a8c0d8 (biru soft)
+            Color::Rgb(168, 212, 212), // #a8d4d4 (cyan soft)
+        ),
+    };
+
+    let color_selected_bg = Color::Rgb(60, 60, 80);
 
     let visible = tree.visible_entries();
     let selected = tree.selected_path.as_ref();
@@ -210,19 +256,76 @@ fn render_file_tree(app: &App) -> String {
     visible
         .iter()
         .map(|(path, name, is_dir, depth, expanded)| {
-            let indent = "  ".repeat(*depth);
+            let is_selected = Some(path) == selected;
+
             let icon = if *is_dir {
                 if *expanded {
-                    "-"
+                    "▾"
                 } else {
-                    "+"
+                    "▸"
                 }
             } else {
                 " "
             };
-            let marker = if Some(path) == selected { ">" } else { " " };
-            format!("{}{}{} {}", marker, indent, icon, name)
+
+            let indent = "  ".repeat(*depth);
+            let prefix = format!("{}{} ", indent, icon);
+
+            let text_color = if *is_dir {
+                if *depth == 0 {
+                    color_folder
+                } else {
+                    color_nested
+                }
+            } else {
+                color_file
+            };
+
+            let mut style = Style::default().fg(text_color);
+            if is_selected {
+                style = style.bg(color_selected_bg).add_modifier(Modifier::BOLD);
+            }
+
+            let marker = if is_selected { "> " } else { "  " };
+
+            Line::from(vec![
+                Span::styled(marker, style),
+                Span::styled(prefix, style),
+                Span::styled(name.clone(), style),
+            ])
         })
-        .collect::<Vec<_>>()
-        .join("\n")
+        .collect()
+}
+
+fn focus_color(theme: crate::app::Theme) -> Color {
+    use crate::app::Theme;
+
+    match theme {
+        Theme::Vesper => Color::Rgb(212, 184, 150),  // #d4b896 (orange soft)
+        Theme::Gruvbox => Color::Rgb(215, 153, 33),  // #d79921 (kuning soft)
+        Theme::Dracula => Color::Rgb(212, 160, 200), // #d4a0c8 (pink soft)
+        Theme::Nord => Color::Rgb(168, 192, 216),    // #a8c0d8 (biru soft)
+    }
+}
+
+fn tab_bg_color(theme: crate::app::Theme) -> Color {
+    use crate::app::Theme;
+
+    match theme {
+        Theme::Vesper => Color::Rgb(42, 42, 62),  // #2a2a3e
+        Theme::Gruvbox => Color::Rgb(50, 48, 47), // #32302f
+        Theme::Dracula => Color::Rgb(52, 55, 70), // #343746
+        Theme::Nord => Color::Rgb(59, 66, 82),    // #3b4252
+    }
+}
+
+fn tab_fg_color(theme: crate::app::Theme) -> Color {
+    use crate::app::Theme;
+
+    match theme {
+        Theme::Vesper => Color::Rgb(197, 209, 192),  // #c5d1c0
+        Theme::Gruvbox => Color::Rgb(213, 196, 161), // #d5c4a1
+        Theme::Dracula => Color::Rgb(216, 216, 224), // #d8d8e0
+        Theme::Nord => Color::Rgb(200, 208, 220),    // #c8d0dc
+    }
 }

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon.png" width="128" alt="Tscode">
+</p>
+
 # Tscode
 
 > Terminal Studio Code — A terminal-based IDE inspired by VS Code.
@@ -10,7 +14,7 @@ Tscode is a terminal-based IDE with a VS Code-inspired layout. It runs in any te
 
 ## Status
 
-**Tsc-v1.1.1** — Editor polish: soft theme-aware colors, auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
+**Tsc-v1.1.2** — UI polish: soft theme-aware colors, explorer scroll, auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
 
 See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
 
@@ -19,7 +23,7 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 - **Editor** — syntax highlighting via tree-sitter, undo/redo, copy/paste, code folding
 - **Auto-pair** — brackets, quotes, and angle brackets auto-close
 - **Auto-indent** — indentation follows code structure
-- **File tree** — recursive, expand/collapse folders, colored by type
+- **File tree** — recursive, expand/collapse folders, colored by type, scrollable
 - **File management** — create file/folder, delete with confirmation
 - **Focus system** — switch between editor and explorer
 - **Themes** — Vesper (default), Gruvbox, Dracula, Nord
@@ -38,23 +42,48 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 
 This auto-detects your platform (Linux x86_64, Linux ARM64, Android ARM64, macOS) and installs to the appropriate directory.
 
-### Manual install
+### macOS — Homebrew (Intel & Apple Silicon)
 
-#### Linux x86_64
+    brew tap iyjaa/tscode https://github.com/iyjaa/Tscode
+    brew install tscode
 
+Or download directly from [GitHub Releases](https://github.com/iyjaa/Tscode/releases):
+
+    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-apple-darwin.tar.gz -o tscode.tar.gz
+    tar xzf tscode.tar.gz
+    sudo mv tscode /usr/local/bin/
+
+### Linux — APT (Debian / Ubuntu / Mint / Raspberry Pi OS)
+
+    curl -fsSL https://iyjaa.github.io/Tscode/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/tscode.gpg
+    echo "deb [signed-by=/usr/share/keyrings/tscode.gpg] https://iyjaa.github.io/Tscode/apt stable main" | sudo tee /etc/apt/sources.list.d/tscode.list
+    sudo apt update
+    sudo apt install tscode
+
+### Linux — Direct .deb
+
+Download the `.deb` from [GitHub Releases](https://github.com/iyjaa/Tscode/releases):
+
+    sudo dpkg -i tscode_*_amd64.deb      # x86_64
+    sudo dpkg -i tscode_*_arm64.deb      # ARM64 (Raspberry Pi 4/5, 64-bit)
+    sudo dpkg -i tscode_*_armhf.deb      # ARM32 (Raspberry Pi 32-bit)
+
+### Linux — Binary (manual)
+
+    # x86_64
     curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-x86_64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
-    tar xzf tscode.tar.gz
-    sudo mv tscode /usr/local/bin/
-    tscode --version
 
-#### Linux ARM64
-
+    # ARM64
     curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
+
+    # ARM32 (Raspberry Pi 32-bit)
+    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-armv7-unknown-linux-gnueabihf.tar.gz -o tscode.tar.gz
+
     tar xzf tscode.tar.gz
     sudo mv tscode /usr/local/bin/
     tscode --version
 
-#### Android (Termux / Acode, ARM64)
+### Android (Termux / Acode, ARM64)
 
 Quick install (recommended):
 
@@ -65,13 +94,8 @@ Manual install:
     curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-linux-android.tar.gz -o tscode.tar.gz
     tar xzf tscode.tar.gz
     chmod +x tscode
-    ./tscode --version
-
-For **Termux**, move to `$PREFIX/bin`:
-
     mv tscode $PREFIX/bin/
-
-For **Acode terminal**, the installer auto-detects `/public/bin`.
+    tscode --version
 
 ### Build from source
 

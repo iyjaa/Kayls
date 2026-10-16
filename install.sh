@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
-#
-# Tscode installer script
-#
-# Usage:
-#   curl -fsSL https://raw.githubusercontent.com/iyjaa/Tscode/main/install.sh | sh
-#
-# Or:
-#   curl -fsSL ... | bash
-#
 
-set -euo pipefail
+set -eo pipefail
 
 REPO="iyjaa/Tscode"
 BINARY_NAME="tscode"
@@ -19,7 +10,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' 
+NC='\033[0m'
 
 info() {
     printf "${BLUE}[INFO]${NC} %s\n" "$1"
@@ -43,6 +34,8 @@ detect_platform() {
 
     os=$(uname -s)
     arch=$(uname -m)
+    target=""
+    install_dir=""
 
     case "$os" in
         Linux)
@@ -51,16 +44,16 @@ detect_platform() {
                     target="x86_64-unknown-linux-gnu"
                     ;;
                 aarch64|arm64)
-                    
-                    if [ -n "${TERMUX_VERSION:-}" ] || [ -d "/data/data/com.termux" ]; then
-                        target="aarch64-linux-android"
-                        install_dir="$PREFIX/bin"
-                    elif [ -d "/system/bin" ] && [ -f "/system/bin/linker64" ]; then
-                        
+                    if [ -d "/public/bin" ]; then
                         target="aarch64-linux-android"
                         install_dir="/public/bin"
+                    elif [ -n "${TERMUX_VERSION:-}" ] || [ -d "/data/data/com.termux" ]; then
+                        target="aarch64-linux-android"
+                        install_dir="${PREFIX:-/data/data/com.termux/files/usr}/bin"
+                    elif [ -d "/system/bin" ] && [ -f "/system/bin/linker64" ]; then
+                        target="aarch64-linux-android"
+                        install_dir="$HOME/bin"
                     else
-                        
                         target="aarch64-unknown-linux-gnu"
                     fi
                     ;;
@@ -103,14 +96,13 @@ detect_platform() {
 }
 
 get_latest_version() {
-    local version
+    local version=""
 
     if command -v gh >/dev/null 2>&1; then
         version=$(gh release view --repo "$REPO" --json tagName --jq .tagName 2>/dev/null || true)
     fi
 
     if [ -z "$version" ]; then
-        
         version=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
             | grep '"tag_name":' \
             | sed -E 's/.*"([^"]+)".*/\1/' \
@@ -131,10 +123,10 @@ install_tscode() {
 
     local archive="tscode-${target}.tar.gz"
     local url="https://github.com/${REPO}/releases/download/${version}/${archive}"
-    local tmp_dir
+    local tmp_dir=""
 
     tmp_dir=$(mktemp -d)
-    trap "rm -rf $tmp_dir" EXIT
+    trap 'rm -rf "$tmp_dir"' EXIT
 
     info "Downloading $archive..."
     if ! curl -fsSL "$url" -o "$tmp_dir/$archive"; then
@@ -151,16 +143,26 @@ install_tscode() {
     chmod +x "$tmp_dir/$BINARY_NAME"
 
     info "Installing to $install_dir..."
+    mkdir -p "$install_dir" 2>/dev/null || true
+
     if [ -w "$install_dir" ]; then
         mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
-    else
+    elif [ "$(id -u)" = "0" ]; then
+        mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
+    elif command -v sudo >/dev/null 2>&1; then
+        sudo mkdir -p "$install_dir"
         sudo mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
+    else
+        install_dir="$HOME/bin"
+        mkdir -p "$install_dir"
+        mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
+        warn "Installed to $install_dir (add to PATH manually)"
     fi
 
     success "Installed $BINARY_NAME to $install_dir/$BINARY_NAME"
 
     if command -v "$BINARY_NAME" >/dev/null 2>&1; then
-        local installed_version
+        local installed_version=""
         installed_version=$("$BINARY_NAME" --version 2>/dev/null || echo "unknown")
         success "Version: $installed_version"
     else
@@ -177,7 +179,7 @@ main() {
     echo ""
 
     info "Detecting platform..."
-    local platform
+    local platform=""
     platform=$(detect_platform)
     local target="${platform%|*}"
     local install_dir="${platform#*|}"
@@ -185,7 +187,7 @@ main() {
     info "Install dir: $install_dir"
 
     info "Getting latest version..."
-    local version
+    local version=""
     version=$(get_latest_version)
     info "Version: $version"
 

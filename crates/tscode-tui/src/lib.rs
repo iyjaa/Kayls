@@ -37,6 +37,7 @@ fn run_loop(
         app.editor_height = editor_height;
         app.editor_width = editor_width;
         app.explorer_height = editor_height;
+        app.explorer_width = 23;
 
         let area = Rect {
             x: if app.show_explorer { 24 } else { 4 },

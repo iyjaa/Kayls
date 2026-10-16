@@ -9,3 +9,5 @@ repository.workspace = true
 [dependencies]
 ropey = { workspace = true }
 thiserror = { workspace = true }
+serde = { workspace = true }
+toml = { workspace = true }

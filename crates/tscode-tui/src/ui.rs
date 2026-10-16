@@ -1,12 +1,12 @@
 use ratatui::{
-    layout::{Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Borders, Clear, Paragraph},
     Frame,
 };
 
-use crate::app::{App, Focus, Mode};
+use crate::app::{App, Focus, Mode, Theme};
 
 pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let rows = Layout::default()
@@ -114,7 +114,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         // Fallback kalau editor belum di-load
         let content = match &app.document {
             Some(doc) => doc.content_as_string(),
-            None => "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string(),
+            None => {
+                "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string()
+            }
         };
 
         frame.render_widget(
@@ -169,7 +171,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             format!(
                 " COMMAND   {} ",
                 app.status_message.as_deref().unwrap_or(
-                    "(o)pen (n)ew file (v)new folder (d)elete (w)rite (e)xplorer (Esc)cancel"
+                    "(o)pen (n)ew file (v)new folder (d)elete (t)heme (w)rite (e)xplorer (Esc)cancel"
                 )
             ),
             Style::default()
@@ -208,14 +210,114 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                     .fg(Color::Rgb(240, 200, 200)),
             )
         }
+        Mode::SelectTheme => (
+            " Select Theme — ↑↓ navigate, 1-4 select, Enter confirm, Esc cancel ".to_string(),
+            Style::default()
+                .bg(Color::Rgb(50, 70, 90))
+                .fg(Color::Rgb(200, 220, 240)),
+        ),
     };
 
     frame.render_widget(Paragraph::new(status).style(status_style), rows[2]);
+
+    // Render theme popup
+    if let Mode::SelectTheme = app.mode {
+        render_theme_popup(frame, app);
+    }
+}
+
+fn render_theme_popup(frame: &mut Frame, app: &App) {
+    let themes = [
+        (Theme::Vesper, "Vesper"),
+        (Theme::Gruvbox, "Gruvbox"),
+        (Theme::Dracula, "Dracula"),
+        (Theme::Nord, "Nord"),
+    ];
+
+    let area = frame.area();
+
+    // Popup dimensions
+    let popup_width: u16 = 40.min(area.width);
+    let popup_height: u16 = (themes.len() as u16 + 6).min(area.height);
+
+    // Center popup
+    let popup_x = area.x + (area.width.saturating_sub(popup_width)) / 2;
+    let popup_y = area.y + (area.height.saturating_sub(popup_height)) / 2;
+
+    let popup_area = Rect {
+        x: popup_x,
+        y: popup_y,
+        width: popup_width,
+        height: popup_height,
+    };
+
+    // Clear background
+    frame.render_widget(Clear, popup_area);
+
+    // Build list lines
+    let mut lines: Vec<Line> = Vec::new();
+
+    for (i, (theme, name)) in themes.iter().enumerate() {
+        let is_active = *theme == app.theme;
+        let is_cursor = i == app.theme_cursor;
+
+        let marker = if is_cursor { "▸ " } else { "  " };
+        let active_marker = if is_active { " ●" } else { "" };
+        let text = format!("{}{}. {}{}", marker, i + 1, name, active_marker);
+
+        let style = if is_cursor {
+            Style::default()
+                .fg(focus_color(app.theme))
+                .add_modifier(Modifier::BOLD)
+        } else if is_active {
+            Style::default().fg(tab_fg_color(app.theme))
+        } else {
+            Style::default().fg(Color::Rgb(180, 180, 190))
+        };
+
+        lines.push(Line::from(Span::styled(text, style)));
+    }
+
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .title(" Select Theme ")
+        .border_style(Style::default().fg(focus_color(app.theme)))
+        .style(Style::default().bg(Color::Rgb(30, 30, 45)));
+
+    let list_area = Rect {
+        x: popup_area.x,
+        y: popup_area.y,
+        width: popup_area.width,
+        height: popup_area.height.saturating_sub(2),
+    };
+
+    let paragraph = Paragraph::new(lines)
+        .block(block)
+        .alignment(Alignment::Left);
+    frame.render_widget(paragraph, list_area);
+
+    // Footer
+    if popup_area.height >= 3 {
+        let footer_area = Rect {
+            x: popup_area.x + 1,
+            y: popup_area.y + popup_area.height.saturating_sub(2),
+            width: popup_area.width.saturating_sub(2),
+            height: 1,
+        };
+
+        let footer = Paragraph::new("↑↓ navigate · 1-4 select · Enter confirm · Esc cancel")
+            .style(
+                Style::default()
+                    .bg(Color::Rgb(30, 30, 45))
+                    .fg(Color::Rgb(140, 140, 160)),
+            )
+            .alignment(Alignment::Center);
+
+        frame.render_widget(footer, footer_area);
+    }
 }
 
 fn render_file_tree(app: &App) -> Vec<Line<'static>> {
-    use crate::app::Theme;
-
     let Some(tree) = app.file_tree.as_ref() else {
         return vec![Line::from("(no file tree)")];
     };
@@ -264,7 +366,7 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
         .iter()
         .enumerate()
         .skip(scroll)
-        .take(end - scroll)
+        .take(end.saturating_sub(scroll))
         .map(|(_idx, (path, name, is_dir, depth, expanded))| {
             let is_selected = Some(path) == selected;
 
@@ -298,18 +400,21 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
 
             let marker = if is_selected { "> " } else { "  " };
 
+            // Horizontal scroll — marker tetap di kiri
+            let full_text = format!("{}{}", prefix, name);
+            let scroll_x = app.explorer_scroll_x;
+
+            let scrolled_text: String = full_text.chars().skip(scroll_x).collect();
+
             Line::from(vec![
                 Span::styled(marker, style),
-                Span::styled(prefix, style),
-                Span::styled(name.clone(), style),
+                Span::styled(scrolled_text, style),
             ])
         })
         .collect()
 }
 
-fn focus_color(theme: crate::app::Theme) -> Color {
-    use crate::app::Theme;
-
+fn focus_color(theme: Theme) -> Color {
     match theme {
         Theme::Vesper => Color::Rgb(212, 184, 150),
         Theme::Gruvbox => Color::Rgb(215, 153, 33),
@@ -318,9 +423,7 @@ fn focus_color(theme: crate::app::Theme) -> Color {
     }
 }
 
-fn tab_bg_color(theme: crate::app::Theme) -> Color {
-    use crate::app::Theme;
-
+fn tab_bg_color(theme: Theme) -> Color {
     match theme {
         Theme::Vesper => Color::Rgb(42, 42, 62),
         Theme::Gruvbox => Color::Rgb(50, 48, 47),
@@ -329,9 +432,7 @@ fn tab_bg_color(theme: crate::app::Theme) -> Color {
     }
 }
 
-fn tab_fg_color(theme: crate::app::Theme) -> Color {
-    use crate::app::Theme;
-
+fn tab_fg_color(theme: Theme) -> Color {
     match theme {
         Theme::Vesper => Color::Rgb(197, 209, 192),
         Theme::Gruvbox => Color::Rgb(213, 196, 161),

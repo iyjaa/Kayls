@@ -4,7 +4,7 @@ use ratatui_code_editor::editor::Editor;
 use ratatui_code_editor::theme::{dracula, gruvbox, nord, vesper};
 use std::path::PathBuf;
 use std::time::Instant;
-use tscode_core::{Document, FileTree};
+use tscode_core::{Config, Document, FileTree};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Mode {
@@ -14,6 +14,7 @@ pub enum Mode {
     PromptNewFile,
     PromptNewFolder,
     ConfirmDelete,
+    SelectTheme,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -45,10 +46,13 @@ pub struct App {
     pub show_explorer: bool,
     pub focus: Focus,
     pub theme: Theme,
+    pub theme_cursor: usize,
     pub scroll_offset: usize,
     pub scroll_offset_x: usize,
     pub explorer_scroll: usize,
+    pub explorer_scroll_x: usize,
     pub explorer_height: u16,
+    pub explorer_width: u16,
     pub editor_height: u16,
     pub editor_width: u16,
     pub mode: Mode,
@@ -60,19 +64,36 @@ pub struct App {
 
 impl App {
     pub fn new(document: Option<Document>) -> Self {
+        let config = Config::load();
+
+        let theme = match config.editor.theme.to_lowercase().as_str() {
+            "gruvbox" => Theme::Gruvbox,
+            "dracula" => Theme::Dracula,
+            "nord" => Theme::Nord,
+            _ => Theme::Vesper,
+        };
+
         let mut app = Self {
             should_quit: false,
             document,
             editor: None,
             editor_area: Rect::default(),
             file_tree: None,
-            show_explorer: true,
+            show_explorer: config.editor.show_explorer,
             focus: Focus::Editor,
-            theme: Theme::default(),
+            theme,
+            theme_cursor: match theme {
+                Theme::Vesper => 0,
+                Theme::Gruvbox => 1,
+                Theme::Dracula => 2,
+                Theme::Nord => 3,
+            },
             scroll_offset: 0,
             scroll_offset_x: 0,
             explorer_scroll: 0,
+            explorer_scroll_x: 0,
             explorer_height: 0,
+            explorer_width: 0,
             editor_height: 0,
             editor_width: 0,
             mode: Mode::Normal,
@@ -148,6 +169,7 @@ impl App {
             Mode::PromptNewFile => self.handle_prompt_new_file(key),
             Mode::PromptNewFolder => self.handle_prompt_new_folder(key),
             Mode::ConfirmDelete => self.handle_confirm_delete(key),
+            Mode::SelectTheme => self.handle_select_theme(key),
         }
     }
 
@@ -189,6 +211,18 @@ impl App {
                 tree.move_down();
                 self.ensure_explorer_visible();
             }
+            KeyCode::Left => {
+                if self.explorer_scroll_x > 0 {
+                    self.explorer_scroll_x -= 1;
+                }
+            }
+            KeyCode::Right => {
+                // Max scroll — biar tidak scroll terlalu jauh
+                let max_scroll = self.max_explorer_scroll_x();
+                if self.explorer_scroll_x < max_scroll {
+                    self.explorer_scroll_x += 1;
+                }
+            }
             KeyCode::Enter => {
                 let is_dir = tree.selected_entry().map(|e| e.is_dir).unwrap_or(false);
 
@@ -222,11 +256,68 @@ impl App {
 
         let scroll = self.explorer_scroll;
 
+        // Vertical
         if selected_idx < scroll {
             self.explorer_scroll = selected_idx;
         } else if selected_idx >= scroll + height {
             self.explorer_scroll = selected_idx - height + 1;
         }
+
+        // Horizontal — auto-scroll saat nama panjang
+        let width = self.explorer_width as usize;
+        if width == 0 {
+            return;
+        }
+
+        let visible = tree.visible_entries();
+        if let Some((_path, name, _is_dir, depth, _expanded)) = visible.get(selected_idx) {
+            let indent = depth * 2;
+            let icon_len = 2; // "▸ " atau "  "
+            let marker_len = 2; // "> " atau "  "
+            let total_len = marker_len + indent + icon_len + name.chars().count();
+
+            let scroll_x = self.explorer_scroll_x;
+
+            // Kalau item lebih panjang dari width, scroll kanan
+            if total_len > scroll_x + width {
+                self.explorer_scroll_x = total_len.saturating_sub(width);
+            } else if scroll_x > 0 && total_len <= scroll_x {
+                // Kalau item lebih pendek dari scroll, scroll kiri
+                self.explorer_scroll_x = 0;
+            }
+
+            // Auto-scroll untuk indent dalam
+            let indent_scroll_threshold = indent + icon_len + marker_len;
+            if indent_scroll_threshold > scroll_x + width / 2 {
+                self.explorer_scroll_x = indent_scroll_threshold.saturating_sub(width / 2);
+            }
+        }
+    }
+
+    fn max_explorer_scroll_x(&self) -> usize {
+        let Some(tree) = self.file_tree.as_ref() else {
+            return 0;
+        };
+
+        let visible = tree.visible_entries();
+        let width = self.explorer_width as usize;
+        if width == 0 {
+            return 0;
+        }
+
+        let mut max_len = 0;
+
+        for (_path, name, _is_dir, depth, _expanded) in visible.iter() {
+            let indent = depth * 2;
+            let icon_len = 2;
+            let marker_len = 2;
+            let total_len = marker_len + indent + icon_len + name.chars().count();
+            if total_len > max_len {
+                max_len = total_len;
+            }
+        }
+
+        max_len.saturating_sub(width)
     }
 
     fn open_file_from_path(&mut self, path: PathBuf) {
@@ -283,6 +374,17 @@ impl App {
                         self.status_time = Some(Instant::now());
                     }
                 }
+            }
+            KeyCode::Char('t') => {
+                self.mode = Mode::SelectTheme;
+                self.theme_cursor = match self.theme {
+                    Theme::Vesper => 0,
+                    Theme::Gruvbox => 1,
+                    Theme::Dracula => 2,
+                    Theme::Nord => 3,
+                };
+                self.status_message = None;
+                self.status_time = None;
             }
             KeyCode::Char('w') => {
                 if let (Some(doc), Some(editor)) = (self.document.as_ref(), self.editor.as_ref()) {
@@ -514,6 +616,62 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             _ => {}
+        }
+    }
+
+    fn handle_select_theme(&mut self, key: KeyEvent) {
+        const THEMES: [Theme; 4] = [Theme::Vesper, Theme::Gruvbox, Theme::Dracula, Theme::Nord];
+
+        let new_theme = match key.code {
+            KeyCode::Up => {
+                if self.theme_cursor > 0 {
+                    self.theme_cursor -= 1;
+                }
+                None
+            }
+            KeyCode::Down => {
+                if self.theme_cursor + 1 < THEMES.len() {
+                    self.theme_cursor += 1;
+                }
+                None
+            }
+            KeyCode::Char('1') => Some(Theme::Vesper),
+            KeyCode::Char('2') => Some(Theme::Gruvbox),
+            KeyCode::Char('3') => Some(Theme::Dracula),
+            KeyCode::Char('4') => Some(Theme::Nord),
+            KeyCode::Enter => Some(THEMES[self.theme_cursor]),
+            KeyCode::Esc => {
+                self.mode = Mode::Normal;
+                self.status_message = Some("Cancelled".to_string());
+                self.status_time = Some(Instant::now());
+                return;
+            }
+            _ => None,
+        };
+
+        if let Some(theme) = new_theme {
+            self.theme = theme;
+            self.load_editor();
+
+            let name = match theme {
+                Theme::Vesper => "Vesper",
+                Theme::Gruvbox => "Gruvbox",
+                Theme::Dracula => "Dracula",
+                Theme::Nord => "Nord",
+            };
+
+            // Save to config
+            let mut config = Config::load();
+            config.editor.theme = name.to_lowercase();
+            config.editor.show_explorer = self.show_explorer;
+            if let Err(e) = config.save() {
+                self.status_message = Some(format!("Theme: {} (save failed: {})", name, e));
+            } else {
+                self.status_message = Some(format!("Theme: {}", name));
+            }
+
+            self.mode = Mode::Normal;
+            self.status_time = Some(Instant::now());
         }
     }
 

@@ -14,7 +14,7 @@ Tscode is a terminal-based IDE with a VS Code-inspired layout. It runs in any te
 
 ## Status
 
-**Tsc-v1.1.2** — UI polish: soft theme-aware colors, explorer scroll, auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
+**Tsc-v1.1.3** — Config file, theme persistence, explorer horizontal scroll, soft theme-aware colors, auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
 
 See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
 
@@ -23,12 +23,13 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 - **Editor** — syntax highlighting via tree-sitter, undo/redo, copy/paste, code folding
 - **Auto-pair** — brackets, quotes, and angle brackets auto-close
 - **Auto-indent** — indentation follows code structure
-- **File tree** — recursive, expand/collapse folders, colored by type, scrollable
+- **File tree** — recursive, expand/collapse folders, colored by type, vertical & horizontal scroll
 - **File management** — create file/folder, delete with confirmation
 - **Focus system** — switch between editor and explorer
 - **Themes** — Vesper (default), Gruvbox, Dracula, Nord
 - **Theme-aware UI** — tab bar, focus border, and file tree colors follow the active theme
 - **Soft palette** — comfortable for long coding sessions
+- **Config file** — `~/.config/tscode/config.toml` with theme persistence
 - **Command mode** — Vim-style commands (`Esc` then key)
 - **Multi-language** — Rust, Python, JavaScript, TypeScript, Go, C/C++, TOML, JSON, Markdown, HTML, CSS, Bash
 - **Lightweight** — ~2.4 MB binary, fast startup
@@ -122,6 +123,27 @@ Requirements: Rust 1.70+ and Git.
     # Show help
     tscode --help
 
+## Configuration
+
+Tscode reads settings from `~/.config/tscode/config.toml`. The file is created automatically when you change the theme.
+
+    [editor]
+    theme = "vesper"
+    show_explorer = true
+
+## Themes
+
+Available themes:
+
+| Theme | Description |
+|-------|-------------|
+| **Vesper** | Default — soft green, orange, purple |
+| **Gruvbox** | Warm, retro — green, yellow, mint |
+| **Dracula** | Dark, soft — green, pink, purple |
+| **Nord** | Cool, minimal — green, blue, cyan |
+
+Switch theme with `Esc` then `t`. Theme is saved to the config file.
+
 ## Keybindings
 
 Tscode uses Vim-style command mode. In normal mode, keys go to the editor. Press `Esc` to enter command mode.
@@ -144,6 +166,14 @@ Tscode uses Vim-style command mode. In normal mode, keys go to the editor. Press
 | `Ctrl+D` | Duplicate line |
 | `Ctrl+K` | Delete line |
 
+### Explorer (when focused)
+
+| Key | Action |
+|-----|--------|
+| Arrow Up/Down | Navigate |
+| Arrow Left/Right | Horizontal scroll |
+| Enter | Open file / expand folder |
+
 ### Command Mode (after `Esc`)
 
 | Key | Action |
@@ -152,6 +182,7 @@ Tscode uses Vim-style command mode. In normal mode, keys go to the editor. Press
 | `n` | New file |
 | `v` | New folder |
 | `d` | Delete (with confirmation) |
+| `t` | Select theme |
 | `w` | Save file |
 | `e` | Toggle explorer |
 | `Esc` | Cancel |
@@ -187,7 +218,7 @@ Tscode is a Rust workspace with 4 crates:
 
 | Crate | Purpose |
 |-------|---------|
-| `tscode-core` | FileTree, Document |
+| `tscode-core` | FileTree, Document, Config |
 | `tscode-terminal` | PTY, shell integration (planned) |
 | `tscode-tui` | App state, UI rendering |
 | `tscode` | Main binary, CLI parsing |
@@ -215,7 +246,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 **Areas that need help:**
 
 - VS Code keybinding mode
-- Config file support
 - Multiple file tabs
 - Search in file
 - Bug fixes and documentation

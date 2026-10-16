@@ -1,6 +1,6 @@
 pub mod actions;
-pub mod click;
 pub mod auto_pair;
+pub mod click;
 pub mod code;
 mod diff;
 #[cfg(feature = "bench-internals")]

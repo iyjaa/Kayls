@@ -1,10 +1,10 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;
-use tscode_editor::editor::Editor;
-use tscode_editor::theme::{dracula, gruvbox, nord, vesper};
 use std::path::PathBuf;
 use std::time::Instant;
 use tscode_core::{Config, Document, FileTree};
+use tscode_editor::editor::Editor;
+use tscode_editor::theme::{dracula, gruvbox, nord, vesper};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Mode {

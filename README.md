@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="assets/icon.png" width="128" alt="Tscode">
-</p>
 # Tscode
 
 > Terminal Studio Code — A terminal-based IDE inspired by VS Code.
@@ -13,7 +10,7 @@ Tscode is a terminal-based IDE with a VS Code-inspired layout. It runs in any te
 
 ## Status
 
-**Tsc-v1.1.0** — Editor polish: auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
+**Tsc-v1.1.1** — Editor polish: soft theme-aware colors, auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
 
 See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
 
@@ -22,10 +19,12 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 - **Editor** — syntax highlighting via tree-sitter, undo/redo, copy/paste, code folding
 - **Auto-pair** — brackets, quotes, and angle brackets auto-close
 - **Auto-indent** — indentation follows code structure
-- **File tree** — recursive, expand/collapse folders
+- **File tree** — recursive, expand/collapse folders, colored by type
 - **File management** — create file/folder, delete with confirmation
 - **Focus system** — switch between editor and explorer
 - **Themes** — Vesper (default), Gruvbox, Dracula, Nord
+- **Theme-aware UI** — tab bar, focus border, and file tree colors follow the active theme
+- **Soft palette** — comfortable for long coding sessions
 - **Command mode** — Vim-style commands (`Esc` then key)
 - **Multi-language** — Rust, Python, JavaScript, TypeScript, Go, C/C++, TOML, JSON, Markdown, HTML, CSS, Bash
 - **Lightweight** — ~2.4 MB binary, fast startup
@@ -33,14 +32,35 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 
 ## Install
 
-### Linux x86_64
+### Quick install (Linux, macOS, Android)
+
+    curl -fsSL https://raw.githubusercontent.com/iyjaa/Tscode/main/install.sh | sh
+
+This auto-detects your platform (Linux x86_64, Linux ARM64, Android ARM64, macOS) and installs to the appropriate directory.
+
+### Manual install
+
+#### Linux x86_64
 
     curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-x86_64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
     tar xzf tscode.tar.gz
     sudo mv tscode /usr/local/bin/
     tscode --version
 
-### Android (Termux / Acode, ARM64)
+#### Linux ARM64
+
+    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
+    tar xzf tscode.tar.gz
+    sudo mv tscode /usr/local/bin/
+    tscode --version
+
+#### Android (Termux / Acode, ARM64)
+
+Quick install (recommended):
+
+    curl -fsSL https://raw.githubusercontent.com/iyjaa/Tscode/main/install.sh | sh
+
+Manual install:
 
     curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-linux-android.tar.gz -o tscode.tar.gz
     tar xzf tscode.tar.gz
@@ -51,7 +71,7 @@ For **Termux**, move to `$PREFIX/bin`:
 
     mv tscode $PREFIX/bin/
 
-For **Acode terminal**, move to `/public/bin` or `~/bin`.
+For **Acode terminal**, the installer auto-detects `/public/bin`.
 
 ### Build from source
 

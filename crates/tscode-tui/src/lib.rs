@@ -36,10 +36,8 @@ fn run_loop(
         };
         app.editor_height = editor_height;
         app.editor_width = editor_width;
+        app.explorer_height = editor_height;
 
-        // Hitung editor_area untuk ratatui-code-editor
-        // x: explorer (20) + nomor baris (3) + border editor (1)
-        // y: tab bar (1) + border editor (1)
         let area = Rect {
             x: if app.show_explorer { 24 } else { 4 },
             y: 2,

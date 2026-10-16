@@ -32,7 +32,7 @@ pub enum Theme {
 
 impl Default for Theme {
     fn default() -> Self {
-        Theme::Dracula
+        Theme::Vesper
     }
 }
 
@@ -47,6 +47,8 @@ pub struct App {
     pub theme: Theme,
     pub scroll_offset: usize,
     pub scroll_offset_x: usize,
+    pub explorer_scroll: usize,
+    pub explorer_height: u16,
     pub editor_height: u16,
     pub editor_width: u16,
     pub mode: Mode,
@@ -69,6 +71,8 @@ impl App {
             theme: Theme::default(),
             scroll_offset: 0,
             scroll_offset_x: 0,
+            explorer_scroll: 0,
+            explorer_height: 0,
             editor_height: 0,
             editor_width: 0,
             mode: Mode::Normal,
@@ -130,7 +134,6 @@ impl App {
             return;
         }
 
-        // Alt+Q — quit
         if key.modifiers.contains(KeyModifiers::ALT) {
             if let KeyCode::Char('q') = key.code {
                 self.should_quit = true;
@@ -180,15 +183,18 @@ impl App {
         match key.code {
             KeyCode::Up => {
                 tree.move_up();
+                self.ensure_explorer_visible();
             }
             KeyCode::Down => {
                 tree.move_down();
+                self.ensure_explorer_visible();
             }
             KeyCode::Enter => {
                 let is_dir = tree.selected_entry().map(|e| e.is_dir).unwrap_or(false);
 
                 if is_dir {
                     tree.toggle_expand_selected();
+                    self.ensure_explorer_visible();
                 } else {
                     let path = tree.selected_entry().map(|e| e.path.clone());
                     if let Some(path) = path {
@@ -197,6 +203,29 @@ impl App {
                 }
             }
             _ => {}
+        }
+    }
+
+    fn ensure_explorer_visible(&mut self) {
+        let Some(tree) = self.file_tree.as_ref() else {
+            return;
+        };
+
+        let Some(selected_idx) = tree.selected_index() else {
+            return;
+        };
+
+        let height = self.explorer_height as usize;
+        if height == 0 {
+            return;
+        }
+
+        let scroll = self.explorer_scroll;
+
+        if selected_idx < scroll {
+            self.explorer_scroll = selected_idx;
+        } else if selected_idx >= scroll + height {
+            self.explorer_scroll = selected_idx - height + 1;
         }
     }
 
@@ -367,6 +396,7 @@ impl App {
                             self.load_editor();
                         }
                         self.focus = Focus::Explorer;
+                        self.ensure_explorer_visible();
                     }
                     Err(e) => {
                         self.status_message = Some(format!("Error: {}", e));
@@ -418,6 +448,7 @@ impl App {
                     Ok(path) => {
                         self.status_message = Some(format!("Created: {}", path.display()));
                         self.focus = Focus::Explorer;
+                        self.ensure_explorer_visible();
                     }
                     Err(e) => {
                         self.status_message = Some(format!("Error: {}", e));
@@ -459,13 +490,14 @@ impl App {
                     Ok(deleted) => {
                         self.status_message = Some(format!("Deleted: {}", deleted.display()));
 
-                        // Kalau file yang dihapus sedang dibuka, kosongkan editor
                         if let Some(doc) = self.document.as_ref() {
                             if doc.path == path {
                                 self.document = None;
                                 self.editor = None;
                             }
                         }
+
+                        self.ensure_explorer_visible();
                     }
                     Err(e) => {
                         self.status_message = Some(format!("Error: {}", e));

@@ -224,27 +224,26 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
         return vec![Line::from("(empty)")];
     }
 
-    // Warna soft berdasarkan theme
     let (color_file, color_folder, color_nested) = match app.theme {
         Theme::Vesper => (
-            Color::Rgb(184, 212, 184), // #b8d4b8 (hijau soft)
-            Color::Rgb(224, 192, 144), // #e0c090 (orange soft)
-            Color::Rgb(192, 168, 224), // #c0a8e0 (ungu soft)
+            Color::Rgb(184, 212, 184),
+            Color::Rgb(224, 192, 144),
+            Color::Rgb(192, 168, 224),
         ),
         Theme::Gruvbox => (
-            Color::Rgb(184, 187, 38),  // #b8bb26 (hijau soft)
-            Color::Rgb(250, 189, 47),  // #fabd2f (kuning soft)
-            Color::Rgb(142, 192, 124), // #8ec07c (hijau mint)
+            Color::Rgb(184, 187, 38),
+            Color::Rgb(250, 189, 47),
+            Color::Rgb(142, 192, 124),
         ),
         Theme::Dracula => (
-            Color::Rgb(127, 212, 160), // #7fd4a0 (hijau soft)
-            Color::Rgb(212, 160, 200), // #d4a0c8 (pink soft)
-            Color::Rgb(184, 160, 224), // #b8a0e0 (ungu soft)
+            Color::Rgb(127, 212, 160),
+            Color::Rgb(212, 160, 200),
+            Color::Rgb(184, 160, 224),
         ),
         Theme::Nord => (
-            Color::Rgb(168, 200, 168), // #a8c8a8 (hijau soft)
-            Color::Rgb(168, 192, 216), // #a8c0d8 (biru soft)
-            Color::Rgb(168, 212, 212), // #a8d4d4 (cyan soft)
+            Color::Rgb(168, 200, 168),
+            Color::Rgb(168, 192, 216),
+            Color::Rgb(168, 212, 212),
         ),
     };
 
@@ -253,9 +252,20 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
     let visible = tree.visible_entries();
     let selected = tree.selected_path.as_ref();
 
+    let scroll = app.explorer_scroll;
+    let height = app.explorer_height as usize;
+    let end = if height > 0 {
+        (scroll + height).min(visible.len())
+    } else {
+        visible.len()
+    };
+
     visible
         .iter()
-        .map(|(path, name, is_dir, depth, expanded)| {
+        .enumerate()
+        .skip(scroll)
+        .take(end - scroll)
+        .map(|(_idx, (path, name, is_dir, depth, expanded))| {
             let is_selected = Some(path) == selected;
 
             let icon = if *is_dir {
@@ -301,10 +311,10 @@ fn focus_color(theme: crate::app::Theme) -> Color {
     use crate::app::Theme;
 
     match theme {
-        Theme::Vesper => Color::Rgb(212, 184, 150),  // #d4b896 (orange soft)
-        Theme::Gruvbox => Color::Rgb(215, 153, 33),  // #d79921 (kuning soft)
-        Theme::Dracula => Color::Rgb(212, 160, 200), // #d4a0c8 (pink soft)
-        Theme::Nord => Color::Rgb(168, 192, 216),    // #a8c0d8 (biru soft)
+        Theme::Vesper => Color::Rgb(212, 184, 150),
+        Theme::Gruvbox => Color::Rgb(215, 153, 33),
+        Theme::Dracula => Color::Rgb(212, 160, 200),
+        Theme::Nord => Color::Rgb(168, 192, 216),
     }
 }
 
@@ -312,10 +322,10 @@ fn tab_bg_color(theme: crate::app::Theme) -> Color {
     use crate::app::Theme;
 
     match theme {
-        Theme::Vesper => Color::Rgb(42, 42, 62),  // #2a2a3e
-        Theme::Gruvbox => Color::Rgb(50, 48, 47), // #32302f
-        Theme::Dracula => Color::Rgb(52, 55, 70), // #343746
-        Theme::Nord => Color::Rgb(59, 66, 82),    // #3b4252
+        Theme::Vesper => Color::Rgb(42, 42, 62),
+        Theme::Gruvbox => Color::Rgb(50, 48, 47),
+        Theme::Dracula => Color::Rgb(52, 55, 70),
+        Theme::Nord => Color::Rgb(59, 66, 82),
     }
 }
 
@@ -323,9 +333,9 @@ fn tab_fg_color(theme: crate::app::Theme) -> Color {
     use crate::app::Theme;
 
     match theme {
-        Theme::Vesper => Color::Rgb(197, 209, 192),  // #c5d1c0
-        Theme::Gruvbox => Color::Rgb(213, 196, 161), // #d5c4a1
-        Theme::Dracula => Color::Rgb(216, 216, 224), // #d8d8e0
-        Theme::Nord => Color::Rgb(200, 208, 220),    // #c8d0dc
+        Theme::Vesper => Color::Rgb(197, 209, 192),
+        Theme::Gruvbox => Color::Rgb(213, 196, 161),
+        Theme::Dracula => Color::Rgb(216, 216, 224),
+        Theme::Nord => Color::Rgb(200, 208, 220),
     }
 }

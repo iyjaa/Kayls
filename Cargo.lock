@@ -1204,7 +1204,7 @@ dependencies = [
 [[package]]
 name = "ratatui-code-editor"
 version = "0.0.6"
-source = "git+https://github.com/iyjaa/ratatui-code-editor?rev=d8f4e46#d8f4e46f2f35e0321ba716edc5d0fe0b7d8a55fd"
+source = "git+https://github.com/iyjaa/ratatui-code-editor?rev=573bb2f#573bb2f97172433b86ccd55acf6e3597be3b3e3f"
 dependencies = [
  "anyhow",
  "crossterm",
@@ -1996,7 +1996,7 @@ dependencies = [
 
 [[package]]
 name = "tscode"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -2007,7 +2007,7 @@ dependencies = [
 
 [[package]]
 name = "tscode-core"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "ropey",
  "thiserror 2.0.21",
@@ -2015,14 +2015,14 @@ dependencies = [
 
 [[package]]
 name = "tscode-terminal"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "anyhow",
 ]
 
 [[package]]
 name = "tscode-tui"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "anyhow",
  "crossterm",

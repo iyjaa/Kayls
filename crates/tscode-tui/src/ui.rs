@@ -110,9 +110,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         // Fallback kalau editor belum di-load
         let content = match &app.document {
             Some(doc) => doc.content_as_string(),
-            None => {
-                "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string()
-            }
+            None => "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string(),
         };
 
         frame.render_widget(
@@ -149,7 +147,11 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                 (
                     format!(
                         " NORMAL [{}]   {}   {}   v:{} h:{} ",
-                        focus_label, version, cursor_info, app.scroll_offset, app.scroll_offset_x
+                        focus_label,
+                        version,
+                        cursor_info,
+                        app.scroll_offset,
+                        app.scroll_offset_x
                     ),
                     Style::default().bg(Color::DarkGray).fg(Color::White),
                 )
@@ -158,9 +160,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         Mode::Command => (
             format!(
                 " COMMAND   {} ",
-                app.status_message
-                    .as_deref()
-                    .unwrap_or("(o)pen (w)rite (e)xplorer (Esc)cancel")
+                app.status_message.as_deref().unwrap_or(
+                    "(o)pen (n)ew file (v)new folder (d)elete (w)rite (e)xplorer (Esc)cancel"
+                )
             ),
             Style::default().bg(Color::Yellow).fg(Color::Black),
         ),
@@ -168,6 +170,26 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             format!(" Open file: {}_ ", app.input_buffer),
             Style::default().bg(Color::Cyan).fg(Color::Black),
         ),
+        Mode::PromptNewFile => (
+            format!(" New file: {}_ ", app.input_buffer),
+            Style::default().bg(Color::Magenta).fg(Color::Black),
+        ),
+        Mode::PromptNewFolder => (
+            format!(" New folder: {}_ ", app.input_buffer),
+            Style::default().bg(Color::Magenta).fg(Color::Black),
+        ),
+        Mode::ConfirmDelete => {
+            let name = app
+                .pending_delete
+                .as_ref()
+                .and_then(|p| p.file_name())
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| "?".to_string());
+            (
+                format!(" Delete '{}'? (y/n) ", name),
+                Style::default().bg(Color::Red).fg(Color::White),
+            )
+        }
     };
 
     frame.render_widget(Paragraph::new(status).style(status_style), rows[2]);

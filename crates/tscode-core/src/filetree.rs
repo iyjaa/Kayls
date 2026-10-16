@@ -201,6 +201,152 @@ impl FileTree {
         true
     }
 
+    /// Buat file baru di folder yang dipilih.
+    /// Return path file yang dibuat.
+    pub fn create_file(&mut self, name: &str) -> std::io::Result<PathBuf> {
+        let parent = self.resolve_parent_dir();
+
+        let new_path = parent.join(name);
+
+        if new_path.exists() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::AlreadyExists,
+                format!("Already exists: {}", new_path.display()),
+            ));
+        }
+
+        fs::write(&new_path, "")?;
+
+        // Reload parent folder
+        self.reload_folder(&parent)?;
+
+        // Select file baru
+        self.selected_path = Some(new_path.clone());
+
+        Ok(new_path)
+    }
+
+    /// Buat folder baru di folder yang dipilih.
+    /// Return path folder yang dibuat.
+    pub fn create_folder(&mut self, name: &str) -> std::io::Result<PathBuf> {
+        let parent = self.resolve_parent_dir();
+
+        let new_path = parent.join(name);
+
+        if new_path.exists() {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::AlreadyExists,
+                format!("Already exists: {}", new_path.display()),
+            ));
+        }
+
+        fs::create_dir(&new_path)?;
+
+        self.reload_folder(&parent)?;
+
+        self.selected_path = Some(new_path.clone());
+
+        Ok(new_path)
+    }
+    /// Hapus item yang dipilih (file atau folder).
+    /// Return path yang dihapus.
+    pub fn delete_selected(&mut self) -> std::io::Result<PathBuf> {
+        let Some(sel) = self.selected_path.clone() else {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "No selection",
+            ));
+        };
+
+        // Cari entry untuk tahu is_dir
+        let is_dir = self.find_entry(&sel).map(|e| e.is_dir).unwrap_or(false);
+
+        if is_dir {
+            fs::remove_dir_all(&sel)?;
+        } else {
+            fs::remove_file(&sel)?;
+        }
+
+        // Cari item berikutnya sebelum rebuild
+        let next_selected = self.find_next_after_delete(&sel);
+
+        // Reload parent folder
+        let parent = sel.parent().map(|p| p.to_path_buf());
+        if let Some(parent) = parent {
+            self.reload_folder(&parent)?;
+        } else {
+            self.rebuild_flat();
+        }
+
+        // Set selection berikutnya
+        self.selected_path = next_selected;
+
+        Ok(sel)
+    }
+
+    /// Cari item berikutnya setelah delete.
+    /// Kalau tidak ada, cari item sebelumnya.
+    fn find_next_after_delete(&self, deleted: &Path) -> Option<PathBuf> {
+        // Cari di flat list
+        let idx = self.flat.iter().position(|p| p == deleted);
+
+        if let Some(idx) = idx {
+            // Coba item berikutnya
+            if idx + 1 < self.flat.len() {
+                let next = &self.flat[idx + 1];
+                // Pastikan bukan anak dari yang dihapus
+                if !next.starts_with(deleted) {
+                    return Some(next.clone());
+                }
+            }
+
+            // Coba item sebelumnya
+            if idx > 0 {
+                let prev = &self.flat[idx - 1];
+                if !prev.starts_with(deleted) {
+                    return Some(prev.clone());
+                }
+            }
+        }
+
+        // Fallback: parent
+        deleted.parent().map(|p| p.to_path_buf())
+    }
+
+    /// Cek apakah path ada di tree.
+    pub fn contains_path(&self, path: &Path) -> bool {
+        self.flat.iter().any(|p| p == path)
+    }
+
+    /// Resolve parent directory berdasarkan selected entry.
+    /// Kalau folder → folder itu. Kalau file → parent file.
+    /// Kalau tidak ada → root.
+    fn resolve_parent_dir(&self) -> PathBuf {
+        self.selected_entry()
+            .map(|e| {
+                if e.is_dir {
+                    e.path.clone()
+                } else {
+                    e.path
+                        .parent()
+                        .map(|p| p.to_path_buf())
+                        .unwrap_or_else(|| self.root.clone())
+                }
+            })
+            .unwrap_or_else(|| self.root.clone())
+    }
+
+    /// Reload folder tertentu di tree — update children.
+    fn reload_folder(&mut self, folder: &Path) -> std::io::Result<()> {
+        if let Some(entry) = find_in_entry_mut(&mut self.root_entry, folder) {
+            entry.children = read_dir_entries(&entry.path);
+            entry.loaded = true;
+            entry.expanded = true;
+        }
+        self.rebuild_flat();
+        Ok(())
+    }
+
     pub fn selected_entry(&self) -> Option<&Entry> {
         let sel = self.selected_path.as_ref()?;
         self.find_entry(sel)

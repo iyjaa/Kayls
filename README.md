@@ -1,7 +1,6 @@
 <p align="center">
   <img src="assets/icon.png" width="128" alt="Tscode">
 </p>
-
 # Tscode
 
 > Terminal Studio Code — A terminal-based IDE inspired by VS Code.
@@ -14,15 +13,19 @@ Tscode is a terminal-based IDE with a VS Code-inspired layout. It runs in any te
 
 ## Status
 
-**Tsc-v1.0.1** — Editor integration complete. Binary available for Linux x86_64 and Android ARM64. Unstable, in development.
+**Tsc-v1.1.0** — Editor polish: auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
 
 See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
 
 ## Features
 
 - **Editor** — syntax highlighting via tree-sitter, undo/redo, copy/paste, code folding
+- **Auto-pair** — brackets, quotes, and angle brackets auto-close
+- **Auto-indent** — indentation follows code structure
 - **File tree** — recursive, expand/collapse folders
+- **File management** — create file/folder, delete with confirmation
 - **Focus system** — switch between editor and explorer
+- **Themes** — Vesper (default), Gruvbox, Dracula, Nord
 - **Command mode** — Vim-style commands (`Esc` then key)
 - **Multi-language** — Rust, Python, JavaScript, TypeScript, Go, C/C++, TOML, JSON, Markdown, HTML, CSS, Bash
 - **Lightweight** — ~2.4 MB binary, fast startup
@@ -48,9 +51,7 @@ For **Termux**, move to `$PREFIX/bin`:
 
     mv tscode $PREFIX/bin/
 
-For **Acode terminal**, run from current directory or move to `~/bin`:
-
-    mv tscode ~/bin/
+For **Acode terminal**, move to `/public/bin` or `~/bin`.
 
 ### Build from source
 
@@ -61,7 +62,7 @@ Requirements: Rust 1.70+ and Git.
     cargo build --release
     sudo cp target/release/tscode /usr/local/bin/
 
-**Note**: Tscode uses a custom fork of `ratatui-code-editor` (with `arboard` removed for Android compatibility). The fork is pulled automatically via `git-fetch-with-cli`.
+**Note**: Tscode uses a custom fork of `ratatui-code-editor` (with `arboard` removed for Android compatibility, plus auto-pair and auto-indent). The fork is pulled automatically via `git-fetch-with-cli`.
 
 ## Usage
 
@@ -86,9 +87,9 @@ Tscode uses Vim-style command mode. In normal mode, keys go to the editor. Press
 | Key | Action |
 |-----|--------|
 | Arrow keys | Move cursor |
-| Any character | Insert character |
+| Any character | Insert character (auto-pair for brackets/quotes) |
 | Backspace | Delete character |
-| Enter | New line |
+| Enter | New line (auto-indent) |
 | Tab | Indent |
 | `Ctrl+Z` | Undo |
 | `Ctrl+Y` | Redo |
@@ -104,6 +105,9 @@ Tscode uses Vim-style command mode. In normal mode, keys go to the editor. Press
 | Key | Action |
 |-----|--------|
 | `o` | Open file |
+| `n` | New file |
+| `v` | New folder |
+| `d` | Delete (with confirmation) |
 | `w` | Save file |
 | `e` | Toggle explorer |
 | `Esc` | Cancel |
@@ -114,6 +118,22 @@ Tscode uses Vim-style command mode. In normal mode, keys go to the editor. Press
 |-----|--------|
 | `Esc` | Enter command mode |
 | `Alt+Q` | Quit |
+
+### Auto-pair
+
+Typing any of these automatically inserts the matching closing character:
+
+| Type | Result |
+|------|--------|
+| `(` | `()` |
+| `{` | `{}` |
+| `[` | `[]` |
+| `<` | `<>` |
+| `"` | `""` |
+| `'` | `''` |
+| `` ` `` | `` ` ` `` |
+
+Typing a closing character when one is already ahead will skip over it (no duplicate).
 
 **Note**: A VS Code keybinding mode (`Ctrl+S`, `Ctrl+O`, `Ctrl+B`, etc.) is planned. See [docs/roadmap.md](docs/roadmap.md).
 

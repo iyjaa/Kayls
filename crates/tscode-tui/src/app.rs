@@ -1,7 +1,8 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;
 use ratatui_code_editor::editor::Editor;
-use ratatui_code_editor::theme::vesper;
+use ratatui_code_editor::theme::{dracula, gruvbox, nord, vesper};
+use std::path::PathBuf;
 use std::time::Instant;
 use tscode_core::{Document, FileTree};
 
@@ -10,12 +11,29 @@ pub enum Mode {
     Normal,
     Command,
     Prompt,
+    PromptNewFile,
+    PromptNewFolder,
+    ConfirmDelete,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Focus {
     Editor,
     Explorer,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Theme {
+    Vesper,
+    Gruvbox,
+    Dracula,
+    Nord,
+}
+
+impl Default for Theme {
+    fn default() -> Self {
+        Theme::Dracula
+    }
 }
 
 pub struct App {
@@ -26,12 +44,14 @@ pub struct App {
     pub file_tree: Option<FileTree>,
     pub show_explorer: bool,
     pub focus: Focus,
+    pub theme: Theme,
     pub scroll_offset: usize,
     pub scroll_offset_x: usize,
     pub editor_height: u16,
     pub editor_width: u16,
     pub mode: Mode,
     pub input_buffer: String,
+    pub pending_delete: Option<PathBuf>,
     pub status_message: Option<String>,
     pub status_time: Option<Instant>,
 }
@@ -46,12 +66,14 @@ impl App {
             file_tree: None,
             show_explorer: true,
             focus: Focus::Editor,
+            theme: Theme::default(),
             scroll_offset: 0,
             scroll_offset_x: 0,
             editor_height: 0,
             editor_width: 0,
             mode: Mode::Normal,
             input_buffer: String::new(),
+            pending_delete: None,
             status_message: None,
             status_time: None,
         };
@@ -62,7 +84,6 @@ impl App {
     }
 
     fn load_file_tree(&mut self) {
-        // Root = current directory (tidak berubah tiap buka file)
         let root = std::env::current_dir().ok();
 
         if let Some(root) = root {
@@ -85,7 +106,14 @@ impl App {
         let content = doc.content_as_string();
         let lang = detect_language(&doc.path);
 
-        match Editor::new(lang, &content, vesper()) {
+        let theme_colors = match self.theme {
+            Theme::Vesper => vesper(),
+            Theme::Gruvbox => gruvbox(),
+            Theme::Dracula => dracula(),
+            Theme::Nord => nord(),
+        };
+
+        match Editor::new(lang, &content, theme_colors) {
             Ok(mut ed) => {
                 ed.show_line_numbers(true);
                 self.editor = Some(ed);
@@ -96,6 +124,7 @@ impl App {
             }
         }
     }
+
     pub fn handle_key(&mut self, key: KeyEvent) {
         if key.kind != KeyEventKind::Press {
             return;
@@ -113,6 +142,9 @@ impl App {
             Mode::Normal => self.handle_normal(key),
             Mode::Command => self.handle_command(key),
             Mode::Prompt => self.handle_prompt(key),
+            Mode::PromptNewFile => self.handle_prompt_new_file(key),
+            Mode::PromptNewFolder => self.handle_prompt_new_folder(key),
+            Mode::ConfirmDelete => self.handle_confirm_delete(key),
         }
     }
 
@@ -168,7 +200,7 @@ impl App {
         }
     }
 
-    fn open_file_from_path(&mut self, path: std::path::PathBuf) {
+    fn open_file_from_path(&mut self, path: PathBuf) {
         match Document::open(&path) {
             Ok(doc) => {
                 self.document = Some(doc);
@@ -177,7 +209,6 @@ impl App {
                 self.status_message = Some(format!("Opened: {}", path.display()));
                 self.status_time = Some(Instant::now());
 
-                // TIDAK reload file tree — biar root tetap
                 self.load_editor();
 
                 self.focus = Focus::Editor;
@@ -201,6 +232,28 @@ impl App {
                 self.input_buffer.clear();
                 self.status_message = Some("Open file:".to_string());
                 self.status_time = Some(Instant::now());
+            }
+            KeyCode::Char('n') => {
+                self.mode = Mode::PromptNewFile;
+                self.input_buffer.clear();
+                self.status_message = Some("New file:".to_string());
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Char('v') => {
+                self.mode = Mode::PromptNewFolder;
+                self.input_buffer.clear();
+                self.status_message = Some("New folder:".to_string());
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Char('d') => {
+                if let Some(tree) = self.file_tree.as_ref() {
+                    if let Some(entry) = tree.selected_entry() {
+                        self.pending_delete = Some(entry.path.clone());
+                        self.mode = Mode::ConfirmDelete;
+                        self.status_message = Some(format!("Delete '{}'? (y/n)", entry.name));
+                        self.status_time = Some(Instant::now());
+                    }
+                }
             }
             KeyCode::Char('w') => {
                 if let (Some(doc), Some(editor)) = (self.document.as_ref(), self.editor.as_ref()) {
@@ -257,7 +310,6 @@ impl App {
                         self.scroll_offset = 0;
                         self.scroll_offset_x = 0;
                         self.status_message = Some(format!("Opened: {}", path));
-                        // TIDAK reload file tree — biar root tetap
                         self.load_editor();
                     }
                     Err(e) => {
@@ -273,6 +325,161 @@ impl App {
             }
             KeyCode::Char(c) => {
                 self.input_buffer.push(c);
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_prompt_new_file(&mut self, key: KeyEvent) {
+        match key.code {
+            KeyCode::Esc => {
+                self.mode = Mode::Normal;
+                self.input_buffer.clear();
+                self.status_message = None;
+                self.status_time = None;
+            }
+            KeyCode::Enter => {
+                let name = self.input_buffer.trim().to_string();
+                if name.is_empty() {
+                    self.status_message = Some("Empty name".to_string());
+                    self.status_time = Some(Instant::now());
+                    self.mode = Mode::Normal;
+                    self.input_buffer.clear();
+                    return;
+                }
+
+                let result = if let Some(tree) = self.file_tree.as_mut() {
+                    tree.create_file(&name)
+                } else {
+                    Err(std::io::Error::new(
+                        std::io::ErrorKind::NotFound,
+                        "No file tree",
+                    ))
+                };
+
+                match result {
+                    Ok(path) => {
+                        self.status_message = Some(format!("Created: {}", path.display()));
+                        if let Ok(doc) = Document::open(&path) {
+                            self.document = Some(doc);
+                            self.scroll_offset = 0;
+                            self.scroll_offset_x = 0;
+                            self.load_editor();
+                        }
+                        self.focus = Focus::Explorer;
+                    }
+                    Err(e) => {
+                        self.status_message = Some(format!("Error: {}", e));
+                    }
+                }
+
+                self.mode = Mode::Normal;
+                self.input_buffer.clear();
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Backspace => {
+                self.input_buffer.pop();
+            }
+            KeyCode::Char(c) => {
+                self.input_buffer.push(c);
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_prompt_new_folder(&mut self, key: KeyEvent) {
+        match key.code {
+            KeyCode::Esc => {
+                self.mode = Mode::Normal;
+                self.input_buffer.clear();
+                self.status_message = None;
+                self.status_time = None;
+            }
+            KeyCode::Enter => {
+                let name = self.input_buffer.trim().to_string();
+                if name.is_empty() {
+                    self.status_message = Some("Empty name".to_string());
+                    self.status_time = Some(Instant::now());
+                    self.mode = Mode::Normal;
+                    self.input_buffer.clear();
+                    return;
+                }
+
+                let result = if let Some(tree) = self.file_tree.as_mut() {
+                    tree.create_folder(&name)
+                } else {
+                    Err(std::io::Error::new(
+                        std::io::ErrorKind::NotFound,
+                        "No file tree",
+                    ))
+                };
+
+                match result {
+                    Ok(path) => {
+                        self.status_message = Some(format!("Created: {}", path.display()));
+                        self.focus = Focus::Explorer;
+                    }
+                    Err(e) => {
+                        self.status_message = Some(format!("Error: {}", e));
+                    }
+                }
+
+                self.mode = Mode::Normal;
+                self.input_buffer.clear();
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Backspace => {
+                self.input_buffer.pop();
+            }
+            KeyCode::Char(c) => {
+                self.input_buffer.push(c);
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_confirm_delete(&mut self, key: KeyEvent) {
+        match key.code {
+            KeyCode::Char('y') | KeyCode::Char('Y') => {
+                let Some(path) = self.pending_delete.take() else {
+                    self.mode = Mode::Normal;
+                    return;
+                };
+
+                let result = if let Some(tree) = self.file_tree.as_mut() {
+                    tree.delete_selected()
+                } else {
+                    Err(std::io::Error::new(
+                        std::io::ErrorKind::NotFound,
+                        "No file tree",
+                    ))
+                };
+
+                match result {
+                    Ok(deleted) => {
+                        self.status_message = Some(format!("Deleted: {}", deleted.display()));
+
+                        // Kalau file yang dihapus sedang dibuka, kosongkan editor
+                        if let Some(doc) = self.document.as_ref() {
+                            if doc.path == path {
+                                self.document = None;
+                                self.editor = None;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        self.status_message = Some(format!("Error: {}", e));
+                    }
+                }
+
+                self.mode = Mode::Normal;
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Char('n') | KeyCode::Char('N') | KeyCode::Esc => {
+                self.pending_delete = None;
+                self.mode = Mode::Normal;
+                self.status_message = Some("Cancelled".to_string());
+                self.status_time = Some(Instant::now());
             }
             _ => {}
         }

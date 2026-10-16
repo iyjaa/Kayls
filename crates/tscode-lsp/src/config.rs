@@ -11,9 +11,32 @@ pub struct ServerConfig {
 
 impl ServerConfig {
     pub fn rust_analyzer() -> Self {
+        // Prefer rustup-installed rust-analyzer (matches toolchain version)
+        let ra_path = std::env::var("RUSTUP_HOME")
+            .ok()
+            .map(|h| {
+                format!(
+                    "{}/toolchains/stable-aarch64-unknown-linux-musl/bin/rust-analyzer",
+                    h
+                )
+            })
+            .filter(|p| std::path::Path::new(p).exists())
+            .or_else(|| {
+                std::env::var("HOME")
+                    .ok()
+                    .map(|h| {
+                        format!(
+                        "{}/.rustup/toolchains/stable-aarch64-unknown-linux-musl/bin/rust-analyzer",
+                        h
+                    )
+                    })
+                    .filter(|p| std::path::Path::new(p).exists())
+            })
+            .unwrap_or_else(|| "rust-analyzer".to_string());
+
         Self {
             name: "rust-analyzer".to_string(),
-            command: "rust-analyzer".to_string(),
+            command: ra_path,
             args: vec![],
             extensions: vec!["rs".to_string()],
             root_markers: vec!["Cargo.toml".to_string()],

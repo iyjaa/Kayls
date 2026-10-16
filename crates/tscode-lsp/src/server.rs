@@ -18,7 +18,7 @@ impl ServerHandle {
             .current_dir(&root)
             .stdin(std::process::Stdio::piped())
             .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::null())
+            .stderr(std::process::Stdio::inherit())
             .kill_on_drop(true)
             .spawn()?;
 

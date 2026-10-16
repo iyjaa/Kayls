@@ -1,7 +1,7 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;
-use ratatui_code_editor::editor::Editor;
-use ratatui_code_editor::theme::{dracula, gruvbox, nord, vesper};
+use tscode_editor::editor::Editor;
+use tscode_editor::theme::{dracula, gruvbox, nord, vesper};
 use std::path::PathBuf;
 use std::time::Instant;
 use tscode_core::{Config, Document, FileTree};

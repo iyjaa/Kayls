@@ -214,12 +214,11 @@ Typing a closing character when one is already ahead will skip over it (no dupli
 
 ## Project Structure
 
-Tscode is a Rust workspace with 4 crates:
+Tscode is a Rust workspace with 3 crates:
 
 | Crate | Purpose |
 |-------|---------|
 | `tscode-core` | FileTree, Document, Config |
-| `tscode-terminal` | PTY, shell integration (planned) |
 | `tscode-tui` | App state, UI rendering |
 | `tscode` | Main binary, CLI parsing |
 
@@ -245,9 +244,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 **Areas that need help:**
 
-- VS Code keybinding mode
-- Multiple file tabs
+- Snippets (user custom)
+- Multi-tabs
 - Search in file
+- Go to line
+- VS Code keybinding mode
 - Bug fixes and documentation
 
 ## License

@@ -6,8 +6,8 @@
 |-------|-------|
 | Project Name | Tscode |
 | Tagline | Terminal Studio Code |
-| Document Version | 2.0 |
-| Date | 2026-10-14 |
+| Document Version | 2.1 |
+| Date | 2026-10-16 |
 | Status | Active |
 | License | MIT |
 
@@ -67,7 +67,7 @@
 
 ## 4. Features
 
-### 4.1 v1.0 Features
+### 4.1 v1.x Features
 
 | ID | Feature | Priority | Status |
 |----|---------|----------|--------|
@@ -80,17 +80,21 @@
 | F-07 | Mode system (Normal/Command/Prompt) | P0 | Done |
 | F-08 | Save with hint | P0 | Done |
 | F-09 | Expand/collapse folder | P0 | Done |
-| F-10 | Multiple file tabs | P1 | Planned |
-| F-11 | Search in file | P1 | Planned |
-| F-12 | Command palette | P2 | Planned |
-| F-13 | VS Code keybinding mode | P1 | Planned |
-| F-14 | Config file | P1 | Planned |
+| F-10 | Auto-pair brackets & quotes | P0 | Done |
+| F-11 | Auto-indent | P0 | Done |
+| F-12 | Themes (Vesper, Gruvbox, Dracula, Nord) | P0 | Done |
+| F-13 | File/folder management | P0 | Done |
+| F-14 | Explorer vertical & horizontal scroll | P0 | Done |
+| F-15 | Config file (`config.toml`) | P0 | Done |
+| F-16 | Theme persistence | P0 | Done |
+| F-17 | Snippets (user custom) | P1 | Planned |
+| F-18 | Multi-tabs | P1 | Planned |
+| F-19 | Search in file | P1 | Planned |
+| F-20 | Go to line | P2 | Planned |
+| F-21 | VS Code keybinding mode | P2 | Planned |
 
-### 4.2 Post-v1.0 Features
+### 4.2 Post-v1.x Features
 
-- Integrated terminal
-- LSP integration
-- AI agent
 - Multi-cursor
 - Split editor
 - Git integration
@@ -143,13 +147,17 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 | Open file | Esc then o |
 | Save file | Esc then w |
 | Toggle explorer | Esc then e |
+| New file | Esc then n |
+| New folder | Esc then v |
+| Delete | Esc then d |
+| Select theme | Esc then t |
 | Cancel command | Esc then Esc |
 | Quit | Alt+Q |
 
 ### 5.3 Mode Selection
 
-- Default mode: depends on terminal environment (planned)
-- User can override via `config.toml` (planned, Tsc-v1.1.0)
+- Default mode: Vim (currently)
+- User can override via `config.toml` (planned, Tsc-v1.1.8)
 
     [keybindings]
     mode = "vscode"   # or "vim"
@@ -163,11 +171,11 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 | Language | Rust 2021 |
 | TUI framework | ratatui 0.30 |
 | Input | crossterm 0.29 |
-| Editor engine | ratatui-code-editor 0.0.6 |
+| Editor engine | ratatui-code-editor 0.0.6 (fork) |
 | Syntax | tree-sitter (via ratatui-code-editor) |
 | CLI | clap 4 |
-| Error | anyhow 1, thiserror 2 |
 | Config | serde 1, toml 0.8 |
+| Error | anyhow 1, thiserror 2 |
 
 ---
 
@@ -177,8 +185,7 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 
 | Crate | Responsibility |
 |-------|----------------|
-| tscode-core | FileTree, Document |
-| tscode-terminal | PTY, shell integration (planned) |
+| tscode-core | FileTree, Document, Config |
 | tscode-tui | App state, UI rendering |
 | tscode | Main binary, CLI parsing |
 
@@ -207,6 +214,7 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 | `filetree` | `tscode-core` | Recursive file tree |
 | `document` | `tscode-core` | File path, content (legacy cursor) |
 | `cursor` | `tscode-core` | Cursor position (legacy) |
+| `config` | `tscode-core` | Config file load/save |
 | `app` | `tscode-tui` | App state, key handling |
 | `ui` | `tscode-tui` | TUI rendering |
 | `lib` | `tscode-tui` | Main loop |
@@ -220,7 +228,6 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 | Scope creep | Stick to versioning golden rule |
 | Editor library limits | Accept trade-off for speed |
 | Performance on Termux | Test at every milestone |
-| LSP complexity | LSP optional, post-v1.0 |
 | Loss of motivation | Open-source, community support |
 
 ---
@@ -244,8 +251,8 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 > — Kent Beck
 
 1. Work — v0.1.0 to v1.0.0: features work first
-2. Right — v2.0.0 to v3.0.0: solid foundation
-3. Fast — v4.0.0 onward: optimization
+2. Right — v1.2.0 onward: solid foundation
+3. Fast — v2.0.0 onward: optimization
 
 ---
 
@@ -283,10 +290,11 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
 
 **Areas that need help**:
 
-- VS Code keybinding mode (F-13)
-- Config file (F-14)
-- Multiple file tabs (F-10)
-- Search in file (F-11)
+- Snippets (user custom) — F-17
+- Multi-tabs — F-18
+- Search in file — F-19
+- Go to line — F-20
+- VS Code keybinding mode — F-21
 - Documentation improvements
 - Bug fixes
 
@@ -294,8 +302,8 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
 
 ## 13. Current Status
 
-- **Version**: Tsc-v1.0.0 (unstable)
-- **Phase**: Editor integration complete, open-source ready
-- **Crates**: 4 (tscode, tscode-core, tscode-terminal, tscode-tui)
-- **Next milestone**: Tsc-s1.0.0 (after dogfooding)
+- **Version**: Tsc-v1.1.3 (unstable)
+- **Phase**: Config file + horizontal scroll
+- **Crates**: 3 (tscode, tscode-core, tscode-tui)
+- **Next milestone**: Tsc-s1.1.3 (after dogfooding)
 - **Open for contributions**: Yes

@@ -9,6 +9,7 @@ repository.workspace = true
 [dependencies]
 tscode-editor = { path = "../tscode-editor", features = ["crossterm"] }
 tscode-core = { path = "../tscode-core" }
+tscode-plugin = { path = "../tscode-plugin" }
 ratatui = { workspace = true }
-crossterm = { workspace = true }
 anyhow = { workspace = true }
+crossterm = { workspace = true }

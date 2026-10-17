@@ -1,21 +1,16 @@
 [package]
-name = "tscode-lsp"
+name = "tscode-plugin"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "LSP client for Tscode"
+description = "Plugin system for Tscode"
 
 [dependencies]
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-tokio = { workspace = true }
-tower-lsp = { workspace = true }
-lsp-types = { workspace = true }
-
-[dev-dependencies]
-tokio = { workspace = true }
-anyhow = { workspace = true }
+toml = { workspace = true }
+wasmtime = { workspace = true }

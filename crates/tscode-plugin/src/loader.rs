@@ -1,4 +1,4 @@
-use crate::error::PluginError;
+use tscode_plugin_api::PluginError;
 use crate::Result;
 use std::path::Path;
 

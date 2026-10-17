@@ -22,6 +22,7 @@ pub trait Plugin: Send + Sync {
     }
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PluginApi {
     pub registered_themes: Vec<String>,
     pub registered_snippets: Vec<String>,
@@ -30,11 +31,7 @@ pub struct PluginApi {
 
 impl PluginApi {
     pub fn new() -> Self {
-        Self {
-            registered_themes: Vec::new(),
-            registered_snippets: Vec::new(),
-            registered_commands: Vec::new(),
-        }
+        Self::default()
     }
 
     pub fn register_theme(&mut self, name: &str) {
@@ -47,11 +44,5 @@ impl PluginApi {
 
     pub fn register_command(&mut self, name: &str) {
         self.registered_commands.push(name.to_string());
-    }
-}
-
-impl Default for PluginApi {
-    fn default() -> Self {
-        Self::new()
     }
 }

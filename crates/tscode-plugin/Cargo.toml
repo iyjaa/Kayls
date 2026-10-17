@@ -8,6 +8,7 @@ repository.workspace = true
 description = "Plugin system for Tscode"
 
 [dependencies]
+tscode-plugin-api = { path = "../tscode-plugin-api" }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }

@@ -1,5 +1,4 @@
-use crate::api::PluginInfo;
-use crate::Result;
+use tscode_plugin_api::{PluginError, PluginInfo, Result};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
@@ -45,7 +44,7 @@ impl PluginRegistry {
                 entry.enabled = enabled;
                 Ok(())
             }
-            None => Err(crate::error::PluginError::NotFound(name.to_string())),
+            None => Err(PluginError::NotFound(name.to_string())),
         }
     }
 }

@@ -1,6 +1,7 @@
 use anyhow::Result;
 use std::path::PathBuf;
-use tscode_plugin::{PluginApi, PluginEvent, PluginInfo, PluginLoader, PluginRegistry};
+use tscode_plugin::{PluginLoader, PluginRegistry};
+use tscode_plugin_api::{PluginApi, PluginEvent, PluginInfo};
 
 pub struct PluginManager {
     loader: PluginLoader,

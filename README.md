@@ -37,6 +37,17 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 
 ## Install
 
+### Quick Install (Linux, macOS, Android/Termux, Proot)
+
+The fastest way to install Kayls is using the automated install script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/iyjaa/Kayls/main/install.sh | sh
+```
+
+This script auto-detects your platform and installs the appropriate binary.
+
+
 ### Debian / Ubuntu / Linux Mint / Raspberry Pi OS (APT)
 
 The recommended way to install Kayls on Debian-based systems. The repository is automatically updated on every release.

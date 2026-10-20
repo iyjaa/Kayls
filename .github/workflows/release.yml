@@ -212,7 +212,7 @@ jobs:
         id: version
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          VERSION=${TAG_NAME#Tsc-}
+          VERSION=${TAG_NAME#Kayls-}
           VERSION=${VERSION#v}
           VERSION=${VERSION#s}
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
@@ -228,7 +228,7 @@ jobs:
           Maintainer: izra mulya putra G. <izramulyaputra@gmail.com>
           Section: utils
           Priority: optional
-          Description: Terminal Studio Code — A terminal-based IDE inspired by VS Code
+          Description: Kayls — A terminal-based IDE
           EOF
           dpkg-deb --build --root-owner-group /tmp/deb-amd64 kayls_${VERSION}_amd64.deb
       - name: Build arm64 .deb
@@ -243,7 +243,7 @@ jobs:
           Maintainer: izra mulya putra G. <izramulyaputra@gmail.com>
           Section: utils
           Priority: optional
-          Description: Terminal Studio Code — A terminal-based IDE inspired by VS Code
+          Description: Kayls — A terminal-based IDE
           EOF
           dpkg-deb --build --root-owner-group /tmp/deb-arm64 kayls_${VERSION}_arm64.deb
       - name: Clone APT Repo

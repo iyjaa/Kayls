@@ -42,12 +42,12 @@ jobs:
       - name: Package binary (tar.gz)
         run: |
           cd target/x86_64-unknown-linux-gnu/release
-          tar -czf ../../../tscode-x86_64-unknown-linux-gnu.tar.gz tscode
+          tar -czf ../../../kayls-x86_64-unknown-linux-gnu.tar.gz kayls
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-x86_64
-          path: tscode-x86_64-unknown-linux-gnu.tar.gz
+          path: kayls-x86_64-unknown-linux-gnu.tar.gz
 
   build-linux-arm64:
     name: Build Linux ARM64
@@ -73,12 +73,12 @@ jobs:
       - name: Package binary (tar.gz)
         run: |
           cd target/aarch64-unknown-linux-gnu/release
-          tar -czf ../../../tscode-aarch64-unknown-linux-gnu.tar.gz tscode
+          tar -czf ../../../kayls-aarch64-unknown-linux-gnu.tar.gz kayls
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-aarch64
-          path: tscode-aarch64-unknown-linux-gnu.tar.gz
+          path: kayls-aarch64-unknown-linux-gnu.tar.gz
 
   build-linux-armv7:
     name: Build Linux ARM32 (ARMv7)
@@ -104,12 +104,12 @@ jobs:
       - name: Package binary (tar.gz)
         run: |
           cd target/armv7-unknown-linux-gnueabihf/release
-          tar -czf ../../../tscode-armv7-unknown-linux-gnueabihf.tar.gz tscode
+          tar -czf ../../../kayls-armv7-unknown-linux-gnueabihf.tar.gz kayls
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-armv7
-          path: tscode-armv7-unknown-linux-gnueabihf.tar.gz
+          path: kayls-armv7-unknown-linux-gnueabihf.tar.gz
 
   build-macos-x86_64:
     name: Build macOS x86_64
@@ -142,12 +142,12 @@ jobs:
       - name: Package binary (tar.gz)
         run: |
           cd target/x86_64-apple-darwin/release
-          tar -czf ../../../tscode-x86_64-apple-darwin.tar.gz tscode
+          tar -czf ../../../kayls-x86_64-apple-darwin.tar.gz kayls
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-x86_64
-          path: tscode-x86_64-apple-darwin.tar.gz
+          path: kayls-x86_64-apple-darwin.tar.gz
 
   build-macos-aarch64:
     name: Build macOS ARM64 (Apple Silicon)
@@ -180,12 +180,12 @@ jobs:
       - name: Package binary (tar.gz)
         run: |
           cd target/aarch64-apple-darwin/release
-          tar -czf ../../../tscode-aarch64-apple-darwin.tar.gz tscode
+          tar -czf ../../../kayls-aarch64-apple-darwin.tar.gz kayls
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-aarch64
-          path: tscode-aarch64-apple-darwin.tar.gz
+          path: kayls-aarch64-apple-darwin.tar.gz
 
   build-deb-and-push:
     name: Build DEB & Push to APT Repo
@@ -206,8 +206,8 @@ jobs:
       - name: Extract binaries
         run: |
           mkdir -p binaries/amd64 binaries/arm64
-          tar -xzf tscode-x86_64-unknown-linux-gnu.tar.gz -C binaries/amd64
-          tar -xzf tscode-aarch64-unknown-linux-gnu.tar.gz -C binaries/arm64
+          tar -xzf kayls-x86_64-unknown-linux-gnu.tar.gz -C binaries/amd64
+          tar -xzf kayls-aarch64-unknown-linux-gnu.tar.gz -C binaries/arm64
       - name: Get version from tag
         id: version
         run: |
@@ -220,7 +220,7 @@ jobs:
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
           mkdir -p /tmp/deb-amd64/DEBIAN /tmp/deb-amd64/usr/bin
-          cp binaries/amd64/tscode /tmp/deb-amd64/usr/bin/
+          cp binaries/amd64/kayls /tmp/deb-amd64/usr/bin/
           cat > /tmp/deb-amd64/DEBIAN/control <<EOF
           Package: kayls
           Version: $VERSION
@@ -235,7 +235,7 @@ jobs:
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
           mkdir -p /tmp/deb-arm64/DEBIAN /tmp/deb-arm64/usr/bin
-          cp binaries/arm64/tscode /tmp/deb-arm64/usr/bin/
+          cp binaries/arm64/kayls /tmp/deb-arm64/usr/bin/
           cat > /tmp/deb-arm64/DEBIAN/control <<EOF
           Package: kayls
           Version: $VERSION
@@ -265,7 +265,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pool/
-          git commit -m "auto: add tscode v${VERSION} DEBs" || echo "No changes"
+          git commit -m "auto: add kayls v${VERSION} DEBs" || echo "No changes"
           git push
 
   release:

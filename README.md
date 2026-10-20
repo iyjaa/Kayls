@@ -46,6 +46,26 @@ echo "deb [signed-by=/usr/share/keyrings/tscode.gpg] https://iyjaa.github.io/Tsc
 sudo apt update
 sudo apt install tscode
 ```
+
+### Android — Proot-Distro (Ubuntu/Debian)
+
+If you are using proot-distro (Ubuntu/Debian) inside Termux or Acode, you are already root inside the proot environment. Do not use sudo, as it is not installed by default. Use the following commands instead:
+
+```bash
+# 1. Install prerequisites
+apt update && apt install -y curl gnupg
+
+# 2. Add the GPG key
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://iyjaa.github.io/Tscode-repo/apt-key.asc | gpg --dearmor -o /etc/apt/keyrings/tscode.gpg
+
+# 3. Add the repository
+echo "deb [signed-by=/etc/apt/keyrings/tscode.gpg] https://iyjaa.github.io/Tscode-repo stable main" > /etc/apt/sources.list.d/tscode.list
+
+# 4. Update and install
+apt update
+apt install -y tscode
+```
 ### Linux — Direct .deb (Manual Download)
 
 If you prefer to download the .deb file directly from GitHub Releases:

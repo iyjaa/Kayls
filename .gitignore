@@ -3,3 +3,50 @@
 .DS_Store
 .idea/
 .vscode/
+# === GPG / Secrets ===
+*.asc
+*.gpg
+*.key
+*.pem
+private-key*
+*private*.asc
+!apt-key.asc
+!*.pub.asc
+
+# === Build artifacts ===
+/target/
+/dist/
+*.deb
+*.dsc
+*.changes
+*.buildinfo
+*.tar.gz
+*.tar.xz
+
+# === APT repo metadata (generated, jangan commit dari Tscode) ===
+/apt/stable/Packages
+/apt/stable/Packages.gz
+/apt/stable/Release
+/apt/stable/InRelease
+/apt/stable/Release.gpg
+
+# === Rust ===
+target/
+Cargo.lock
+**/*.rs.bk
+
+# === Node (kalau ada) ===
+node_modules/
+npm-debug.log*
+
+# === Editor / OS ===
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# === Env / config lokal ===
+.env
+.env.*
+!.env.example

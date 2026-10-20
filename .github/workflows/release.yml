@@ -11,6 +11,93 @@ permissions:
   contents: write
 
 jobs:
+  build-deb-and-push:
+  name: Build DEB & Push to APT Repo
+  needs:
+    - build-linux-x86_64
+    - build-linux-arm64
+  runs-on: ubuntu-latest
+  if: startsWith(github.ref, 'refs/tags/')
+
+  steps:
+    - name: Download amd64 binary
+      uses: actions/download-artifact@v4
+      with:
+        name: linux-x86_64
+
+    - name: Download arm64 binary
+      uses: actions/download-artifact@v4
+      with:
+        name: linux-aarch64
+
+    - name: Extract binaries
+      run: |
+        mkdir -p binaries/amd64 binaries/arm64
+        tar -xzf tscode-x86_64-unknown-linux-gnu.tar.gz -C binaries/amd64
+        tar -xzf tscode-aarch64-unknown-linux-gnu.tar.gz -C binaries/arm64
+
+    - name: Get version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/Tsc-}" | sed 's/^v//' >> $GITHUB_OUTPUT
+      # Catatan: karena tag kamu formatnya Tsc-v1.1.4 atau Tsc-s1.1.4,
+      # kita ambil apa pun setelah "Tsc-" lalu hapus "v" atau "s" di awal.
+
+    - name: Build amd64 .deb
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        mkdir -p /tmp/deb-amd64/DEBIAN /tmp/deb-amd64/usr/bin
+        cp binaries/amd64/tscode /tmp/deb-amd64/usr/bin/
+        cat > /tmp/deb-amd64/DEBIAN/control <<EOF
+        Package: tscode
+        Version: $VERSION
+        Architecture: amd64
+        Maintainer: izra mulya putra G. <izramulyaputra@gmail.com>
+        Section: utils
+        Priority: optional
+        Description: Terminal Studio Code — A terminal-based IDE inspired by VS Code
+        EOF
+        dpkg-deb --build --root-owner-group /tmp/deb-amd64 tscode_${VERSION}_amd64.deb
+
+    - name: Build arm64 .deb
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        mkdir -p /tmp/deb-arm64/DEBIAN /tmp/deb-arm64/usr/bin
+        cp binaries/arm64/tscode /tmp/deb-arm64/usr/bin/
+        cat > /tmp/deb-arm64/DEBIAN/control <<EOF
+        Package: tscode
+        Version: $VERSION
+        Architecture: arm64
+        Maintainer: izra mulya putra G. <izramulyaputra@gmail.com>
+        Section: utils
+        Priority: optional
+        Description: Terminal Studio Code — A terminal-based IDE inspired by VS Code
+        EOF
+        dpkg-deb --build --root-owner-group /tmp/deb-arm64 tscode_${VERSION}_arm64.deb
+
+    - name: Clone APT Repo
+      uses: actions/checkout@v4
+      with:
+        repository: iyjaa/Tscode-repo
+        token: ${{ secrets.REPO_TOKEN }}
+        path: apt-repo
+
+    - name: Copy .deb to APT Repo pool
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        mkdir -p apt-repo/pool/main/t/tscode
+        cp tscode_${VERSION}_amd64.deb apt-repo/pool/main/t/tscode/
+        cp tscode_${VERSION}_arm64.deb apt-repo/pool/main/t/tscode/
+
+    - name: Commit & Push to APT Repo
+      run: |
+        VERSION=${{ steps.version.outputs.VERSION }}
+        cd apt-repo
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add pool/
+        git commit -m "auto: add tscode v${VERSION} DEBs" || echo "No changes"
+        git push
+        
   build-linux-x86_64:
     name: Build Linux x86_64
     runs-on: ubuntu-latest

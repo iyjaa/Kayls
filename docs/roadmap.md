@@ -11,7 +11,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Current Status
 
-**Tsc-v1.1.3** — Config file, theme persistence, explorer horizontal scroll.
+**Tsc-v1.1.4** — Fix horizontal scroll in editor (smoother). Config file, theme persistence, soft theme-aware colors, auto-pair, auto-indent, themes, file/folder management.
 
 ---
 
@@ -52,12 +52,14 @@ See [versioning.md](versioning.md) for the versioning scheme.
 | Tsc-v1.1.2 | Done | Explorer scroll, UI polish |
 | Tsc-s1.1.2 | Done | Explorer scroll verified |
 | Tsc-v1.1.3 | Done | Config file, theme persist, horizontal scroll |
-| Tsc-s1.1.3 | Planned | Config file verified |
-| Tsc-v1.1.4 | Planned | Snippets (user custom) |
-| Tsc-v1.1.5 | Planned | Multi-tabs |
-| Tsc-v1.1.6 | Planned | Search in file |
-| Tsc-v1.1.7 | Planned | Go to line |
-| Tsc-v1.1.8 | Planned | VS Code keybinding mode |
+| Tsc-s1.1.3 | Done | Config file verified |
+| Tsc-v1.1.4 | Done | Fix horizontal scroll in editor |
+| Tsc-s1.1.4 | Planned | Horizontal scroll fix verified |
+| Tsc-v1.1.5 | Planned | Snippets (user custom) |
+| Tsc-v1.1.6 | Planned | Multi-tabs |
+| Tsc-v1.1.7 | Planned | Search in file |
+| Tsc-v1.1.8 | Planned | Go to line |
+| Tsc-v1.1.9 | Planned | VS Code keybinding mode |
 
 ---
 
@@ -350,7 +352,7 @@ See [versioning.md](versioning.md) for full details.
 
 ### Tsc-v1.1.3 — Config File & Horizontal Scroll
 
-**Status**: Done (stable: Tsc-s1.1.3 planned)
+**Status**: Done (stable: Tsc-s1.1.3)
 
 **Contents**:
 - Config file at `~/.config/tscode/config.toml`
@@ -366,13 +368,26 @@ See [versioning.md](versioning.md) for full details.
 
 **Crates touched**: `tscode-core`, `tscode-tui`
 
+---
+
+### Tsc-v1.1.4 — Fix Horizontal Scroll in Editor
+
+**Status**: Done (stable: Tsc-s1.1.4 planned)
+
+**Contents**:
+- Smoother horizontal scroll in editor
+- Fix rough scroll behavior
+
+**Crates touched**: `tscode-editor` (fork), `tscode-tui`
+
 **Known issues**:
+- Snippets not yet implemented
 - Multi-tabs not yet implemented
 - Search in file not yet implemented
 
 ---
 
-### Tsc-v1.1.4 — Snippets (User Custom)
+### Tsc-v1.1.5 — Snippets (User Custom)
 
 **Status**: Planned
 
@@ -387,11 +402,11 @@ See [versioning.md](versioning.md) for full details.
 - Auto-reload on file change
 - User snippets override built-in
 
-**Crates touched**: `tscode-core`, `tscode-tui`, fork `ratatui-code-editor`
+**Crates touched**: `tscode-core`, `tscode-tui`, fork `tscode-editor`
 
 ---
 
-### Tsc-v1.1.5 — Multi-Tabs
+### Tsc-v1.1.6 — Multi-Tabs
 
 **Status**: Planned
 
@@ -404,7 +419,7 @@ See [versioning.md](versioning.md) for full details.
 
 ---
 
-### Tsc-v1.1.6 — Search in File
+### Tsc-v1.1.7 — Search in File
 
 **Status**: Planned
 
@@ -413,11 +428,11 @@ See [versioning.md](versioning.md) for full details.
 - Highlight matches
 - Next/prev navigation
 
-**Crates touched**: fork `ratatui-code-editor`, `tscode-tui`
+**Crates touched**: fork `tscode-editor`, `tscode-tui`
 
 ---
 
-### Tsc-v1.1.7 — Go to Line
+### Tsc-v1.1.8 — Go to Line
 
 **Status**: Planned
 
@@ -429,7 +444,7 @@ See [versioning.md](versioning.md) for full details.
 
 ---
 
-### Tsc-v1.1.8 — VS Code Keybinding Mode
+### Tsc-v1.1.9 — VS Code Keybinding Mode
 
 **Status**: Planned
 
@@ -447,6 +462,6 @@ See [versioning.md](versioning.md) for full details.
 > Make it work, make it right, make it fast.
 > — Kent Beck
 
-1. **Work** — Tsc-v0.1.0 to Tsc-s1.1.3: features work first
+1. **Work** — Tsc-v0.1.0 to Tsc-s1.1.4: features work first
 2. **Right** — Tsc-v1.2.0 onward: solid foundation
 3. **Fast** — Tsc-v2.0.0 onward: optimization and advanced features

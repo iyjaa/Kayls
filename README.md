@@ -14,7 +14,7 @@ Tscode is a terminal-based IDE with a VS Code-inspired layout. It runs in any te
 
 ## Status
 
-**Tsc-v1.1.3** — Config file, theme persistence, explorer horizontal scroll, soft theme-aware colors, auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
+**Tsc-v1.1.4** — Smoother horizontal scroll in editor. Config file, theme persistence, explorer horizontal scroll, soft theme-aware colors, auto-pair, auto-indent, themes, file/folder management. Unstable, in development.
 
 See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
 

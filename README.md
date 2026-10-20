@@ -39,78 +39,79 @@ See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning
 
 ### Quick install (Linux, macOS, Android)
 
-    curl -fsSL https://raw.githubusercontent.com/iyjaa/Tscode/main/install.sh | sh
-
+```bash
+curl -fsSL https://raw.githubusercontent.com/iyjaa/Tscode/main/install.sh | sh
+```
 This auto-detects your platform (Linux x86_64, Linux ARM64, Android ARM64, macOS) and installs to the appropriate directory.
 
 ### macOS — Homebrew (Intel & Apple Silicon)
-
-    brew tap iyjaa/tscode https://github.com/iyjaa/Tscode
-    brew install tscode
-
+```bash
+brew tap iyjaa/tscode https://github.com/iyjaa/Tscode
+brew install tscode
+```
 Or download directly from [GitHub Releases](https://github.com/iyjaa/Tscode/releases):
-
-    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-apple-darwin.tar.gz -o tscode.tar.gz
-    tar xzf tscode.tar.gz
-    sudo mv tscode /usr/local/bin/
-
+```bash
+curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-apple-darwin.tar.gz -o tscode.tar.gz
+tar xzf tscode.tar.gz
+sudo mv tscode /usr/local/bin/
+```
 ### Linux — APT (Debian / Ubuntu / Mint / Raspberry Pi OS)
-
-    curl -fsSL https://iyjaa.github.io/Tscode/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/tscode.gpg
-    echo "deb [signed-by=/usr/share/keyrings/tscode.gpg] https://iyjaa.github.io/Tscode/apt stable main" | sudo tee /etc/apt/sources.list.d/tscode.list
-    sudo apt update
-    sudo apt install tscode
-
+```bash
+curl -fsSL https://iyjaa.github.io/Tscode/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/tscode.gpg
+echo "deb [signed-by=/usr/share/keyrings/tscode.gpg] https://iyjaa.github.io/Tscode/apt stable main" | sudo tee /etc/apt/sources.list.d/tscode.list
+sudo apt update
+sudo apt install tscode
+```
 ### Linux — Direct .deb
 
 Download the `.deb` from [GitHub Releases](https://github.com/iyjaa/Tscode/releases):
-
-    sudo dpkg -i tscode_*_amd64.deb      # x86_64
-    sudo dpkg -i tscode_*_arm64.deb      # ARM64 (Raspberry Pi 4/5, 64-bit)
-    sudo dpkg -i tscode_*_armhf.deb      # ARM32 (Raspberry Pi 32-bit)
-
+```bash
+sudo dpkg -i tscode_*_amd64.deb      # x86_64
+sudo dpkg -i tscode_*_arm64.deb      # ARM64 (Raspberry Pi 4/5, 64-bit)
+sudo dpkg -i tscode_*_armhf.deb      # ARM32 (Raspberry Pi 32-bit)
+```
 ### Linux — Binary (manual)
-
+```bash
     # x86_64
-    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-x86_64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
+curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-x86_64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
 
     # ARM64
-    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
+curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-unknown-linux-gnu.tar.gz -o tscode.tar.gz
 
     # ARM32 (Raspberry Pi 32-bit)
-    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-armv7-unknown-linux-gnueabihf.tar.gz -o tscode.tar.gz
+curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-armv7-unknown-linux-gnueabihf.tar.gz -o tscode.tar.gz
 
-    tar xzf tscode.tar.gz
-    sudo mv tscode /usr/local/bin/
-    tscode --version
-
+tar xzf tscode.tar.gz
+sudo mv tscode /usr/local/bin/
+tscode --version
+```
 ### Android (Termux / Acode, ARM64)
 
 Quick install (recommended):
-
-    curl -fsSL https://raw.githubusercontent.com/iyjaa/Tscode/main/install.sh | sh
-
+```bash
+curl -fsSL https://raw.githubusercontent.com/iyjaa/Tscode/main/install.sh | sh
+```
 Manual install:
-
-    curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-linux-android.tar.gz -o tscode.tar.gz
-    tar xzf tscode.tar.gz
-    chmod +x tscode
-    mv tscode $PREFIX/bin/
-    tscode --version
-
+```bash
+curl -L https://github.com/iyjaa/Tscode/releases/latest/download/tscode-aarch64-linux-android.tar.gz -o tscode.tar.gz
+tar xzf tscode.tar.gz
+chmod +x tscode
+mv tscode $PREFIX/bin/
+tscode --version
+```
 ### Build from source
 
 Requirements: Rust 1.70+ and Git.
-
-    git clone https://github.com/iyjaa/Tscode
-    cd Tscode
-    cargo build --release
-    sudo cp target/release/tscode /usr/local/bin/
-
+```bash
+git clone https://github.com/iyjaa/Tscode
+cd Tscode
+cargo build --release
+sudo cp target/release/tscode /usr/local/bin/
+```
 **Note**: Tscode uses a custom fork of `ratatui-code-editor` (with `arboard` removed for Android compatibility, plus auto-pair and auto-indent). The fork is pulled automatically via `git-fetch-with-cli`.
 
 ## Usage
-
+```bash
     # Open a file
     tscode Cargo.toml
 
@@ -122,15 +123,15 @@ Requirements: Rust 1.70+ and Git.
 
     # Show help
     tscode --help
-
+```
 ## Configuration
 
 Tscode reads settings from `~/.config/tscode/config.toml`. The file is created automatically when you change the theme.
-
+```toml
     [editor]
     theme = "vesper"
     show_explorer = true
-
+```
 ## Themes
 
 Available themes:

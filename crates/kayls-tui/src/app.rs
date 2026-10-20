@@ -2,9 +2,9 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;
 use std::path::PathBuf;
 use std::time::Instant;
-use tscode_core::{Config, Document, FileTree};
-use tscode_editor::editor::Editor;
-use tscode_editor::theme::{dracula, gruvbox, nord, vesper};
+use kayls_core::{Config, Document, FileTree};
+use kayls_editor::editor::Editor;
+use kayls_editor::theme::{dracula, gruvbox, nord, vesper};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Mode {

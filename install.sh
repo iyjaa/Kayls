@@ -2,8 +2,8 @@
 
 set -eo pipefail
 
-REPO="iyjaa/Tscode"
-BINARY_NAME="tscode"
+REPO="iyjaa/Kayls"
+BINARY_NAME="kayls"
 INSTALL_DIR=""
 
 RED='\033[0;31m'
@@ -116,12 +116,12 @@ get_latest_version() {
     echo "$version"
 }
 
-install_tscode() {
+install_kayls() {
     local target="$1"
     local install_dir="$2"
     local version="$3"
 
-    local archive="tscode-${target}.tar.gz"
+    local archive="kayls-${target}.tar.gz"
     local url="https://github.com/${REPO}/releases/download/${version}/${archive}"
     local tmp_dir=""
 
@@ -173,7 +173,7 @@ install_tscode() {
 
 main() {
     echo "======================================"
-    echo "  Tscode Installer"
+    echo "  Kayls Installer"
     echo "  Terminal Studio Code"
     echo "======================================"
     echo ""
@@ -192,10 +192,10 @@ main() {
     info "Version: $version"
 
     echo ""
-    install_tscode "$target" "$install_dir" "$version"
+    install_kayls "$target" "$install_dir" "$version"
 
     echo ""
-    success "Done! Run 'tscode --help' to get started."
+    success "Done! Run 'kayls --help' to get started."
 }
 
 main "$@"

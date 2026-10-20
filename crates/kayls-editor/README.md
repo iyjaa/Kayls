@@ -1,10 +1,10 @@
-# tscode-editor
+# kayls-editor
 
 Editor widget for Tscode — a terminal-based IDE written in Rust.
 
 ## Overview
 
-tscode-editor provides a complete code editor widget for `ratatui`. It handles:
+kayls-editor provides a complete code editor widget for `ratatui`. It handles:
 
 - Text buffer with rope data structure
 - Tree-sitter syntax highlighting
@@ -262,8 +262,8 @@ Skip closing: if closing char already ahead, cursor just moves forward.
 Change theme via `Editor::new(lang, text, theme)`:
 
 ```rust
-use tscode_editor::editor::Editor;
-use tscode_editor::theme::{vesper, gruvbox, dracula, nord};
+use kayls_editor::editor::Editor;
+use kayls_editor::theme::{vesper, gruvbox, dracula, nord};
 
 let editor = Editor::new("rust", "fn main() {}", vesper())?;
 let editor = Editor::new("rust", "fn main() {}", dracula())?;

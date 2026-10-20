@@ -1,5 +1,5 @@
 [package]
-name = "tscode-editor"
+name = "kayls-editor"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

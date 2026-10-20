@@ -92,7 +92,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         " Editor "
     };
 
-    // Render editor dari tscode-editor
+    // Render editor dari kayls-editor
     if let Some(editor) = app.editor.as_ref() {
         let inner = Block::default()
             .borders(Borders::ALL)

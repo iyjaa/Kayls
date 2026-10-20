@@ -1,5 +1,5 @@
 [package]
-name = "tscode"
+name = "kayls"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -9,12 +9,12 @@ description = "Terminal Studio Code — A terminal-based IDE inspired by VS Code
 build = "build.rs"
 
 [[bin]]
-name = "tscode"
+name = "kayls"
 path = "src/main.rs"
 
 [dependencies]
-tscode-core = { path = "../tscode-core" }
-tscode-tui = { path = "../tscode-tui" }
+kayls-core = { path = "../kayls-core" }
+kayls-tui = { path = "../kayls-tui" }
 anyhow = { workspace = true }
 clap = { workspace = true }
 
@@ -34,7 +34,7 @@ Features:
 section = "utils"
 priority = "optional"
 assets = [
-    ["target/release/tscode", "usr/bin/", "755"],
-    ["../../README.md", "usr/share/doc/tscode/README.md", "644"],
-    ["../../LICENSE", "usr/share/doc/tscode/LICENSE", "644"],
+    ["target/release/kayls", "usr/bin/", "755"],
+    ["../../README.md", "usr/share/doc/kayls/README.md", "644"],
+    ["../../LICENSE", "usr/share/doc/kayls/LICENSE", "644"],
 ]

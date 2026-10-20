@@ -1,5 +1,5 @@
 [package]
-name = "tscode-tui"
+name = "kayls-tui"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
@@ -7,8 +7,8 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-tscode-editor = { path = "../tscode-editor", features = ["crossterm"] }
-tscode-core = { path = "../tscode-core" }
+kayls-editor = { path = "../kayls-editor", features = ["crossterm"] }
+kayls-core = { path = "../kayls-core" }
 ratatui = { workspace = true }
 crossterm = { workspace = true }
 anyhow = { workspace = true }

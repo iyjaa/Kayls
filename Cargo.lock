@@ -880,6 +880,70 @@ dependencies = [
 ]
 
 [[package]]
+name = "kayls"
+version = "1.1.4"
+dependencies = [
+ "anyhow",
+ "clap",
+ "kayls-core",
+ "kayls-tui",
+]
+
+[[package]]
+name = "kayls-core"
+version = "1.1.4"
+dependencies = [
+ "ropey",
+ "serde",
+ "thiserror 2.0.21",
+ "toml",
+]
+
+[[package]]
+name = "kayls-editor"
+version = "1.1.4"
+dependencies = [
+ "anyhow",
+ "criterion",
+ "crossterm",
+ "ratatui-core",
+ "ropey",
+ "rust-embed",
+ "similar",
+ "streaming-iterator",
+ "tree-sitter",
+ "tree-sitter-bash",
+ "tree-sitter-c",
+ "tree-sitter-c-sharp",
+ "tree-sitter-cpp",
+ "tree-sitter-css",
+ "tree-sitter-go",
+ "tree-sitter-html",
+ "tree-sitter-java",
+ "tree-sitter-javascript",
+ "tree-sitter-json",
+ "tree-sitter-md",
+ "tree-sitter-python",
+ "tree-sitter-rust",
+ "tree-sitter-toml-ng",
+ "tree-sitter-typescript",
+ "tree-sitter-yaml",
+ "unicode-segmentation",
+ "unicode-width",
+]
+
+[[package]]
+name = "kayls-tui"
+version = "1.1.4"
+dependencies = [
+ "anyhow",
+ "crossterm",
+ "kayls-core",
+ "kayls-editor",
+ "ratatui",
+]
+
+[[package]]
 name = "lab"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2216,70 +2280,6 @@ checksum = "53c223db85f05e34794f065454843b0668ebc15d240ada63e2b5939f43ce7c97"
 dependencies = [
  "cc",
  "tree-sitter-language",
-]
-
-[[package]]
-name = "tscode"
-version = "1.1.4"
-dependencies = [
- "anyhow",
- "clap",
- "tscode-core",
- "tscode-tui",
-]
-
-[[package]]
-name = "tscode-core"
-version = "1.1.4"
-dependencies = [
- "ropey",
- "serde",
- "thiserror 2.0.21",
- "toml",
-]
-
-[[package]]
-name = "tscode-editor"
-version = "1.1.4"
-dependencies = [
- "anyhow",
- "criterion",
- "crossterm",
- "ratatui-core",
- "ropey",
- "rust-embed",
- "similar",
- "streaming-iterator",
- "tree-sitter",
- "tree-sitter-bash",
- "tree-sitter-c",
- "tree-sitter-c-sharp",
- "tree-sitter-cpp",
- "tree-sitter-css",
- "tree-sitter-go",
- "tree-sitter-html",
- "tree-sitter-java",
- "tree-sitter-javascript",
- "tree-sitter-json",
- "tree-sitter-md",
- "tree-sitter-python",
- "tree-sitter-rust",
- "tree-sitter-toml-ng",
- "tree-sitter-typescript",
- "tree-sitter-yaml",
- "unicode-segmentation",
- "unicode-width",
-]
-
-[[package]]
-name = "tscode-tui"
-version = "1.1.4"
-dependencies = [
- "anyhow",
- "crossterm",
- "ratatui",
- "tscode-core",
- "tscode-editor",
 ]
 
 [[package]]

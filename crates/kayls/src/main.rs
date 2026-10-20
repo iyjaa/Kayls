@@ -1,9 +1,9 @@
 use anyhow::Result;
 use clap::Parser;
-use tscode_core::Document;
+use kayls_core::Document;
 
 #[derive(Parser)]
-#[command(name = "tscode", version, about = "Terminal Studio Code")]
+#[command(name = "kayls", version, about = "Terminal Studio Code")]
 struct Cli {
     /// File to open
     file: Option<String>,
@@ -23,5 +23,5 @@ fn main() -> Result<()> {
         None => None,
     };
 
-    tscode_tui::run(env!("TSC_VERSION"), document)
+    kayls_tui::run(env!("TSC_VERSION"), document)
 }

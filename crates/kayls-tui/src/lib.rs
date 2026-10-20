@@ -8,7 +8,7 @@ use crossterm::event::{self, Event};
 use ratatui::layout::Rect;
 use ratatui::DefaultTerminal;
 use std::time::Duration;
-use tscode_core::Document;
+use kayls_core::Document;
 
 pub fn run(version: &str, document: Option<Document>) -> Result<()> {
     let mut terminal = ratatui::init();

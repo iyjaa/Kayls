@@ -42,12 +42,12 @@ impl Default for EditorConfig {
 }
 
 impl Config {
-    /// Get config file path: ~/.config/tscode/config.toml
+    /// Get config file path: ~/.config/kayls/config.toml
     pub fn config_path() -> Option<PathBuf> {
         let home = std::env::var("HOME").ok()?;
         let path = PathBuf::from(home)
             .join(".config")
-            .join("tscode")
+            .join("kayls")
             .join("config.toml");
         Some(path)
     }

@@ -3,8 +3,8 @@ name: Release
 on:
   push:
     tags:
-      - 'Tsc-v*'
-      - 'Tsc-s*'
+      - 'Kayls-v*'
+      - 'Kayls-s*'
   workflow_dispatch:
 
 permissions:
@@ -38,7 +38,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-x86_64-${{ hashFiles('**/Cargo.lock') }}
       - name: Build release binary
-        run: cargo build --release --target x86_64-unknown-linux-gnu -p tscode
+        run: cargo build --release --target x86_64-unknown-linux-gnu -p kayls
       - name: Package binary (tar.gz)
         run: |
           cd target/x86_64-unknown-linux-gnu/release
@@ -69,7 +69,7 @@ jobs:
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build release binary
-        run: cross build --release --target aarch64-unknown-linux-gnu -p tscode
+        run: cross build --release --target aarch64-unknown-linux-gnu -p kayls
       - name: Package binary (tar.gz)
         run: |
           cd target/aarch64-unknown-linux-gnu/release
@@ -100,7 +100,7 @@ jobs:
       - name: Install cross
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: Build release binary
-        run: cross build --release --target armv7-unknown-linux-gnueabihf -p tscode
+        run: cross build --release --target armv7-unknown-linux-gnueabihf -p kayls
       - name: Package binary (tar.gz)
         run: |
           cd target/armv7-unknown-linux-gnueabihf/release
@@ -138,7 +138,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-macos-x86_64-${{ hashFiles('**/Cargo.lock') }}
       - name: Build release binary
-        run: cargo build --release --target x86_64-apple-darwin -p tscode
+        run: cargo build --release --target x86_64-apple-darwin -p kayls
       - name: Package binary (tar.gz)
         run: |
           cd target/x86_64-apple-darwin/release
@@ -176,7 +176,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-macos-aarch64-${{ hashFiles('**/Cargo.lock') }}
       - name: Build release binary
-        run: cargo build --release --target aarch64-apple-darwin -p tscode
+        run: cargo build --release --target aarch64-apple-darwin -p kayls
       - name: Package binary (tar.gz)
         run: |
           cd target/aarch64-apple-darwin/release
@@ -222,7 +222,7 @@ jobs:
           mkdir -p /tmp/deb-amd64/DEBIAN /tmp/deb-amd64/usr/bin
           cp binaries/amd64/tscode /tmp/deb-amd64/usr/bin/
           cat > /tmp/deb-amd64/DEBIAN/control <<EOF
-          Package: tscode
+          Package: kayls
           Version: $VERSION
           Architecture: amd64
           Maintainer: izra mulya putra G. <izramulyaputra@gmail.com>
@@ -230,14 +230,14 @@ jobs:
           Priority: optional
           Description: Terminal Studio Code — A terminal-based IDE inspired by VS Code
           EOF
-          dpkg-deb --build --root-owner-group /tmp/deb-amd64 tscode_${VERSION}_amd64.deb
+          dpkg-deb --build --root-owner-group /tmp/deb-amd64 kayls_${VERSION}_amd64.deb
       - name: Build arm64 .deb
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
           mkdir -p /tmp/deb-arm64/DEBIAN /tmp/deb-arm64/usr/bin
           cp binaries/arm64/tscode /tmp/deb-arm64/usr/bin/
           cat > /tmp/deb-arm64/DEBIAN/control <<EOF
-          Package: tscode
+          Package: kayls
           Version: $VERSION
           Architecture: arm64
           Maintainer: izra mulya putra G. <izramulyaputra@gmail.com>
@@ -245,7 +245,7 @@ jobs:
           Priority: optional
           Description: Terminal Studio Code — A terminal-based IDE inspired by VS Code
           EOF
-          dpkg-deb --build --root-owner-group /tmp/deb-arm64 tscode_${VERSION}_arm64.deb
+          dpkg-deb --build --root-owner-group /tmp/deb-arm64 kayls_${VERSION}_arm64.deb
       - name: Clone APT Repo
         uses: actions/checkout@v4
         with:
@@ -255,9 +255,9 @@ jobs:
       - name: Copy .deb to APT Repo pool
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
-          mkdir -p apt-repo/pool/main/t/tscode
-          cp tscode_${VERSION}_amd64.deb apt-repo/pool/main/t/tscode/
-          cp tscode_${VERSION}_arm64.deb apt-repo/pool/main/t/tscode/
+          mkdir -p apt-repo/pool/main/t/kayls
+          cp kayls_${VERSION}_amd64.deb apt-repo/pool/main/t/kayls/
+          cp kayls_${VERSION}_arm64.deb apt-repo/pool/main/t/kayls/
       - name: Commit & Push to APT Repo
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}

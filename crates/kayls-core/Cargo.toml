@@ -1,5 +1,5 @@
 [package]
-name = "tscode-core"
+name = "kayls-core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true

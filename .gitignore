@@ -23,7 +23,7 @@ private-key*
 *.tar.gz
 *.tar.xz
 
-# === APT repo metadata (generated, jangan commit dari Tscode) ===
+# === APT repo metadata (generated, jangan commit dari Kayls) ===
 /apt/stable/Packages
 /apt/stable/Packages.gz
 /apt/stable/Release

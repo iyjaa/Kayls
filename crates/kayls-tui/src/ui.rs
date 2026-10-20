@@ -116,7 +116,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             Some(doc) => doc.content_as_string(),
             None => {
                 "
-                Welcome to Tscode!\n\nOpen a Editor: Esc then e\nOpen a file: Esc then o\nPress Alt+Q to quit.
+                Welcome to Kayls!\n\nOpen a Editor: Esc then e\nOpen a file: Esc then o\nPress Alt+Q to quit.
                 ".to_string()
             }
         };

@@ -11,7 +11,7 @@
 
 set -euo pipefail
 
-REPO="${GITHUB_REPOSITORY:-iyjaa/Tscode}"
+REPO="${GITHUB_REPOSITORY:-iyjaa/Kayls}"
 OUTPUT="ISSUES.md"
 DATE=$(date -u +"%Y-%m-%d")
 
@@ -115,7 +115,7 @@ generate_fixed_table() {
 
 {
     cat <<EOF
-# Tscode Issues
+# Kayls Issues
 
 > Summary of issues from [GitHub Issues](https://github.com/$REPO/issues).
 > For the full list, see GitHub.
@@ -182,7 +182,7 @@ Only issues that meet all criteria appear in the "Fixed Issues" list.
 
 ## Contributors
 
-Thanks to everyone who has contributed to Tscode:
+Thanks to everyone who has contributed to Kayls:
 
 | Contributor | Issues |
 |-------------|--------|
@@ -198,7 +198,7 @@ Thanks to everyone who has contributed to Tscode:
    - **Type** — Bug, Feature, or Docs
    - **Description** — what happened, what you expected
    - **Steps to reproduce** (for bugs)
-   - **Environment** — OS, terminal, Tscode version
+   - **Environment** — OS, terminal, Kayls version
 3. Wait for maintainer triage
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow.

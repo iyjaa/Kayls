@@ -1,6 +1,6 @@
-# Contributing to Tscode
+# Contributing to Kayls
 
-Thanks for your interest in contributing to Tscode! This document explains how to contribute.
+Thanks for your interest in contributing to Kayls! This document explains how to contribute.
 
 ---
 
@@ -29,13 +29,13 @@ Please read these documents first:
 - [docs/versioning.md](docs/versioning.md) — Versioning scheme
 - [docs/roadmap.md](docs/roadmap.md) — Feature progress
 
-**Important**: Tscode uses a custom versioning scheme. In `Tsc-v` versions, **no new features** are allowed — only bug fixes. New features start after `Tsc-s`. See [docs/versioning.md](docs/versioning.md) for details.
+**Important**: Kayls uses a custom versioning scheme. In `Tsc-v` versions, **no new features** are allowed — only bug fixes. New features start after `Tsc-s`. See [docs/versioning.md](docs/versioning.md) for details.
 
 ---
 
 ## How to Contribute
 
-Tscode follows a **discuss-first** workflow. Before writing code:
+Kayls follows a **discuss-first** workflow. Before writing code:
 
 ### 1. Discuss (Open an Issue)
 
@@ -157,10 +157,10 @@ Follow Conventional Commits:
 
 **Scopes** (optional):
 
-- `core` — tscode-core
-- `tui` — tscode-tui
-- `terminal` — tscode-terminal
-- `cli` — tscode binary
+- `core` — kayls-core
+- `tui` — kayls-tui
+- `terminal` — kayls-terminal
+- `cli` — kayls binary
 
 **Examples:**
 
@@ -207,14 +207,14 @@ Current priorities (see [docs/roadmap.md](docs/roadmap.md) for details):
 
 ### Bug Fixes
 
-- Check [GitHub Issues](https://github.com/iyjaa/Tscode/issues)
+- Check [GitHub Issues](https://github.com/iyjaa/Kayls/issues)
 - Look for `good first issue` label
 
 ---
 
 ## Contact
 
-- **GitHub Issues** — [github.com/iyjaa/Tscode/issues](https://github.com/iyjaa/Tscode/issues)
+- **GitHub Issues** — [github.com/iyjaa/Kayls/issues](https://github.com/iyjaa/Kayls/issues)
 - **Email** — izramulyaputra@gmail.com
 
 For security issues, please email directly instead of opening a public issue.
@@ -223,10 +223,10 @@ For security issues, please email directly instead of opening a public issue.
 
 ## License
 
-By contributing to Tscode, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+By contributing to Kayls, you agree that your contributions will be licensed under the [MIT License](LICENSE).
 
 ---
 
 ## Thank You
 
-Every contribution matters — code, docs, bug reports, or feedback. Thank you for helping make Tscode better.
+Every contribution matters — code, docs, bug reports, or feedback. Thank you for helping make Kayls better.

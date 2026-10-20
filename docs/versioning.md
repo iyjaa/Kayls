@@ -1,6 +1,6 @@
-# Tscode Versioning
+# Kayls Versioning
 
-Tscode uses a custom versioning scheme to enforce discipline and quality.
+Kayls uses a custom versioning scheme to enforce discipline and quality.
 
 ---
 
@@ -144,16 +144,16 @@ build.rs reads VERSION and exposes it as an env var:
     fn main() {
         let version = std::fs::read_to_string("VERSION")
             .unwrap_or_else(|_| "Tsc-v0.0.0".to_string());
-        println!("cargo:rustc-env=TSC_VERSION={}", version.trim());
+        println!("cargo:rustc-env=KAYL_VERSION={}", version.trim());
     }
 
 main.rs:
 
     fn main() {
-        println!("Tscode {}", env!("TSC_VERSION"));
+        println!("Kayls {}", env!("KAYL_VERSION"));
     }
 
-Output: Tscode Tsc-v1.0.0
+Output: Kayls Tsc-v1.0.0
 
 ---
 

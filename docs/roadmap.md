@@ -1,4 +1,4 @@
-# Tscode Roadmap
+# Kayls Roadmap
 
 From Tsc-v0.1.0 onward.
 
@@ -65,7 +65,7 @@ See [versioning.md](versioning.md) for the versioning scheme.
 
 ## Versioning Rules
 
-Tscode uses `Tsc-vX.Y.Z` (unstable) and `Tsc-sX.Y.Z` (stable).
+Kayls uses `Tsc-vX.Y.Z` (unstable) and `Tsc-sX.Y.Z` (stable).
 
 | Position | Meaning |
 |----------|---------|
@@ -103,7 +103,7 @@ See [versioning.md](versioning.md) for full details.
 - TUI layout with ratatui (tab bar, file tree, editor, status bar)
 - `q` to quit
 
-**Crates touched**: `tscode-tui`, `tscode`
+**Crates touched**: `kayls-tui`, `kayls`
 
 ---
 
@@ -112,12 +112,12 @@ See [versioning.md](versioning.md) for full details.
 **Status**: Done (stable: Tsc-s0.2.1)
 
 **Contents**:
-- `Document` struct in `tscode-core`
+- `Document` struct in `kayls-core`
 - Argument parsing with `clap`
 - Open file & display contents
 - Dynamic tab bar (file name)
 
-**Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
+**Crates touched**: `kayls-core`, `kayls-tui`, `kayls`
 
 ---
 
@@ -132,7 +132,7 @@ See [versioning.md](versioning.md) for full details.
 - Cursor position in status bar
 - Vertical & horizontal scroll
 
-**Crates touched**: `tscode-core`, `tscode-tui`
+**Crates touched**: `kayls-core`, `kayls-tui`
 
 ---
 
@@ -146,7 +146,7 @@ See [versioning.md](versioning.md) for full details.
 - Fixed width (3 columns, 2 digits)
 - Aligned with file content (border TOP + RIGHT)
 
-**Crates touched**: `tscode-tui`
+**Crates touched**: `kayls-tui`
 
 ---
 
@@ -164,7 +164,7 @@ See [versioning.md](versioning.md) for full details.
 - 2-second hint after save
 - Quit via `Alt+Q`
 
-**Crates touched**: `tscode-core`, `tscode-tui`
+**Crates touched**: `kayls-core`, `kayls-tui`
 
 ---
 
@@ -173,13 +173,13 @@ See [versioning.md](versioning.md) for full details.
 **Status**: Done (stable: Tsc-s0.3.0)
 
 **Contents**:
-- `FileTree` struct in `tscode-core`
+- `FileTree` struct in `kayls-core`
 - `Entry` struct (path, name, is_dir)
 - `FileTree::from_path()` reads folder contents
 - Sort: folders first, then files, alphabetical
 - `fs::canonicalize()` to resolve absolute path
 
-**Crates touched**: `tscode-core`
+**Crates touched**: `kayls-core`
 
 ---
 
@@ -195,7 +195,7 @@ See [versioning.md](versioning.md) for full details.
 - `>` marker for selected item
 - Explorer width 20 columns
 
-**Crates touched**: `tscode-tui`
+**Crates touched**: `kayls-tui`
 
 ---
 
@@ -211,7 +211,7 @@ See [versioning.md](versioning.md) for full details.
 - Yellow border + `[*]` title on focused panel
 - Status bar shows `[EDITOR]` / `[EXPLORER]`
 
-**Crates touched**: `tscode-core`, `tscode-tui`
+**Crates touched**: `kayls-core`, `kayls-tui`
 
 ---
 
@@ -227,7 +227,7 @@ See [versioning.md](versioning.md) for full details.
 - Switch focus to Editor
 - If folder -> show message
 
-**Crates touched**: `tscode-core`, `tscode-tui`
+**Crates touched**: `kayls-core`, `kayls-tui`
 
 ---
 
@@ -246,10 +246,10 @@ See [versioning.md](versioning.md) for full details.
 - Recursive file tree (tree structure)
 - Expand/collapse folder with Enter
 - Stable root (current directory)
-- Remove `tscode-syntax` (redundant)
+- Remove `kayls-syntax` (redundant)
 - Save via `editor.get_content()`
 
-**Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
+**Crates touched**: `kayls-core`, `kayls-tui`, `kayls`
 
 ---
 
@@ -307,13 +307,13 @@ See [versioning.md](versioning.md) for full details.
 - Dracula
 - Nord
 
-**File/folder management** (in `tscode-core` + `tscode-tui`):
+**File/folder management** (in `kayls-core` + `kayls-tui`):
 - `Esc` -> `n` — create new file
 - `Esc` -> `v` — create new folder
 - `Esc` -> `d` — delete file/folder (with `y`/`n` confirmation)
 - Tree auto-refresh after create/delete
 
-**Crates touched**: fork `ratatui-code-editor`, `tscode-core`, `tscode-tui`
+**Crates touched**: fork `ratatui-code-editor`, `kayls-core`, `kayls-tui`
 
 ---
 
@@ -331,7 +331,7 @@ See [versioning.md](versioning.md) for full details.
 - `install.sh` for quick install (Linux, macOS, Android)
 - Fix `install.sh` for Termux (`set -u` removal, default values)
 
-**Crates touched**: `tscode-tui`, root (install.sh)
+**Crates touched**: `kayls-tui`, root (install.sh)
 
 ---
 
@@ -346,7 +346,7 @@ See [versioning.md](versioning.md) for full details.
 - Linux ARM64 build via `cross`
 - Improved `install.sh` — prioritize `/public/bin` for Acode
 
-**Crates touched**: `tscode-tui`
+**Crates touched**: `kayls-tui`
 
 ---
 
@@ -355,8 +355,8 @@ See [versioning.md](versioning.md) for full details.
 **Status**: Done (stable: Tsc-s1.1.3)
 
 **Contents**:
-- Config file at `~/.config/tscode/config.toml`
-- `Config` struct in `tscode-core` (serde + toml)
+- Config file at `~/.config/kayls/config.toml`
+- `Config` struct in `kayls-core` (serde + toml)
 - Theme persistence — save on change, load on startup
 - `show_explorer` setting
 - Explorer horizontal scroll (`explorer_scroll_x`)
@@ -366,7 +366,7 @@ See [versioning.md](versioning.md) for full details.
 - `max_explorer_scroll_x()` to limit scroll
 - Theme selection popup with arrow + number navigation
 
-**Crates touched**: `tscode-core`, `tscode-tui`
+**Crates touched**: `kayls-core`, `kayls-tui`
 
 ---
 
@@ -378,7 +378,7 @@ See [versioning.md](versioning.md) for full details.
 - Smoother horizontal scroll in editor
 - Fix rough scroll behavior
 
-**Crates touched**: `tscode-editor` (fork), `tscode-tui`
+**Crates touched**: `kayls-editor` (fork), `kayls-tui`
 
 **Known issues**:
 - Snippets not yet implemented
@@ -394,7 +394,7 @@ See [versioning.md](versioning.md) for full details.
 **Contents**:
 - `Snippet` struct + `SnippetRegistry`
 - Built-in snippets (~50) for Rust, Python, JavaScript, TOML, Markdown
-- User snippets at `~/.config/tscode/snippets/*.json`
+- User snippets at `~/.config/kayls/snippets/*.json`
 - VS Code compatible JSON format
 - Trigger with `Tab` — expand snippet
 - Tab stop navigation (`$1`, `$2`, `$0`)
@@ -402,7 +402,7 @@ See [versioning.md](versioning.md) for full details.
 - Auto-reload on file change
 - User snippets override built-in
 
-**Crates touched**: `tscode-core`, `tscode-tui`, fork `tscode-editor`
+**Crates touched**: `kayls-core`, `kayls-tui`, fork `kayls-editor`
 
 ---
 
@@ -415,7 +415,7 @@ See [versioning.md](versioning.md) for full details.
 - Switch with `Ctrl+Tab`
 - Close with `Ctrl+W`
 
-**Crates touched**: `tscode-tui`
+**Crates touched**: `kayls-tui`
 
 ---
 
@@ -428,7 +428,7 @@ See [versioning.md](versioning.md) for full details.
 - Highlight matches
 - Next/prev navigation
 
-**Crates touched**: fork `tscode-editor`, `tscode-tui`
+**Crates touched**: fork `kayls-editor`, `kayls-tui`
 
 ---
 
@@ -440,7 +440,7 @@ See [versioning.md](versioning.md) for full details.
 - `Ctrl+G` to go to line
 - Input line number
 
-**Crates touched**: `tscode-tui`
+**Crates touched**: `kayls-tui`
 
 ---
 
@@ -453,7 +453,7 @@ See [versioning.md](versioning.md) for full details.
 - Config option to switch between Vim and VS Code mode
 - Custom keybinding overrides
 
-**Crates touched**: `tscode-core`, `tscode-tui`, `tscode`
+**Crates touched**: `kayls-core`, `kayls-tui`, `kayls`
 
 ---
 

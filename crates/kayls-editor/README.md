@@ -1,6 +1,6 @@
 # kayls-editor
 
-Editor widget for Tscode — a terminal-based IDE written in Rust.
+Editor widget for Kayls — a terminal-based IDE written in Rust.
 
 ## Overview
 
@@ -34,7 +34,7 @@ src/
 ├── utils.rs            # Helpers (rgb parsing, grapheme width)
 ├── click.rs            # Mouse click tracking
 ├── diff.rs             # Diff computation (for diff view)
-├── auto_pair.rs        # Auto-pair logic (Tscode addition)
+├── auto_pair.rs        # Auto-pair logic (Kayls addition)
 └── editor_crossterm.rs # Crossterm input handler
 ```
 
@@ -224,7 +224,7 @@ Built-in themes:
 | `dracula()` | Dark, soft pink |
 | `nord()` | Cool, blue |
 
-## Auto-pair & Auto-indent (Tscode additions)
+## Auto-pair & Auto-indent (Kayls additions)
 
 ### Auto-pair (auto_pair.rs)
 

@@ -1,10 +1,10 @@
-# PRD: Tscode
+# PRD: Kayls
 
 **Terminal Studio Code — A terminal-based IDE inspired by VS Code**
 
 | Field | Value |
 |-------|-------|
-| Project Name | Tscode |
+| Project Name | Kayls |
 | Tagline | Terminal Studio Code |
 | Document Version | 2.1 |
 | Date | 2026-10-16 |
@@ -23,7 +23,7 @@
 
 ### 1.2 Vision
 
-> Tscode is a terminal-based IDE inspired by VS Code's layout and workflow. It supports two keybinding modes: VS Code (Ctrl+key) and Vim (Esc then key). The default mode adapts to the terminal environment.
+> Kayls is a terminal-based IDE inspired by VS Code's layout and workflow. It supports two keybinding modes: VS Code (Ctrl+key) and Vim (Esc then key). The default mode adapts to the terminal environment.
 
 ---
 
@@ -104,7 +104,7 @@
 
 ## 5. Keybindings
 
-Tscode supports two keybinding modes. **Currently only Vim mode is implemented.** VS Code mode is planned.
+Kayls supports two keybinding modes. **Currently only Vim mode is implemented.** VS Code mode is planned.
 
 ### 5.1 VS Code Mode (Planned, not yet implemented)
 
@@ -185,9 +185,9 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 
 | Crate | Responsibility |
 |-------|----------------|
-| tscode-core | FileTree, Document, Config |
-| tscode-tui | App state, UI rendering |
-| tscode | Main binary, CLI parsing |
+| kayls-core | FileTree, Document, Config |
+| kayls-tui | App state, UI rendering |
+| kayls | Main binary, CLI parsing |
 
 ### 7.2 Data Flow
 
@@ -211,13 +211,13 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 
 | Module | Location | Responsibility |
 |--------|----------|----------------|
-| `filetree` | `tscode-core` | Recursive file tree |
-| `document` | `tscode-core` | File path, content (legacy cursor) |
-| `cursor` | `tscode-core` | Cursor position (legacy) |
-| `config` | `tscode-core` | Config file load/save |
-| `app` | `tscode-tui` | App state, key handling |
-| `ui` | `tscode-tui` | TUI rendering |
-| `lib` | `tscode-tui` | Main loop |
+| `filetree` | `kayls-core` | Recursive file tree |
+| `document` | `kayls-core` | File path, content (legacy cursor) |
+| `cursor` | `kayls-core` | Cursor position (legacy) |
+| `config` | `kayls-core` | Config file load/save |
+| `app` | `kayls-tui` | App state, key handling |
+| `ui` | `kayls-tui` | TUI rendering |
+| `lib` | `kayls-tui` | Main loop |
 
 ---
 
@@ -258,7 +258,7 @@ Tscode supports two keybinding modes. **Currently only Vim mode is implemented.*
 
 ## 11. Versioning
 
-Tscode uses a custom versioning scheme:
+Kayls uses a custom versioning scheme:
 
     Tsc-vX.Y.Z   ->  Unstable
     Tsc-sX.Y.Z   ->  Stable
@@ -278,7 +278,7 @@ See [roadmap.md](roadmap.md) for actual feature progress.
 
 ## 12. Contributing
 
-Tscode is open for contributions. The workflow:
+Kayls is open for contributions. The workflow:
 
 1. **Discuss first** — open an issue to discuss the feature/bug before coding
 2. **Get approval** — wait for maintainer approval
@@ -304,6 +304,6 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
 
 - **Version**: Tsc-v1.1.3 (unstable)
 - **Phase**: Config file + horizontal scroll
-- **Crates**: 3 (tscode, tscode-core, tscode-tui)
+- **Crates**: 3 (kayls, kayls-core, kayls-tui)
 - **Next milestone**: Tsc-s1.1.3 (after dogfooding)
 - **Open for contributions**: Yes

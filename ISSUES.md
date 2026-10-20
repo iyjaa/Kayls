@@ -1,6 +1,6 @@
-# Tscode Issues
+# Kayls Issues
 
-> Summary of issues from [GitHub Issues](https://github.com/iyjaa/Tscode/issues).
+> Summary of issues from [GitHub Issues](https://github.com/iyjaa/Kayls/issues).
 > For the full list, see GitHub.
 
 **Last updated**: 2026-10-15
@@ -53,7 +53,7 @@ Only issues that meet all criteria appear in the "Fixed Issues" list.
 
 ## Contributors
 
-Thanks to everyone who has contributed to Tscode:
+Thanks to everyone who has contributed to Kayls:
 
 | Contributor | Issues |
 |-------------|--------|
@@ -63,13 +63,13 @@ Thanks to everyone who has contributed to Tscode:
 
 ## How to Report an Issue
 
-1. Check if the issue already exists in [GitHub Issues](https://github.com/iyjaa/Tscode/issues)
+1. Check if the issue already exists in [GitHub Issues](https://github.com/iyjaa/Kayls/issues)
 2. If not, open a new issue with:
    - **Title** — clear and specific
    - **Type** — Bug, Feature, or Docs
    - **Description** — what happened, what you expected
    - **Steps to reproduce** (for bugs)
-   - **Environment** — OS, terminal, Tscode version
+   - **Environment** — OS, terminal, Kayls version
 3. Wait for maintainer triage
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow.
@@ -93,6 +93,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow.
 ## Notes
 
 - This file is a **summary**, not the source of truth
-- The source of truth is [GitHub Issues](https://github.com/iyjaa/Tscode/issues)
+- The source of truth is [GitHub Issues](https://github.com/iyjaa/Kayls/issues)
 - This file is updated automatically via GitHub Actions
 - Workflow: `.github/workflows/update-issues.yml`

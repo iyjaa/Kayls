@@ -59,25 +59,25 @@ jobs:
           cargo ndk \
             --target aarch64-linux-android \
             --platform 24 \
-            build --release -p tscode
+            build --release -p kayls
 
       - name: Strip binary
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip \
-            target/aarch64-linux-android/release/tscode
+            target/aarch64-linux-android/release/kayls
 
       - name: Package binary (tar.gz)
         run: |
           cd target/aarch64-linux-android/release
-          tar -czf ../../../tscode-aarch64-linux-android.tar.gz tscode
+          tar -czf ../../../kayls-aarch64-linux-android.tar.gz kayls
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android-aarch64
-          path: tscode-aarch64-linux-android.tar.gz
+          path: kayls-aarch64-linux-android.tar.gz
 
   release:
     name: Upload to Release

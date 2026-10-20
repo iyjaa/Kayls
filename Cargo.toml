@@ -7,7 +7,7 @@ version = "1.0.0"
 edition = "2024"
 authors = ["izra mulya putra G. <izramulyaputra@gmail.com>"]
 license = "MIT"
-repository = "https://github.com/iyjaa/Tscode"
+repository = "https://github.com/iyjaa/Kayls"
 
 [workspace.dependencies]
 anyhow = "1"

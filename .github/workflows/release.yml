@@ -249,7 +249,7 @@ jobs:
       - name: Clone APT Repo
         uses: actions/checkout@v4
         with:
-          repository: iyjaa/Tscode-repo
+          repository: iyjaa/Kayls-repo
           token: ${{ secrets.REPO_TOKEN }}
           path: apt-repo
       - name: Copy .deb to APT Repo pool

@@ -4,7 +4,7 @@
 
 # Tscode
 
-> Terminal Studio Code — A terminal-based IDE inspired by VS Code.
+> Terminal Studio Code — A terminal-based IDE
 
 [![Release](https://img.shields.io/github/v/release/iyjaa/Tscode?include_prereleases&label=release)](https://github.com/iyjaa/Tscode/releases)
 [![License](https://img.shields.io/github/license/iyjaa/Tscode)](LICENSE)

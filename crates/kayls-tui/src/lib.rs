@@ -53,6 +53,9 @@ fn run_loop(
 
         if event::poll(Duration::from_millis(100))? {
             match event::read()? {
+                Event::Paste(text) => {
+                    app.paste(&text);
+                }
                 Event::Key(key) => {
                     app.handle_key(key);
                 }

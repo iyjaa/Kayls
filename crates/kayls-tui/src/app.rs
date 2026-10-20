@@ -54,6 +54,7 @@ pub struct App {
     pub explorer_height: u16,
     pub explorer_width: u16,
     pub editor_height: u16,
+    pub clipboard: String,
     pub editor_width: u16,
     pub mode: Mode,
     pub input_buffer: String,
@@ -95,6 +96,7 @@ impl App {
             explorer_height: 0,
             explorer_width: 0,
             editor_height: 0,
+            clipboard: String::new(),
             editor_width: 0,
             mode: Mode::Normal,
             input_buffer: String::new(),
@@ -173,6 +175,13 @@ impl App {
         }
     }
 
+    pub fn paste(&mut self, text: &str) {
+        if let Some(editor) = &mut self.editor {
+            use kayls_editor::actions::InsertText;
+            editor.apply(InsertText { text: text.to_string() });
+        }
+    }
+
     fn handle_normal(&mut self, key: KeyEvent) {
         if let KeyCode::Esc = key.code {
             self.mode = Mode::Command;
@@ -190,6 +199,26 @@ impl App {
     fn handle_editor_keys(&mut self, key: KeyEvent) {
         if let Some(editor) = self.editor.as_mut() {
             let area = self.editor_area;
+            
+            // Ctrl+Y untuk Copy ke App.clipboard (antar-file)
+            if key.code == KeyCode::Char('y') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                use kayls_editor::actions::Copy;
+                editor.apply(Copy {});
+                // Simpan ke clipboard App
+                if let Ok(text) = editor.get_clipboard() {
+                    self.clipboard = text;
+                }
+                return;
+            }
+            // Ctrl+P untuk Paste dari App.clipboard (antar-file)
+            if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                if !self.clipboard.is_empty() {
+                    use kayls_editor::actions::InsertText;
+                    editor.apply(InsertText { text: self.clipboard.clone() });
+                }
+                return;
+            }
+            
             if let Err(e) = editor.input(key, &area) {
                 self.status_message = Some(format!("Editor error: {}", e));
                 self.status_time = Some(Instant::now());

@@ -3,8 +3,8 @@ name: Release Android
 on:
   push:
     tags:
-      - 'Tsc-v*'
-      - 'Tsc-s*'
+      - 'Kayls-v*'
+      - 'Kayls-s*'
   workflow_dispatch:
 
 permissions:

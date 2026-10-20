@@ -1,14 +1,10 @@
 [package]
 name = "tscode-editor"
-version = "0.0.6"
-edition = "2024"
-authors = ["iyjaa"]
-description = "Editor widget for Tscode (fork of ratatui-code-editor)"
-license = "MIT"
-readme = "README.md"
-repository = "https://github.com/iyjaa/Tscode"
-keywords = ["ratatui", "terminal", "editor", "tree-sitter", "tscode"]
-categories = ["command-line-interface", "text-editors"]
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 
 [dependencies]
 anyhow = "^1.0"

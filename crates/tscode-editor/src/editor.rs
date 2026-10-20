@@ -158,13 +158,18 @@ impl Editor {
         let visible_width = width.saturating_sub(line_number_width);
         let visible_height = height;
 
-        let step_size = 10;
-        if col < self.offset_x {
-            self.offset_x = col.saturating_sub(step_size);
-        } else if col >= self.offset_x + visible_width {
-            self.offset_x = col.saturating_sub(visible_width.saturating_sub(step_size));
+        // ── Horizontal: smooth scroll dengan margin ──
+        let margin_x = 1.min(visible_width / 4);
+        let left_limit = self.offset_x + margin_x;
+        let right_limit = self.offset_x + visible_width.saturating_sub(margin_x + 1);
+
+        if col < left_limit {
+            self.offset_x = col.saturating_sub(margin_x);
+        } else if col > right_limit {
+            self.offset_x = col + margin_x + 1 - visible_width;
         }
 
+        // ── Vertical ──
         let visual_line = self.visual_line_idx(line);
         if visual_line == usize::MAX {
             return;

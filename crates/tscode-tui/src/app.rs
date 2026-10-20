@@ -1,4 +1,3 @@
-use crate::plugin_manager::PluginManager;
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;
 use std::path::PathBuf;
@@ -61,7 +60,6 @@ pub struct App {
     pub pending_delete: Option<PathBuf>,
     pub status_message: Option<String>,
     pub status_time: Option<Instant>,
-    pub plugin_manager: Option<PluginManager>,
 }
 
 impl App {
@@ -82,7 +80,7 @@ impl App {
             editor_area: Rect::default(),
             file_tree: None,
             show_explorer: config.editor.show_explorer,
-            focus: Focus::Editor,
+            focus: Focus::Explorer,
             theme,
             theme_cursor: match theme {
                 Theme::Vesper => 0,
@@ -103,7 +101,6 @@ impl App {
             pending_delete: None,
             status_message: None,
             status_time: None,
-            plugin_manager: None,
         };
 
         app.load_file_tree();

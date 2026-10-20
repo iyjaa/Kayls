@@ -43,7 +43,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     let editor_area: Rect = if app.show_explorer {
         let cols = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([Constraint::Length(25), Constraint::Min(0)])
+            .constraints([Constraint::Length(20), Constraint::Min(0)])
             .split(rows[1]);
 
         // Render file tree
@@ -115,7 +115,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         let content = match &app.document {
             Some(doc) => doc.content_as_string(),
             None => {
-                "Welcome to Tscode!\n\nOpen a file: Esc then o\nPress Alt+Q to quit.".to_string()
+                "
+                Welcome to Tscode!\n\nOpen a Editor: Esc then e\nOpen a file: Esc then o\nPress Alt+Q to quit.
+                ".to_string()
             }
         };
 

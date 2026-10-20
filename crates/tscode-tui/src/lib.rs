@@ -1,15 +1,12 @@
 mod app;
-mod plugin_manager;
 mod ui;
 
 pub use app::App;
-pub use plugin_manager::PluginManager;
 
 use anyhow::Result;
 use crossterm::event::{self, Event};
 use ratatui::layout::Rect;
 use ratatui::DefaultTerminal;
-use std::path::PathBuf;
 use std::time::Duration;
 use tscode_core::Document;
 
@@ -26,25 +23,6 @@ fn run_loop(
     document: Option<Document>,
 ) -> Result<()> {
     let mut app = App::new(document);
-
-    // Load plugins
-    let plugin_dir = std::env::var("HOME")
-        .map(|h| PathBuf::from(h).join(".config/tscode/plugins"))
-        .unwrap_or_else(|_| PathBuf::from(".tscode/plugins"));
-
-    let mut plugin_manager = PluginManager::new();
-    match plugin_manager.load_plugins_from_dir(&plugin_dir) {
-        Ok(count) => {
-            if count > 0 {
-                eprintln!("[TSCode] Loaded {} plugin(s)", count);
-            }
-        }
-        Err(e) => {
-            eprintln!("[TSCode] Plugin load error: {}", e);
-        }
-    }
-
-    app.plugin_manager = Some(plugin_manager);
 
     while !app.should_quit {
         terminal.autoresize()?;

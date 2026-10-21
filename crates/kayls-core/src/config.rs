@@ -14,10 +14,16 @@ pub struct EditorConfig {
     pub theme: String,
     #[serde(default = "default_show_explorer")]
     pub show_explorer: bool,
+    #[serde(default = "default_keybinding")]
+    pub keybinding: String,
 }
 
 fn default_theme() -> String {
     "vesper".to_string()
+}
+
+fn default_keybinding() -> String {
+    "vim".to_string()
 }
 
 fn default_show_explorer() -> bool {
@@ -37,6 +43,7 @@ impl Default for EditorConfig {
         Self {
             theme: default_theme(),
             show_explorer: default_show_explorer(),
+            keybinding: default_keybinding(),
         }
     }
 }

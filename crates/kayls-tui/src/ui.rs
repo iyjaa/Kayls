@@ -1,3 +1,4 @@
+use ratatui::widgets::{List, ListItem};
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -145,6 +146,30 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     };
 
     let (status, status_style) = match app.mode {
+        Mode::Easy => {
+            if let Some(msg) = &app.status_message {
+                (
+                    format!(" {} ", msg),
+                    Style::default()
+                        .bg(Color::Rgb(60, 90, 60))
+                        .fg(Color::Rgb(200, 230, 200)),
+                )
+            } else {
+                (
+                    format!(
+                        " EASY [{}]   {}   {}   v:{} h:{} ",
+                        focus_label,
+                        version,
+                        cursor_info,
+                        app.scroll_offset,
+                        app.scroll_offset_x
+                    ),
+                    Style::default()
+                        .bg(Color::Rgb(60, 60, 120))
+                        .fg(Color::Rgb(200, 200, 255)),
+                )
+            }
+        }
         Mode::Normal => {
             if let Some(msg) = &app.status_message {
                 (
@@ -212,6 +237,12 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                     .fg(Color::Rgb(240, 200, 200)),
             )
         }
+        Mode::SelectKeybinding => (
+            " Select Keybinding Mode — ↑↓ navigate, Enter confirm, Esc cancel ".to_string(),
+            Style::default()
+                .bg(Color::Rgb(50, 70, 90))
+                .fg(Color::Rgb(200, 220, 240)),
+        ),
         Mode::SelectTheme => (
             " Select Theme — ↑↓ navigate, 1-4 select, Enter confirm, Esc cancel ".to_string(),
             Style::default()
@@ -225,6 +256,9 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
     // Render theme popup
     if let Mode::SelectTheme = app.mode {
         render_theme_popup(frame, app);
+    }
+    if let Mode::SelectKeybinding = app.mode {
+        render_keybinding_popup(frame, app);
     }
 }
 
@@ -441,4 +475,89 @@ fn tab_fg_color(theme: Theme) -> Color {
         Theme::Dracula => Color::Rgb(216, 216, 224),
         Theme::Nord => Color::Rgb(200, 208, 220),
     }
+}
+fn render_keybinding_popup(frame: &mut Frame, app: &App) {
+    let area = centered_rect(50, 30, frame.area());
+    let modes = ["Vim (Modal)", "Easy (VS Code)"];
+    
+    // Ambil warna dari tema aktif
+    let accent = theme_accent_color(app.theme);
+    let bg = theme_bg_color(app.theme);
+    let fg = theme_fg_color(app.theme);
+    
+    let items: Vec<ListItem> = modes
+        .iter()
+        .enumerate()
+        .map(|(i, mode)| {
+            let style = if i == app.keybinding_cursor {
+                Style::default()
+                    .bg(accent)
+                    .fg(Color::Rgb(20, 20, 30))
+                    .add_modifier(Modifier::BOLD)
+            } else {
+                Style::default().fg(fg)
+            };
+            ListItem::new(format!("  {}  ", mode)).style(style)
+        })
+        .collect();
+
+    let list = List::new(items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(accent))
+                .title(" Select Keybinding Mode ")
+                .title_style(Style::default().fg(accent).add_modifier(Modifier::BOLD))
+                .style(Style::default().bg(bg))
+        );
+    
+    frame.render_widget(Clear, area);
+    frame.render_widget(list, area);
+}
+
+fn theme_accent_color(theme: Theme) -> Color {
+    match theme {
+        Theme::Vesper => Color::Rgb(212, 184, 150),
+        Theme::Gruvbox => Color::Rgb(215, 153, 33),
+        Theme::Dracula => Color::Rgb(212, 160, 200),
+        Theme::Nord => Color::Rgb(168, 192, 216),
+    }
+}
+
+fn theme_bg_color(theme: Theme) -> Color {
+    match theme {
+        Theme::Vesper => Color::Rgb(42, 42, 62),
+        Theme::Gruvbox => Color::Rgb(50, 48, 47),
+        Theme::Dracula => Color::Rgb(52, 55, 70),
+        Theme::Nord => Color::Rgb(59, 66, 82),
+    }
+}
+
+fn theme_fg_color(theme: Theme) -> Color {
+    match theme {
+        Theme::Vesper => Color::Rgb(197, 209, 192),
+        Theme::Gruvbox => Color::Rgb(213, 196, 161),
+        Theme::Dracula => Color::Rgb(216, 216, 224),
+        Theme::Nord => Color::Rgb(200, 208, 220),
+    }
+}
+
+fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage((100 - percent_y) / 2),
+            Constraint::Percentage(percent_y),
+            Constraint::Percentage((100 - percent_y) / 2),
+        ])
+        .split(r);
+
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage((100 - percent_x) / 2),
+            Constraint::Percentage(percent_x),
+            Constraint::Percentage((100 - percent_x) / 2),
+        ])
+        .split(popup_layout[1])[1]
 }

@@ -9,12 +9,14 @@ use kayls_editor::theme::{dracula, gruvbox, nord, vesper};
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Mode {
     Normal,
+    Easy,
     Command,
     Prompt,
     PromptNewFile,
     PromptNewFolder,
     ConfirmDelete,
     SelectTheme,
+    SelectKeybinding,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -47,6 +49,7 @@ pub struct App {
     pub focus: Focus,
     pub theme: Theme,
     pub theme_cursor: usize,
+    pub keybinding_cursor: usize,
     pub scroll_offset: usize,
     pub scroll_offset_x: usize,
     pub explorer_scroll: usize,
@@ -83,6 +86,7 @@ impl App {
             show_explorer: config.editor.show_explorer,
             focus: Focus::Explorer,
             theme,
+            keybinding_cursor: 0,
             theme_cursor: match theme {
                 Theme::Vesper => 0,
                 Theme::Gruvbox => 1,
@@ -98,7 +102,11 @@ impl App {
             editor_height: 0,
             clipboard: String::new(),
             editor_width: 0,
-            mode: Mode::Normal,
+            mode: if config.editor.keybinding.to_lowercase() == "easy" {
+                Mode::Easy
+            } else {
+                Mode::Normal
+            },
             input_buffer: String::new(),
             pending_delete: None,
             status_message: None,
@@ -166,12 +174,14 @@ impl App {
 
         match self.mode {
             Mode::Normal => self.handle_normal(key),
+            Mode::Easy => self.handle_easy(key),
             Mode::Command => self.handle_command(key),
             Mode::Prompt => self.handle_prompt(key),
             Mode::PromptNewFile => self.handle_prompt_new_file(key),
             Mode::PromptNewFolder => self.handle_prompt_new_folder(key),
             Mode::ConfirmDelete => self.handle_confirm_delete(key),
             Mode::SelectTheme => self.handle_select_theme(key),
+            Mode::SelectKeybinding => self.handle_select_keybinding(key),
         }
     }
 
@@ -179,6 +189,91 @@ impl App {
         if let Some(editor) = &mut self.editor {
             use kayls_editor::actions::InsertText;
             editor.apply(InsertText { text: text.to_string() });
+        }
+    }
+
+    fn handle_easy(&mut self, key: KeyEvent) {
+        // Handle Ctrl+<key> shortcuts for VS Code-style
+        if key.modifiers.contains(KeyModifiers::CONTROL) {
+            match key.code {
+                KeyCode::Char('s') => {
+                    // Save
+                    if let Some(editor) = &self.editor {
+                        let _ = editor.get_content(); // just a placeholder, save logic is in Command mode
+                    }
+                    self.mode = Mode::Command;
+                    self.handle_command(KeyEvent::new(KeyCode::Char('w'), KeyModifiers::NONE));
+                    return;
+                }
+                KeyCode::Char('o') => {
+                    // Open file
+                    self.mode = Mode::Prompt;
+                    self.handle_prompt(KeyEvent::new(KeyCode::Char('/'), KeyModifiers::NONE));
+                    return;
+                }
+                KeyCode::Char('q') => {
+                    // Quit
+                    self.should_quit = true;
+                    return;
+                }
+                KeyCode::Char('e') => {
+                    // Toggle Explorer
+                    self.show_explorer = !self.show_explorer;
+                    if self.show_explorer {
+                        self.focus = Focus::Explorer;
+                    } else {
+                        self.focus = Focus::Editor;
+                    }
+                    return;
+                }
+                KeyCode::Char('n') => {
+                    // New file
+                    self.mode = Mode::PromptNewFile;
+                    return;
+                }
+                _ => {}
+            }
+        }
+        // Passthrough to normal handler
+        self.handle_normal(key);
+    }
+
+    fn handle_select_keybinding(&mut self, key: KeyEvent) {
+        match key.code {
+            KeyCode::Up | KeyCode::Char('k') => {
+                self.keybinding_cursor = self.keybinding_cursor.saturating_sub(1);
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+                if self.keybinding_cursor < 1 {
+                    self.keybinding_cursor += 1;
+                }
+            }
+            KeyCode::Enter => {
+                // Simpan pilihan
+                let new_mode = if self.keybinding_cursor == 1 {
+                    Mode::Easy
+                } else {
+                    Mode::Normal
+                };
+                self.mode = new_mode;
+                // Update config
+                let mut config = Config::load();
+                config.editor.keybinding = if self.keybinding_cursor == 1 {
+                    "easy".to_string()
+                } else {
+                    "vim".to_string()
+                };
+                let _ = config.save();
+                self.status_message = Some(format!(
+                    "Mode: {}",
+                    if self.keybinding_cursor == 1 { "Easy" } else { "Vim" }
+                ));
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Esc => {
+                self.mode = Mode::Normal;
+            }
+            _ => {}
         }
     }
 
@@ -439,6 +534,11 @@ impl App {
                 self.status_message = Some("Explorer ON".to_string());
                 self.mode = Mode::Normal;
                 self.status_time = Some(Instant::now());
+            }
+            KeyCode::Char('m') => {
+                // Buka popup pilih mode
+                self.mode = Mode::SelectKeybinding;
+                self.keybinding_cursor = if self.mode == Mode::Easy { 1 } else { 0 };
             }
             KeyCode::Char('q') => {
                 // Sembunyikan explorer dan fokus ke editor

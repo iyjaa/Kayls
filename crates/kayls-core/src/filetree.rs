@@ -93,6 +93,7 @@ pub struct FileTree {
     pub root_entry: Entry,
     pub selected_path: Option<PathBuf>,
     pub flat: Vec<PathBuf>,
+    pub needs_rebuild: bool,
 }
 
 impl FileTree {
@@ -115,6 +116,7 @@ impl FileTree {
             root_entry,
             selected_path: None,
             flat: Vec::new(),
+            needs_rebuild: false,
         };
 
         tree.rebuild_flat();
@@ -352,11 +354,29 @@ impl FileTree {
         self.find_entry(sel)
     }
 
-    /// Info untuk render: (path, name, is_dir, depth, expanded)
-    pub fn visible_entries(&self) -> Vec<(PathBuf, String, bool, usize, bool)> {
-        let mut result = Vec::new();
-        collect_visible(&self.root_entry, 0, &mut result);
-        result
+    /// Iterator untuk render: (path, name, is_dir, depth, expanded)
+    pub fn iter_visible(&self) -> impl Iterator<Item = (&Path, &str, bool, usize, bool)> {
+        let mut stack: Vec<(&Entry, usize)> = Vec::new();
+        for child in self.root_entry.children.iter().rev() {
+            stack.push((child, 0));
+        }
+        std::iter::from_fn(move || {
+            while let Some((entry, depth)) = stack.pop() {
+                if entry.is_dir && entry.expanded {
+                    for child in entry.children.iter().rev() {
+                        stack.push((child, depth + 1));
+                    }
+                }
+                return Some((
+                    entry.path.as_path(),
+                    entry.name.as_str(),
+                    entry.is_dir,
+                    depth,
+                    entry.expanded,
+                ));
+            }
+            None
+        })
     }
 }
 
@@ -369,37 +389,16 @@ fn flatten(entry: &Entry, out: &mut Vec<PathBuf>) {
     }
 }
 
-fn collect_visible(
-    entry: &Entry,
-    depth: usize,
-    out: &mut Vec<(PathBuf, String, bool, usize, bool)>,
-) {
-    for child in &entry.children {
-        out.push((
-            child.path.clone(),
-            child.name.clone(),
-            child.is_dir,
-            depth,
-            child.expanded,
-        ));
-
-        if child.is_dir && child.expanded {
-            collect_visible(child, depth + 1, out);
-        }
-    }
-}
-
 fn find_in_entry<'a>(entry: &'a Entry, path: &Path) -> Option<&'a Entry> {
-    if entry.path == path {
-        return Some(entry);
-    }
-
-    for child in &entry.children {
-        if let Some(found) = find_in_entry(child, path) {
-            return Some(found);
+    let mut stack = vec![entry];
+    while let Some(e) = stack.pop() {
+        if e.path == path {
+            return Some(e);
+        }
+        for child in &e.children {
+            stack.push(child);
         }
     }
-
     None
 }
 

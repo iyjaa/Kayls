@@ -387,27 +387,22 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
 
     let color_selected_bg = Color::Rgb(60, 60, 80);
 
-    let visible = tree.visible_entries();
+    let visible_iter = tree.iter_visible();
     let selected = tree.selected_path.as_ref();
 
     let scroll = app.explorer_scroll;
     let height = app.explorer_height as usize;
-    let end = if height > 0 {
-        (scroll + height).min(visible.len())
-    } else {
-        visible.len()
-    };
 
-    visible
-        .iter()
+    // Kita enumerate dulu, lalu skip dan take. Tidak perlu .len().
+    visible_iter
         .enumerate()
         .skip(scroll)
-        .take(end.saturating_sub(scroll))
+        .take(height.max(1))
         .map(|(_idx, (path, name, is_dir, depth, expanded))| {
-            let is_selected = Some(path) == selected;
+            let is_selected = Some(path) == selected.map(|p| p.as_path());
 
-            let icon = if *is_dir {
-                if *expanded {
+            let icon = if is_dir {
+                if expanded {
                     "▾"
                 } else {
                     "▸"
@@ -416,11 +411,8 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
                 " "
             };
 
-            let indent = "  ".repeat(*depth);
-            let prefix = format!("{}{} ", indent, icon);
-
-            let text_color = if *is_dir {
-                if *depth == 0 {
+            let text_color = if is_dir {
+                if depth == 0 {
                     color_folder
                 } else {
                     color_nested
@@ -436,16 +428,18 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
 
             let marker = if is_selected { "> " } else { "  " };
 
-            // Horizontal scroll — marker tetap di kiri
-            let full_text = format!("{}{}", prefix, name);
             let scroll_x = app.explorer_scroll_x;
+            let indent_str = "  ".repeat(depth);
 
-            let scrolled_text: String = full_text.chars().skip(scroll_x).collect();
+            // Bangun teks lengkap untuk horizontal scroll
+            let full_text = format!("{}{}{}{}", marker, indent_str, icon, name);
+            let display_text: String = if scroll_x > 0 {
+                full_text.chars().skip(scroll_x).collect()
+            } else {
+                full_text
+            };
 
-            Line::from(vec![
-                Span::styled(marker, style),
-                Span::styled(scrolled_text, style),
-            ])
+            Line::from(Span::styled(display_text, style))
         })
         .collect()
 }

@@ -63,6 +63,9 @@ impl Widget for &Editor {
 
         let fold_separator_style = Style::default().fg(Color::DarkGray);
 
+        // Buffer untuk nomor baris (hindari alokasi String berulang)
+        let mut line_num_buf = String::with_capacity(8);
+
         // draw lines, syntax highlighting, selection and marks in a single unified loop
         for visual_row_idx in self.offset_y..total_visual_lines {
             if draw_y >= area.bottom() {
@@ -114,9 +117,15 @@ impl Widget for &Editor {
                 // 1. Draw line numbers
                 if self.show_line_numbers {
                     let line_number = if is_ghost {
-                        format!("{:>width$}", " ", width = line_number_digits)
+                        use std::fmt::Write;
+                        line_num_buf.clear();
+                        let _ = write!(line_num_buf, "{:>width$}", " ", width = line_number_digits);
+                        &line_num_buf
                     } else {
-                        format!("{:>width$}", line_idx + 1, width = line_number_digits)
+                        use std::fmt::Write;
+                        line_num_buf.clear();
+                        let _ = write!(line_num_buf, "{:>width$}", line_idx + 1, width = line_number_digits);
+                        &line_num_buf
                     };
                     buf.set_string(area.left(), draw_y, &line_number, line_number_style);
                 }

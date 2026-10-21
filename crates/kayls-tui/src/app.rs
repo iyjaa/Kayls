@@ -138,8 +138,8 @@ impl App {
             return;
         };
 
-        let content = doc.content_as_string();
         let lang = detect_language(&doc.path);
+        let rope = doc.rope.clone();
 
         let theme_colors = match self.theme {
             Theme::Vesper => vesper(),
@@ -148,7 +148,7 @@ impl App {
             Theme::Nord => nord(),
         };
 
-        match Editor::new(lang, &content, theme_colors) {
+        match Editor::from_rope(lang, rope, theme_colors) {
             Ok(mut ed) => {
                 ed.show_line_numbers(true);
                 self.editor = Some(ed);
@@ -393,8 +393,7 @@ impl App {
             return;
         }
 
-        let visible = tree.visible_entries();
-        if let Some((_path, name, _is_dir, depth, _expanded)) = visible.get(selected_idx) {
+        if let Some((_path, name, _is_dir, depth, _expanded)) = tree.iter_visible().nth(selected_idx) {
             let indent = depth * 2;
             let icon_len = 2; // "▸ " atau "  "
             let marker_len = 2; // "> " atau "  "
@@ -423,7 +422,6 @@ impl App {
             return 0;
         };
 
-        let visible = tree.visible_entries();
         let width = self.explorer_width as usize;
         if width == 0 {
             return 0;
@@ -431,7 +429,7 @@ impl App {
 
         let mut max_len = 0;
 
-        for (_path, name, _is_dir, depth, _expanded) in visible.iter() {
+        for (_path, name, _is_dir, depth, _expanded) in tree.iter_visible() {
             let indent = depth * 2;
             let icon_len = 2;
             let marker_len = 2;

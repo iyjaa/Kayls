@@ -1,12 +1,13 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use ropey::Rope;
 use crate::cursor::Cursor;
 
 #[derive(Debug)]
 pub struct Document {
     pub path: PathBuf,
-    pub lines: Vec<String>,
+    pub rope: Rope,
     pub cursor: Cursor,
     pub dirty: bool,
 }
@@ -16,15 +17,11 @@ impl Document {
         let path = path.as_ref().to_path_buf();
         let path = fs::canonicalize(&path)?;
         let content = fs::read_to_string(&path)?;
-        let mut lines: Vec<String> = content.lines().map(String::from).collect();
-
-        if lines.is_empty() {
-            lines.push(String::new());
-        }
+        let rope = Rope::from_str(&content);
 
         Ok(Self {
             path,
-            lines,
+            rope,
             cursor: Cursor::new(),
             dirty: false,
         })
@@ -33,45 +30,36 @@ impl Document {
     pub fn empty() -> Self {
         Self {
             path: PathBuf::new(),
-            lines: vec![String::new()],
+            rope: Rope::new(),
             cursor: Cursor::new(),
             dirty: false,
         }
     }
 
     pub fn line_count(&self) -> usize {
-        self.lines.len()
+        self.rope.len_lines()
     }
 
     pub fn current_line_len(&self) -> usize {
-        self.lines
-            .get(self.cursor.line)
-            .map(|l| l.chars().count())
-            .unwrap_or(0)
+        if self.cursor.line < self.rope.len_lines() {
+            self.rope.line(self.cursor.line).len_chars().saturating_sub(1)
+        } else {
+            0
+        }
     }
 
     pub fn content_as_string(&self) -> String {
-        self.lines.join("\n")
+        self.rope.to_string()
     }
 
     pub fn insert_char(&mut self, c: char) {
         let line = self.cursor.line;
         let col = self.cursor.col;
 
-        if let Some(current) = self.lines.get_mut(line) {
-            let char_count = current.chars().count();
-
-            if col >= char_count {
-                current.push(c);
-            } else {
-                let byte_idx = current
-                    .char_indices()
-                    .nth(col)
-                    .map(|(i, _)| i)
-                    .unwrap_or(current.len());
-                current.insert(byte_idx, c);
-            }
-
+        if line < self.rope.len_lines() {
+            let line_start = self.rope.line_to_char(line);
+            let char_idx = line_start + col;
+            self.rope.insert_char(char_idx, c);
             self.cursor.col += 1;
             self.dirty = true;
         }
@@ -81,19 +69,27 @@ impl Document {
         let line = self.cursor.line;
         let col = self.cursor.col;
 
-        if col == 0 {
-            return;
-        }
-
-        if let Some(current) = self.lines.get_mut(line) {
-            let byte_idx = current
-                .char_indices()
-                .nth(col - 1)
-                .map(|(i, _)| i)
-                .unwrap_or(current.len());
-            current.remove(byte_idx);
-            self.cursor.col -= 1;
-            self.dirty = true;
+        if col > 0 {
+            // Hapus karakter sebelum kursor di baris yang sama
+            if line < self.rope.len_lines() {
+                let line_start = self.rope.line_to_char(line);
+                let char_idx = line_start + col - 1;
+                if char_idx < self.rope.len_chars() {
+                    self.rope.remove(char_idx..char_idx + 1);
+                    self.cursor.col -= 1;
+                    self.dirty = true;
+                }
+            }
+        } else if line > 0 {
+            // Gabungkan dengan baris sebelumnya: hapus newline di akhir baris sebelumnya
+            let line_start = self.rope.line_to_char(line);
+            if line_start > 0 {
+                let prev_line_len = self.rope.line(line - 1).len_chars().saturating_sub(1);
+                self.rope.remove(line_start - 1..line_start);
+                self.cursor.line -= 1;
+                self.cursor.col = prev_line_len;
+                self.dirty = true;
+            }
         }
     }
 

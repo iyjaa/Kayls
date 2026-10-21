@@ -124,6 +124,17 @@ impl Code {
         Ok(code)
     }
 
+    pub fn from_rope(
+        lang: &str,
+        rope: ropey::Rope,
+        custom_highlights: Option<HashMap<String, String>>,
+    ) -> Result<Self> {
+        let text = rope.to_string();
+        let mut code = Self::new(&text, lang, custom_highlights)?;
+        code.content = rope;
+        Ok(code)
+    }
+
     fn get_language(lang: &str) -> Option<Language> {
         match lang {
             "rust" => Some(tree_sitter_rust::LANGUAGE.into()),

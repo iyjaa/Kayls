@@ -881,7 +881,7 @@ dependencies = [
 
 [[package]]
 name = "kayls"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "clap",
@@ -891,7 +891,7 @@ dependencies = [
 
 [[package]]
 name = "kayls-core"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "ropey",
  "serde",
@@ -901,7 +901,7 @@ dependencies = [
 
 [[package]]
 name = "kayls-editor"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "criterion",
@@ -934,7 +934,7 @@ dependencies = [
 
 [[package]]
 name = "kayls-tui"
-version = "1.0.2"
+version = "1.0.3"
 dependencies = [
  "anyhow",
  "crossterm",

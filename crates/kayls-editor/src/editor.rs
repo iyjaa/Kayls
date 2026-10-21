@@ -90,6 +90,44 @@ impl Editor {
         Self::new_with_highlights(lang, text, theme, None)
     }
 
+    pub fn from_rope(
+        lang: &str,
+        rope: ropey::Rope,
+        theme: Vec<(&str, &str)>,
+    ) -> Result<Self> {
+        let code = Code::from_rope(lang, rope, None)
+            .or_else(|_| Code::new("", "text", None))?;
+
+        let theme = Self::build_theme(&theme);
+        let highlights_cache = RefCell::new(HashMap::new());
+        let line_diff_cache = RefCell::new(HashMap::new());
+        let view = View::new(&code, ViewMode::Plain);
+
+        Ok(Self {
+            code,
+            cursor: 0,
+            offset_y: 0,
+            offset_x: 0,
+            theme,
+            selection: None,
+            clicks: ClickTracker::new(Duration::from_millis(700)),
+            selection_snap: SelectionSnap::None,
+            clipboard: None,
+            marks: None,
+            highlights_cache,
+            line_diff_cache,
+            word_highlight_enabled: true,
+            word_highlight_cache: RefCell::new(None),
+            show_line_numbers: true,
+            code_folding_options: CodeFoldingOptions::default(),
+            left_code_padding: 2,
+            view_mode: ViewMode::Plain,
+            original_code: None,
+            diff_options: DiffOptions::default(),
+            view,
+        })
+    }
+
     pub fn new_with_highlights(
         lang: &str,
         text: &str,

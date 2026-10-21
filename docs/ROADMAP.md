@@ -2,9 +2,9 @@
 
 This document outlines the planned features and progress for Kayls.
 
-## Current Status: v1.0.2 (Stable)
+## Current Status: v1.0.3 (Stable)
 
-- [x] Complete rebranding from Tscode to Kayls
+- [x] Keybinding mode switcher (Vim/Easy) with themed popup
 - [x] Multi-architecture CI/CD (Linux x86_64, ARM64, ARMv7, macOS, Android)
 - [x] APT repository with GPG signing
 - [x] Automated release pipeline (GitHub Actions)
@@ -15,7 +15,6 @@ This document outlines the planned features and progress for Kayls.
 ## Next Up (v1.1.x — Q1 2026)
 
 ### High Priority
-- [ ] **Easy Mode (VS Code Keybindings)**: Optional non-modal mode using `Ctrl+S`, `Ctrl+O`, `Ctrl+B`, etc.
 - [ ] **Search in File**: `Ctrl+F` to find text within the open document.
 - [ ] **Multi-Tabs**: Open and switch between multiple files.
 - [ ] **Go to Line**: Quick navigation to a specific line number.
@@ -50,6 +49,11 @@ This document outlines the planned features and progress for Kayls.
 - [x] New explorer shortcuts (`Esc e`, `Esc q`)
 - [x] Keybindings documentation
 
+### v1.0.3 — Keybinding Modes
+- [x] Added Vim/Easy mode switcher (`Esc m`)
+- [x] Themed popup for mode selection
+- [x] Config persistence for keybinding mode
+
 ## Versioning
 
-See [docs/VERSIONING.md](versioning.md) for the versioning scheme (`Kayls-vX.Y.Z` for stable, `Kayls-sX.Y.Z` for snapshots).
+See [docs/VERSIONING.md](VERSIONING.md) for the versioning scheme (`Kayls-vX.Y.Z` for stable, `Kayls-sX.Y.Z` for snapshots).

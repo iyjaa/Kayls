@@ -433,16 +433,18 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('e') => {
-                self.show_explorer = !self.show_explorer;
-
-                if self.show_explorer {
-                    self.focus = Focus::Explorer;
-                    self.status_message = Some("Explorer ON".to_string());
-                } else {
-                    self.focus = Focus::Editor;
-                    self.status_message = Some("Explorer OFF".to_string());
-                }
-
+                // Selalu buka explorer dan fokus ke sana
+                self.show_explorer = true;
+                self.focus = Focus::Explorer;
+                self.status_message = Some("Explorer ON".to_string());
+                self.mode = Mode::Normal;
+                self.status_time = Some(Instant::now());
+            }
+            KeyCode::Char('q') => {
+                // Sembunyikan explorer dan fokus ke editor
+                self.show_explorer = false;
+                self.focus = Focus::Editor;
+                self.status_message = Some("Focus: Editor".to_string());
                 self.mode = Mode::Normal;
                 self.status_time = Some(Instant::now());
             }

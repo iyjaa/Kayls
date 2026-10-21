@@ -236,7 +236,7 @@ Kayls is a Rust workspace with 3 crates:
 - [PRD](docs/prd.md) — Product requirements
 - [Roadmap](docs/roadmap.md) — Feature progress
 - [Versioning](docs/versioning.md) — Version scheme
-- [Keybindings](KEYBINDS.md) — All shortcuts and clipboard alternatives
+- [Keybindings](docs/KEYBINDS.md) — All shortcuts and clipboard alternatives
 - [Issues](ISSUES.md) — Summary of GitHub issues
 - [Contributing](CONTRIBUTING.md) — How to contribute
 

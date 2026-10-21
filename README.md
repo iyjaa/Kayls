@@ -16,7 +16,7 @@ Kayls is a terminal-based IDE with a VS Code-inspired layout. It runs in any ter
 
 **Kayls-v1.0.2** fix: bug in keybindings
 
-See [docs/roadmap.md](docs/roadmap.md) for feature progress and [docs/versioning.md](docs/versioning.md) for the versioning scheme.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for feature progress and [docs/VERSIONING.md](docs/VERSIONING.md) for the versioning scheme.
 
 ## Features
 
@@ -219,7 +219,7 @@ Typing any of these automatically inserts the matching closing character:
 
 Typing a closing character when one is already ahead will skip over it (no duplicate).
 
-**Note**: A VS Code keybinding mode (Ctrl+S, Ctrl+O, Ctrl+B, etc.) is planned. See [docs/roadmap.md](docs/roadmap.md).
+**Note**: A VS Code keybinding mode (Ctrl+S, Ctrl+O, Ctrl+B, etc.) is planned. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Project Structure
 
@@ -233,9 +233,9 @@ Kayls is a Rust workspace with 3 crates:
 
 ## Documentation
 
-- [PRD](docs/prd.md) — Product requirements
-- [Roadmap](docs/roadmap.md) — Feature progress
-- [Versioning](docs/versioning.md) — Version scheme
+- [PRD](docs/PRD.md) — Product requirements
+- [Roadmap](docs/ROADMAP.md) — Feature progress
+- [Versioning](docs/VERSIONING.md) — Version scheme
 - [Keybindings](docs/KEYBINDS.md) — All shortcuts and clipboard alternatives
 - [Issues](ISSUES.md) — Summary of GitHub issues
 - [Contributing](CONTRIBUTING.md) — How to contribute

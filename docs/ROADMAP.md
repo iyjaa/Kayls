@@ -52,4 +52,4 @@ This document outlines the planned features and progress for Kayls.
 
 ## Versioning
 
-See [docs/versioning.md](versioning.md) for the versioning scheme (`Kayls-vX.Y.Z` for stable, `Kayls-sX.Y.Z` for snapshots).
+See [docs/VERSIONING.md](versioning.md) for the versioning scheme (`Kayls-vX.Y.Z` for stable, `Kayls-sX.Y.Z` for snapshots).

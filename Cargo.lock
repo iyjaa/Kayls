@@ -894,6 +894,7 @@ dependencies = [
  "criterion",
  "kayls-core",
  "kayls-tui",
+ "ropey",
  "tempfile",
 ]
 

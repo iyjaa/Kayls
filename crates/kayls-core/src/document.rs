@@ -15,7 +15,8 @@ pub struct Document {
 impl Document {
     pub fn open<P: AsRef<Path>>(path: P) -> std::io::Result<Self> {
         let path = path.as_ref().to_path_buf();
-        let path = fs::canonicalize(&path)?;
+        // Jangan canonicalize: operasi ini lambat (1-2ms) dan tidak perlu
+        // untuk sekadar membaca file. Path relatif sudah cukup.
         let content = fs::read_to_string(&path)?;
         let rope = Rope::from_str(&content);
 

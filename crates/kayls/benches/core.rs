@@ -29,15 +29,18 @@ fn bench_document_insert(c: &mut Criterion) {
     let mut group = c.benchmark_group("document_insert");
     for size in [100, 1_000, 10_000].iter() {
         let file = make_temp_file(*size);
+        // Buka file DI LUAR loop agar tidak mengukur I/O
+        let mut doc = Document::open(file.path()).unwrap();
+        doc.cursor.line = *size / 2;
+        doc.cursor.col = 0;
         group.bench_with_input(format!("{}_lines", size), size, |b, _| {
             b.iter(|| {
-                let mut doc = Document::open(file.path()).unwrap();
-                doc.cursor.line = *size / 2;
-                doc.cursor.col = 0;
+                // Clone ringan? Tidak, kita langsung insert ke doc yang sama
+                // (ini mengukur insert, bukan open)
                 for _ in 0..100 {
                     doc.insert_char('x');
                 }
-                black_box(doc);
+                black_box(&doc);
             });
         });
     }

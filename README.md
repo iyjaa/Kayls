@@ -14,7 +14,7 @@ Kayls is a terminal-based IDE with a VS Code-inspired layout. It runs in any ter
 
 ## Status
 
-**Kayls-v1.0.3** — Added keybinding mode switcher (Vim/Easy) with themed popup. Smoother horizontal scroll, config file, theme persistence, auto-pair, auto-indent, and themes. Unstable, in development.
+**Kayls-s1.0.3** — Added keybinding mode switcher (Vim/Easy) with themed popup. Smoother horizontal scroll, config file, theme persistence, auto-pair, auto-indent, and themes. Unstable, in development.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for feature progress and [docs/VERSIONING.md](docs/VERSIONING.md) for the versioning scheme.
 

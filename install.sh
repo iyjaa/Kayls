@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
-
 set -eo pipefail
 
-# --- Palet Warna (Menggunakan $'\033' agar pasti diproses) ---
-ESC=$'\033'
-BLUE="${ESC}[38;5;111m"
-GREEN="${ESC}[38;5;114m"
-CYAN="${ESC}[38;5;116m"
-GRAY="${ESC}[38;5;242m"
-YELLOW="${ESC}[38;5;222m"
-BOLD="${ESC}[1m"
-NC="${ESC}[0m"
+# Warna ANSI
+C_INFO="\033[38;5;111m"
+C_OK="\033[38;5;114m"
+C_ERR="\033[38;5;203m"
+C_TITLE="\033[38;5;222m"
+C_DIM="\033[38;5;242m"
+C_RESET="\033[0m"
 
-info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-success() { echo -e "${GREEN}[ OK ]${NC} $1"; }
-error() { echo -e "${ESC}[38;5;203m[FAIL]${NC} $1" >&2; exit 1; }
+info() { printf "${C_INFO}[INFO]${C_RESET} %s\n" "$1"; }
+success() { printf "${C_OK}[ OK ]${C_RESET} %s\n" "$1"; }
+error() { printf "${C_ERR}[FAIL]${C_RESET} %s\n" "$1" >&2; exit 1; }
 
 progress_bar() {
     local current=$1
@@ -24,10 +21,10 @@ progress_bar() {
     local filled=$(( percent * width / 100 ))
     local empty=$(( width - filled ))
 
-    echo -ne "${CYAN}["
+    printf "${C_INFO}["
     printf "%${filled}s" | tr ' ' '█'
     printf "%${empty}s" | tr ' ' '-'
-    echo -ne "]${NC} ${percent}%\r"
+    printf "]${C_RESET} %3d%%\r" "$percent"
 }
 
 download_file() {
@@ -36,7 +33,7 @@ download_file() {
     local total_size=$(curl -sIL "$url" | grep -i "content-length:" | tail -1 | tr -dc '0-9')
     
     if [ -z "$total_size" ] || [ "$total_size" -eq 0 ]; then
-        info "Downloading..."
+        printf "${C_INFO}[INFO]${C_RESET} Downloading (size unknown)...\n"
         curl -fsSL "$url" -o "$output"
         return
     fi
@@ -54,7 +51,19 @@ download_file() {
     
     wait $pid
     progress_bar "$total_size" "$total_size"
-    echo ""
+    printf "\n"
+}
+
+spinner() {
+    local pid=$!
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " ${C_INFO}[%c]${C_RESET} Extracting...\r" "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep 0.1
+    done
+    printf "\r\033[K"
 }
 
 REPO="iyjaa/Kayls"
@@ -64,6 +73,7 @@ detect_platform() {
     local os arch target install_dir
     os=$(uname -s)
     arch=$(uname -m)
+    
     case "$os" in
         Linux)
             case "$arch" in
@@ -85,6 +95,7 @@ detect_platform() {
             esac ;;
         *) error "Unsupported OS: $os" ;;
     esac
+    
     if [ -z "$install_dir" ]; then
         if [ -w "/usr/local/bin" ]; then install_dir="/usr/local/bin"
         else install_dir="$HOME/.local/bin"; mkdir -p "$install_dir"; fi
@@ -100,47 +111,42 @@ get_latest_version() {
 
 main() {
     clear
-    echo -e "${CYAN}${BOLD}======================================${NC}"
-    echo -e "${CYAN}${BOLD}      Kayls Installer                 ${NC}"
-    echo -e "${CYAN}${BOLD}======================================${NC}"
-    echo ""
-    echo -e "  ${YELLOW}${BOLD}Terminal Studio Code${NC}"
-    echo -e "  ${GRAY}Lightweight • Fast • Rust-powered${NC}"
-    echo ""
-    echo -e "${GRAY}──────────────────────────────────────${NC}"
-    echo ""
+    printf "${C_DIM}──────────────────────────────────────────────────${C_RESET}\n"
+    printf "  ${C_TITLE}K A Y L S${C_RESET}  Installer\n"
+    printf "  ${C_DIM}Terminal Studio Code${C_RESET}\n"
+    printf "${C_DIM}──────────────────────────────────────────────────${C_RESET}\n\n"
 
     info "Detecting platform..."
     local platform=$(detect_platform)
     local target="${platform%|*}"
     local install_dir="${platform#*|}"
-    success "Target:      ${BOLD}$target${NC}"
-    success "Install dir: ${BOLD}$install_dir${NC}"
-    echo ""
+    success "Target:      $target"
+    success "Install dir: $install_dir"
+    printf "\n"
 
     info "Fetching latest release..."
     local version=$(get_latest_version)
-    success "Version:     ${BOLD}$version${NC}"
-    echo ""
+    success "Version:     $version"
+    printf "\n"
 
     local archive="${BINARY_NAME}-${target}.tar.gz"
     local url="https://github.com/${REPO}/releases/download/${version}/${archive}"
     local tmp_dir=$(mktemp -d)
     trap 'rm -rf "$tmp_dir"' EXIT
 
-    info "Downloading ${BOLD}$archive${NC}..."
-    echo ""
+    printf "${C_INFO}[INFO]${C_RESET} Downloading %s\n" "$archive"
     download_file "$url" "$tmp_dir/$archive"
     success "Downloaded."
-    echo ""
+    printf "\n"
 
-    info "Extracting binary..."
-    tar xzf "$tmp_dir/$archive" -C "$tmp_dir"
+    printf "${C_INFO}[INFO]${C_RESET} Extracting binary...\n"
+    (tar xzf "$tmp_dir/$archive" -C "$tmp_dir") &
+    spinner
     chmod +x "$tmp_dir/$BINARY_NAME"
     success "Extracted."
-    echo ""
+    printf "\n"
 
-    info "Installing to ${BOLD}$install_dir${NC}..."
+    info "Installing to $install_dir..."
     mkdir -p "$install_dir" 2>/dev/null || true
     if [ -w "$install_dir" ] || [ "$(id -u)" = "0" ]; then
         mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
@@ -153,16 +159,15 @@ main() {
         mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
     fi
     success "Installed $BINARY_NAME."
-    echo ""
+    printf "\n"
 
-    echo -e "${GRAY}──────────────────────────────────────${NC}"
-    echo -e "${GREEN}${BOLD}🎉 Installation Complete!${NC}"
-    echo ""
+    printf "${C_DIM}──────────────────────────────────────────────────${C_RESET}\n"
+    printf "  ${C_OK}Installation Complete${C_RESET}\n\n"
     if command -v "$BINARY_NAME" >/dev/null 2>&1; then
-        echo -e "  Run ${BOLD}kayls --help${NC} to get started."
-        echo -e "  Installed version: ${GREEN}$($BINARY_NAME --version)${NC}"
+        printf "  Run ${C_TITLE}kayls --help${C_RESET} to get started.\n"
+        printf "  Installed version: ${C_OK}%s${C_RESET}\n" "$($BINARY_NAME --version)"
     fi
-    echo ""
+    printf "\n"
 }
 
 main "$@"

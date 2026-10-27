@@ -387,34 +387,7 @@ impl App {
             self.explorer_scroll = selected_idx - height + 1;
         }
 
-        // Horizontal — auto-scroll saat nama panjang
-        let width = self.explorer_width as usize;
-        if width == 0 {
-            return;
-        }
-
-        if let Some((_path, name, _is_dir, depth, _expanded)) = tree.iter_visible().nth(selected_idx) {
-            let indent = depth * 2;
-            let icon_len = 2; // "▸ " atau "  "
-            let marker_len = 2; // "> " atau "  "
-            let total_len = marker_len + indent + icon_len + name.chars().count();
-
-            let scroll_x = self.explorer_scroll_x;
-
-            // Kalau item lebih panjang dari width, scroll kanan
-            if total_len > scroll_x + width {
-                self.explorer_scroll_x = total_len.saturating_sub(width);
-            } else if scroll_x > 0 && total_len <= scroll_x {
-                // Kalau item lebih pendek dari scroll, scroll kiri
-                self.explorer_scroll_x = 0;
-            }
-
-            // Auto-scroll untuk indent dalam
-            let indent_scroll_threshold = indent + icon_len + marker_len;
-            if indent_scroll_threshold > scroll_x + width / 2 {
-                self.explorer_scroll_x = indent_scroll_threshold.saturating_sub(width / 2);
-            }
-        }
+        // Posisi horizontal dibiarkan sepenuhnya statis saat navigasi vertikal.
     }
 
     fn max_explorer_scroll_x(&self) -> usize {

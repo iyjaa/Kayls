@@ -2,152 +2,159 @@
 
 set -eo pipefail
 
+# --- Palet Warna Vesper ---
+BLUE='\033[38;5;111m'
+GREEN='\033[38;5;114m'
+CYAN='\033[38;5;116m'
+GRAY='\033[38;5;242m'
+YELLOW='\033[38;5;222m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+success() { echo -e "${GREEN}[ OK ]${NC} $1"; }
+error() { echo -e "${RED}[FAIL]${NC} $1" >&2; exit 1; }
+
+progress_bar() {
+    local current=$1
+    local total=$2
+    local width=30
+    local percent=$(( current * 100 / total ))
+    local filled=$(( percent * width / 100 ))
+    local empty=$(( width - filled ))
+
+    printf "${CYAN}["
+    printf "%${filled}s" | tr ' ' '█'
+    printf "%${empty}s" | tr ' ' '-'
+    printf "]${NC} %3d%% (${GRAY}%d/%d bytes${NC})\r" "$percent" "$current" "$total"
+}
+
+download_file() {
+    local url=$1
+    local output=$2
+    local total_size=$(curl -sI "$url" | grep -i "content-length:" | tail -1 | tr -dc '0-9')
+    
+    if [ -z "$total_size" ] || [ "$total_size" -eq 0 ]; then
+        info "Downloading (unknown size)..."
+        curl -fsSL "$url" -o "$output"
+        return
+    fi
+
+    curl -fsSL "$url" -o "$output" &
+    local pid=$!
+    
+    while kill -0 $pid 2>/dev/null; do
+        if [ -f "$output" ]; then
+            local current_size=$(stat -c%s "$output" 2>/dev/null || echo 0)
+            progress_bar "$current_size" "$total_size"
+        fi
+        sleep 0.1
+    done
+    
+    wait $pid
+    progress_bar "$total_size" "$total_size"
+    echo ""
+}
+
+spinner() {
+    local text=$1
+    local pid=$!
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " ${CYAN}[%c]${NC} %s\r" "$spinstr" "$text"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep 0.1
+    done
+    printf "\r\033[K"
+}
+
 REPO="iyjaa/Kayls"
 BINARY_NAME="kayls"
 INSTALL_DIR=""
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-info() {
-    printf "${BLUE}[INFO]${NC} %s\n" "$1"
-}
-
-success() {
-    printf "${GREEN}[OK]${NC} %s\n" "$1"
-}
-
-warn() {
-    printf "${YELLOW}[WARN]${NC} %s\n" "$1"
-}
-
-error() {
-    printf "${RED}[ERROR]${NC} %s\n" "$1" >&2
-    exit 1
-}
-
 detect_platform() {
     local os arch target install_dir
-
     os=$(uname -s)
     arch=$(uname -m)
-    target=""
-    install_dir=""
-
     case "$os" in
         Linux)
             case "$arch" in
-                x86_64|amd64)
-                    target="x86_64-unknown-linux-gnu"
-                    ;;
+                x86_64|amd64) target="x86_64-unknown-linux-gnu" ;;
                 aarch64|arm64)
-                    if [ -d "/public/bin" ]; then
-                        target="aarch64-linux-android"
-                        install_dir="/public/bin"
-                    elif [ -n "${TERMUX_VERSION:-}" ] || [ -d "/data/data/com.termux" ]; then
+                    if [ -n "${TERMUX_VERSION:-}" ] || [ -d "/data/data/com.termux" ]; then
                         target="aarch64-linux-android"
                         install_dir="${PREFIX:-/data/data/com.termux/files/usr}/bin"
-                    elif [ -d "/system/bin" ] && [ -f "/system/bin/linker64" ]; then
-                        target="aarch64-linux-android"
-                        install_dir="$HOME/bin"
                     else
                         target="aarch64-unknown-linux-gnu"
-                    fi
-                    ;;
-                armv7l)
-                    error "ARM32 not supported yet"
-                    ;;
-                *)
-                    error "Unsupported architecture: $arch"
-                    ;;
-            esac
-            ;;
+                    fi ;;
+                *) error "Unsupported architecture: $arch" ;;
+            esac ;;
         Darwin)
             case "$arch" in
-                x86_64|amd64)
-                    target="x86_64-apple-darwin"
-                    ;;
-                arm64|aarch64)
-                    target="aarch64-apple-darwin"
-                    ;;
-                *)
-                    error "Unsupported architecture: $arch"
-                    ;;
-            esac
-            ;;
-        *)
-            error "Unsupported OS: $os"
-            ;;
+                x86_64|amd64) target="x86_64-apple-darwin" ;;
+                arm64|aarch64) target="aarch64-apple-darwin" ;;
+                *) error "Unsupported OS: $os" ;;
+            esac ;;
+        *) error "Unsupported OS: $os" ;;
     esac
-
     if [ -z "$install_dir" ]; then
-        if [ -w "/usr/local/bin" ]; then
-            install_dir="/usr/local/bin"
-        else
-            install_dir="$HOME/.local/bin"
-            mkdir -p "$install_dir"
-        fi
+        if [ -w "/usr/local/bin" ]; then install_dir="/usr/local/bin"
+        else install_dir="$HOME/.local/bin"; mkdir -p "$install_dir"; fi
     fi
-
     echo "$target|$install_dir"
 }
 
 get_latest_version() {
-    local version=""
-
-    if command -v gh >/dev/null 2>&1; then
-        version=$(gh release view --repo "$REPO" --json tagName --jq .tagName 2>/dev/null || true)
-    fi
-
-    if [ -z "$version" ]; then
-        version=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-            | grep '"tag_name":' \
-            | sed -E 's/.*"([^"]+)".*/\1/' \
-            | head -1 || true)
-    fi
-
-    if [ -z "$version" ]; then
-        error "Could not determine latest version"
-    fi
-
+    local version=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | head -1)
+    if [ -z "$version" ]; then error "Could not determine latest version"; fi
     echo "$version"
 }
 
-install_kayls() {
-    local target="$1"
-    local install_dir="$2"
-    local version="$3"
+main() {
+    clear
+    echo -e "${CYAN}${BOLD}======================================${NC}"
+    echo -e "${CYAN}${BOLD}      Kayls Installer                 ${NC}"
+    echo -e "${CYAN}${BOLD}======================================${NC}"
+    echo ""
+    echo -e "  ${YELLOW}${BOLD}Kayls-Terminal-Editor${NC}"
+    echo ""
+    echo -e "${GRAY}──────────────────────────────────────${NC}"
+    echo ""
 
-    local archive="kayls-${target}.tar.gz"
+    info "Detecting platform..."
+    local platform=$(detect_platform)
+    local target="${platform%|*}"
+    local install_dir="${platform#*|}"
+    success "Target:      ${BOLD}$target${NC}"
+    success "Install dir: ${BOLD}$install_dir${NC}"
+    echo ""
+
+    info "Fetching latest release..."
+    local version=$(get_latest_version)
+    success "Version:     ${BOLD}$version${NC}"
+    echo ""
+
+    local archive="${BINARY_NAME}-${target}.tar.gz"
     local url="https://github.com/${REPO}/releases/download/${version}/${archive}"
-    local tmp_dir=""
-
-    tmp_dir=$(mktemp -d)
+    local tmp_dir=$(mktemp -d)
     trap 'rm -rf "$tmp_dir"' EXIT
 
-    info "Downloading $archive..."
-    if ! curl -fsSL "$url" -o "$tmp_dir/$archive"; then
-        error "Failed to download $url"
-    fi
+    info "Downloading ${BOLD}$archive${NC}..."
+    echo ""
+    download_file "$url" "$tmp_dir/$archive"
+    success "Downloaded."
+    echo ""
 
-    info "Extracting..."
-    tar xzf "$tmp_dir/$archive" -C "$tmp_dir"
+    info "Extracting binary..."
+    (tar xzf "$tmp_dir/$archive" -C "$tmp_dir") &
+    spinner "Extracting..."
+    success "Extracted."
+    echo ""
 
-    if [ ! -f "$tmp_dir/$BINARY_NAME" ]; then
-        error "Binary not found in archive"
-    fi
-
-    chmod +x "$tmp_dir/$BINARY_NAME"
-
-    info "Installing to $install_dir..."
+    info "Installing to ${BOLD}$install_dir${NC}..."
     mkdir -p "$install_dir" 2>/dev/null || true
-
-    if [ -w "$install_dir" ]; then
-        mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
-    elif [ "$(id -u)" = "0" ]; then
+    if [ -w "$install_dir" ] || [ "$(id -u)" = "0" ]; then
         mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
     elif command -v sudo >/dev/null 2>&1; then
         sudo mkdir -p "$install_dir"
@@ -156,46 +163,18 @@ install_kayls() {
         install_dir="$HOME/bin"
         mkdir -p "$install_dir"
         mv "$tmp_dir/$BINARY_NAME" "$install_dir/"
-        warn "Installed to $install_dir (add to PATH manually)"
     fi
+    success "Installed $BINARY_NAME."
+    echo ""
 
-    success "Installed $BINARY_NAME to $install_dir/$BINARY_NAME"
-
+    echo -e "${GRAY}──────────────────────────────────────${NC}"
+    echo -e "${GREEN}${BOLD} Installation Complete!${NC}"
+    echo ""
     if command -v "$BINARY_NAME" >/dev/null 2>&1; then
-        local installed_version=""
-        installed_version=$("$BINARY_NAME" --version 2>/dev/null || echo "unknown")
-        success "Version: $installed_version"
-    else
-        warn "Binary installed but not in PATH"
-        warn "Add $install_dir to your PATH"
+        echo -e "  Run ${BOLD}kayls --help${NC} to get started."
+        echo -e "  Installed version: ${GREEN}$($BINARY_NAME --version)${NC}"
     fi
-}
-
-main() {
-    echo "======================================"
-    echo "  Kayls Installer"
-    echo "  Terminal Studio Code"
-    echo "======================================"
     echo ""
-
-    info "Detecting platform..."
-    local platform=""
-    platform=$(detect_platform)
-    local target="${platform%|*}"
-    local install_dir="${platform#*|}"
-    info "Target: $target"
-    info "Install dir: $install_dir"
-
-    info "Getting latest version..."
-    local version=""
-    version=$(get_latest_version)
-    info "Version: $version"
-
-    echo ""
-    install_kayls "$target" "$install_dir" "$version"
-
-    echo ""
-    success "Done! Run 'kayls --help' to get started."
 }
 
 main "$@"

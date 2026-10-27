@@ -1,10 +1,10 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use ratatui::layout::Rect;
-use std::path::PathBuf;
-use std::time::Instant;
 use kayls_core::{Config, Document, FileTree};
 use kayls_editor::editor::Editor;
 use kayls_editor::theme::{dracula, gruvbox, nord, vesper};
+use ratatui::layout::Rect;
+use std::path::PathBuf;
+use std::time::Instant;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Mode {
@@ -26,18 +26,15 @@ pub enum Focus {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Default)]
 pub enum Theme {
+    #[default]
     Vesper,
     Gruvbox,
     Dracula,
     Nord,
 }
 
-impl Default for Theme {
-    fn default() -> Self {
-        Theme::Vesper
-    }
-}
 
 pub struct App {
     pub should_quit: bool,
@@ -165,12 +162,11 @@ impl App {
             return;
         }
 
-        if key.modifiers.contains(KeyModifiers::ALT) {
-            if let KeyCode::Char('q') = key.code {
+        if key.modifiers.contains(KeyModifiers::ALT)
+            && let KeyCode::Char('q') = key.code {
                 self.should_quit = true;
                 return;
             }
-        }
 
         match self.mode {
             Mode::Normal => self.handle_normal(key),
@@ -188,7 +184,9 @@ impl App {
     pub fn paste(&mut self, text: &str) {
         if let Some(editor) = &mut self.editor {
             use kayls_editor::actions::InsertText;
-            editor.apply(InsertText { text: text.to_string() });
+            editor.apply(InsertText {
+                text: text.to_string(),
+            });
         }
     }
 
@@ -266,7 +264,11 @@ impl App {
                 let _ = config.save();
                 self.status_message = Some(format!(
                     "Mode: {}",
-                    if self.keybinding_cursor == 1 { "Easy" } else { "Vim" }
+                    if self.keybinding_cursor == 1 {
+                        "Easy"
+                    } else {
+                        "Vim"
+                    }
                 ));
                 self.status_time = Some(Instant::now());
             }
@@ -294,7 +296,7 @@ impl App {
     fn handle_editor_keys(&mut self, key: KeyEvent) {
         if let Some(editor) = self.editor.as_mut() {
             let area = self.editor_area;
-            
+
             // Ctrl+Y untuk Copy ke App.clipboard (antar-file)
             if key.code == KeyCode::Char('y') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 use kayls_editor::actions::Copy;
@@ -309,11 +311,13 @@ impl App {
             if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 if !self.clipboard.is_empty() {
                     use kayls_editor::actions::InsertText;
-                    editor.apply(InsertText { text: self.clipboard.clone() });
+                    editor.apply(InsertText {
+                        text: self.clipboard.clone(),
+                    });
                 }
                 return;
             }
-            
+
             if let Err(e) = editor.input(key, &area) {
                 self.status_message = Some(format!("Editor error: {}", e));
                 self.status_time = Some(Instant::now());
@@ -461,14 +465,13 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('d') => {
-                if let Some(tree) = self.file_tree.as_ref() {
-                    if let Some(entry) = tree.selected_entry() {
+                if let Some(tree) = self.file_tree.as_ref()
+                    && let Some(entry) = tree.selected_entry() {
                         self.pending_delete = Some(entry.path.clone());
                         self.mode = Mode::ConfirmDelete;
                         self.status_message = Some(format!("Delete '{}'? (y/n)", entry.name));
                         self.status_time = Some(Instant::now());
                     }
-                }
             }
             KeyCode::Char('t') => {
                 self.mode = Mode::SelectTheme;
@@ -694,12 +697,11 @@ impl App {
                     Ok(deleted) => {
                         self.status_message = Some(format!("Deleted: {}", deleted.display()));
 
-                        if let Some(doc) = self.document.as_ref() {
-                            if doc.path == path {
+                        if let Some(doc) = self.document.as_ref()
+                            && doc.path == path {
                                 self.document = None;
                                 self.editor = None;
                             }
-                        }
 
                         self.ensure_explorer_visible();
                     }
@@ -778,12 +780,11 @@ impl App {
     }
 
     pub fn tick(&mut self) {
-        if let Some(t) = self.status_time {
-            if t.elapsed().as_secs() >= 2 {
+        if let Some(t) = self.status_time
+            && t.elapsed().as_secs() >= 2 {
                 self.status_message = None;
                 self.status_time = None;
             }
-        }
     }
 }
 

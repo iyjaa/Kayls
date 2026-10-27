@@ -80,7 +80,7 @@ fn compute_diff_with_algorithm(
 
                 let anchor = current_line_idx + 1;
                 let total_deletes = pending_deletes.len();
-                let drained_deletes: Vec<usize> = pending_deletes.drain(..).collect();
+                let drained_deletes: Vec<usize> = std::mem::take(&mut pending_deletes);
 
                 for (i, orig_idx) in drained_deletes.iter().copied().enumerate() {
                     let matched_curr = if i < new_len {

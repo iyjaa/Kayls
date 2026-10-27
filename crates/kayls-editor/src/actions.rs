@@ -20,27 +20,24 @@ impl Action for MoveRight {
     fn apply(&mut self, editor: &mut Editor) {
         let cursor = editor.get_cursor();
 
-        if !self.shift {
-            if let Some(sel) = editor.get_selection() {
-                if !sel.is_empty() {
+        if !self.shift
+            && let Some(sel) = editor.get_selection()
+                && !sel.is_empty() {
                     let (_, end) = sel.sorted();
                     editor.set_cursor(end);
                     editor.clamp_cursor_to_focus_rows();
                     editor.clear_selection();
                     return;
                 }
-            }
-        }
 
         if cursor < editor.code_ref().len() {
             let code = editor.code_ref();
             let mut new_cursor = code.next_grapheme_boundary(cursor);
             let new_line = code.char_to_line(new_cursor);
-            if !editor.line_visible(new_line) {
-                if let Some(next_line) = editor.next_line(new_line) {
+            if !editor.line_visible(new_line)
+                && let Some(next_line) = editor.next_line(new_line) {
                     new_cursor = code.line_to_char(next_line);
                 }
-            }
             if self.shift {
                 editor.extend_selection(new_cursor);
             } else {
@@ -66,28 +63,25 @@ impl Action for MoveLeft {
     fn apply(&mut self, editor: &mut Editor) {
         let cursor = editor.get_cursor();
 
-        if !self.shift {
-            if let Some(sel) = editor.get_selection() {
-                if !sel.is_empty() {
+        if !self.shift
+            && let Some(sel) = editor.get_selection()
+                && !sel.is_empty() {
                     let (start, _) = sel.sorted();
                     editor.set_cursor(start);
                     editor.clamp_cursor_to_focus_rows();
                     editor.clear_selection();
                     return;
                 }
-            }
-        }
 
         if cursor > 0 {
             let code = editor.code_ref();
             let mut new_cursor = code.prev_grapheme_boundary(cursor);
             let new_line = code.char_to_line(new_cursor);
-            if !editor.line_visible(new_line) {
-                if let Some(prev_line) = editor.prev_line(new_line) {
+            if !editor.line_visible(new_line)
+                && let Some(prev_line) = editor.prev_line(new_line) {
                     new_cursor =
                         code.line_to_char(prev_line) + code.line_len(prev_line).saturating_sub(1);
                 }
-            }
             if self.shift {
                 editor.extend_selection(new_cursor);
             } else {
@@ -196,13 +190,12 @@ impl Action for InsertText {
         code.set_state_before(cursor, selection);
 
         // 3. Remove selection if present
-        if let Some(sel) = &selection {
-            if !sel.is_empty() {
+        if let Some(sel) = &selection
+            && !sel.is_empty() {
                 let (start, end) = sel.sorted();
                 code.remove(start, end);
                 cursor = start;
             }
-        }
         selection = None;
 
         // 4. Insert the text at the cursor
@@ -719,7 +712,7 @@ impl Action for Cut {
         let mut selection = editor.get_selection();
 
         let sel = match &selection {
-            Some(sel) if !sel.is_empty() => sel.clone(),
+            Some(sel) if !sel.is_empty() => *sel,
             _ => return, // nothing to cut
         };
 
@@ -792,14 +785,13 @@ impl Action for Paste {
         code.set_state_before(cursor, selection);
 
         // 4. Remove selection if present
-        if let Some(sel) = &selection {
-            if !sel.is_empty() {
+        if let Some(sel) = &selection
+            && !sel.is_empty() {
                 let (start, end) = sel.sorted();
                 code.remove(start, end);
                 cursor = start;
                 selection = None;
             }
-        }
 
         // 5. Perform paste with smart indentation
         let inserted = code.smart_paste(cursor, &text);

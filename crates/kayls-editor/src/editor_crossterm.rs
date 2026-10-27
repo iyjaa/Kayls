@@ -43,7 +43,7 @@ impl Editor {
             KeyCode::BackTab => self.apply(UnIndent {}),
             _ => {}
         }
-        self.focus(&area);
+        self.focus(area);
         Ok(())
     }
 

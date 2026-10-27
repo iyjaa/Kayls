@@ -5,10 +5,10 @@ pub use app::App;
 
 use anyhow::Result;
 use crossterm::event::{self, Event};
-use ratatui::layout::Rect;
-use ratatui::DefaultTerminal;
-use std::time::Duration;
 use kayls_core::Document;
+use ratatui::DefaultTerminal;
+use ratatui::layout::Rect;
+use std::time::Duration;
 
 pub fn run(version: &str, document: Option<Document>) -> Result<()> {
     let mut terminal = ratatui::init();

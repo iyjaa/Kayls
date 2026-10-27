@@ -90,13 +90,8 @@ impl Editor {
         Self::new_with_highlights(lang, text, theme, None)
     }
 
-    pub fn from_rope(
-        lang: &str,
-        rope: ropey::Rope,
-        theme: Vec<(&str, &str)>,
-    ) -> Result<Self> {
-        let code = Code::from_rope(lang, rope, None)
-            .or_else(|_| Code::new("", "text", None))?;
+    pub fn from_rope(lang: &str, rope: ropey::Rope, theme: Vec<(&str, &str)>) -> Result<Self> {
+        let code = Code::from_rope(lang, rope, None).or_else(|_| Code::new("", "text", None))?;
 
         let theme = Self::build_theme(&theme);
         let highlights_cache = RefCell::new(HashMap::new());
@@ -654,7 +649,7 @@ impl Editor {
 
     pub fn build_theme(theme: &Vec<(&str, &str)>) -> Theme {
         theme
-            .into_iter()
+            .iter()
             .map(|(name, hex)| {
                 let (r, g, b) = utils::rgb(hex);
                 let color = Color::Rgb(r, g, b);
@@ -730,7 +725,7 @@ impl Editor {
     }
 
     pub fn get_selection(&mut self) -> Option<Selection> {
-        return self.selection;
+        self.selection
     }
 
     pub fn set_selection(&mut self, selection: Option<Selection>) {
@@ -842,11 +837,10 @@ impl Editor {
         }
 
         let mut cache = self.word_highlight_cache.borrow_mut();
-        if let Some((cached_cursor, cached_ranges)) = &*cache {
-            if *cached_cursor == self.cursor {
+        if let Some((cached_cursor, cached_ranges)) = &*cache
+            && *cached_cursor == self.cursor {
                 return cached_ranges.clone();
             }
-        }
 
         let (start, end) = self.code.word_boundaries(self.cursor);
         if start == end {
@@ -861,7 +855,7 @@ impl Editor {
         }
 
         let is_word_char = |c: char| c.is_alphanumeric() || c == '_';
-        if !word.chars().next().map_or(false, is_word_char) {
+        if !word.chars().next().is_some_and(is_word_char) {
             *cache = Some((self.cursor, Vec::new()));
             return Vec::new();
         }
@@ -1037,7 +1031,7 @@ impl Editor {
             }
         }
 
-        return None;
+        None
     }
 
     pub fn show_line_numbers(&mut self, show: bool) {

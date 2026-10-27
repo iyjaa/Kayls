@@ -1,10 +1,12 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use ropey::Rope;
 
 fn bench_rope_from_str(c: &mut Criterion) {
     let mut group = c.benchmark_group("rope");
     for size in [100, 1_000, 10_000].iter() {
-        let text = (0..*size).map(|i| format!("line {}: some content here\n", i)).collect::<String>();
+        let text = (0..*size)
+            .map(|i| format!("line {}: some content here\n", i))
+            .collect::<String>();
         group.bench_with_input(format!("from_str_{}_lines", size), &text, |b, text| {
             b.iter(|| {
                 let rope = Rope::from_str(black_box(text));
@@ -18,7 +20,9 @@ fn bench_rope_from_str(c: &mut Criterion) {
 fn bench_rope_insert(c: &mut Criterion) {
     let mut group = c.benchmark_group("rope_insert");
     for size in [100, 1_000, 10_000].iter() {
-        let text = (0..*size).map(|i| format!("line {}: some content here\n", i)).collect::<String>();
+        let text = (0..*size)
+            .map(|i| format!("line {}: some content here\n", i))
+            .collect::<String>();
         group.bench_with_input(format!("insert_{}_lines", size), size, |b, _| {
             b.iter(|| {
                 let mut rope = Rope::from_str(&text);
@@ -33,10 +37,9 @@ fn bench_rope_insert(c: &mut Criterion) {
     group.finish();
 }
 
-
 fn bench_fs_operations(c: &mut Criterion) {
     let mut group = c.benchmark_group("fs");
-    
+
     // Buat file sementara 100 baris
     use std::io::Write;
     let mut file = tempfile::NamedTempFile::new().unwrap();
@@ -62,6 +65,11 @@ fn bench_fs_operations(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_rope_from_str, bench_rope_insert, bench_fs_operations);
+criterion_group!(
+    benches,
+    bench_rope_from_str,
+    bench_rope_insert,
+    bench_fs_operations
+);
 
 criterion_main!(benches);

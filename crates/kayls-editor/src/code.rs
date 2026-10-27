@@ -48,6 +48,12 @@ impl EditBatch {
     }
 }
 
+impl Default for EditBatch {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EditState {
     pub offset: usize,
@@ -159,11 +165,10 @@ impl Code {
     }
 
     fn get_highlights(&self, lang: &str) -> anyhow::Result<String> {
-        if let Some(highlights_map) = &self.custom_highlights {
-            if let Some(highlights) = highlights_map.get(lang) {
+        if let Some(highlights_map) = &self.custom_highlights
+            && let Some(highlights) = highlights_map.get(lang) {
                 return Ok(highlights.clone());
             }
-        }
         let p = format!("langs/{}/highlights.scm", lang);
         let highlights_bytes =
             LangAssets::get(&p).ok_or_else(|| anyhow!("No highlights found for {}", lang))?;
@@ -223,7 +228,7 @@ impl Code {
         };
         let mut cursor = QueryCursor::new();
         let mut matches = cursor.matches(
-            &query,
+            query,
             tree.root_node(),
             RopeProvider(self.content.slice(..)),
         );
@@ -790,8 +795,8 @@ impl Code {
         }
 
         let count_units = count_indent_units(line, &indent_unit, Some(c));
-        let only_indent = count_units * indent_unit.chars().count() >= c;
-        only_indent
+        
+        count_units * indent_unit.chars().count() >= c
     }
 
     pub fn find_indent_at_line_start(&self, line_idx: usize) -> Option<usize> {
@@ -976,7 +981,7 @@ impl<'a> RopeGraphemes<'a> {
         let first_chunk = chunks.next().unwrap_or("");
         RopeGraphemes {
             text: *slice,
-            chunks: chunks,
+            chunks,
             cur_chunk: first_chunk,
             cur_chunk_start: 0,
             cursor: GraphemeCursor::new(0, slice.len_bytes(), true),
@@ -1134,16 +1139,16 @@ mod tests {
     fn test_is_only_indentation_before() {
         let mut code = Code::new("", "python", None).unwrap();
         code.insert(0, "    print('Hello, World!')");
-        assert_eq!(code.is_only_indentation_before(0, 4), true);
-        assert_eq!(code.is_only_indentation_before(0, 10), false);
+        assert!(code.is_only_indentation_before(0, 4));
+        assert!(!code.is_only_indentation_before(0, 10));
     }
 
     #[test]
     fn test_is_only_indentation_before2() {
         let mut code = Code::new("", "", None).unwrap();
         code.insert(0, "    Hello, World");
-        assert_eq!(code.is_only_indentation_before(0, 4), false);
-        assert_eq!(code.is_only_indentation_before(0, 10), false);
+        assert!(!code.is_only_indentation_before(0, 4));
+        assert!(!code.is_only_indentation_before(0, 10));
     }
 
     #[test]

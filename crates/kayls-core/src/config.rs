@@ -3,6 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct Config {
     #[serde(default)]
     pub editor: EditorConfig,
@@ -30,13 +31,6 @@ fn default_show_explorer() -> bool {
     true
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            editor: EditorConfig::default(),
-        }
-    }
-}
 
 impl Default for EditorConfig {
     fn default() -> Self {

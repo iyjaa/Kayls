@@ -1,10 +1,10 @@
 use ratatui::widgets::{List, ListItem};
 use ratatui::{
+    Frame,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
     widgets::{Block, Borders, Clear, Paragraph},
-    Frame,
 };
 
 use crate::app::{App, Focus, Mode, Theme};
@@ -106,11 +106,10 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
         frame.render_widget(editor, inner_area);
 
         // Set posisi cursor terminal
-        if editor_focused {
-            if let Some((cx, cy)) = editor.get_visible_cursor(&inner_area) {
+        if editor_focused
+            && let Some((cx, cy)) = editor.get_visible_cursor(&inner_area) {
                 frame.set_cursor_position((cx, cy));
             }
-        }
     } else {
         // Fallback kalau editor belum di-load
         let content = match &app.document {
@@ -362,29 +361,6 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
         return vec![Line::from("(empty)")];
     }
 
-    let (color_file, color_folder, color_nested) = match app.theme {
-        Theme::Vesper => (
-            Color::Rgb(184, 212, 184),
-            Color::Rgb(224, 192, 144),
-            Color::Rgb(192, 168, 224),
-        ),
-        Theme::Gruvbox => (
-            Color::Rgb(184, 187, 38),
-            Color::Rgb(250, 189, 47),
-            Color::Rgb(142, 192, 124),
-        ),
-        Theme::Dracula => (
-            Color::Rgb(127, 212, 160),
-            Color::Rgb(212, 160, 200),
-            Color::Rgb(184, 160, 224),
-        ),
-        Theme::Nord => (
-            Color::Rgb(168, 200, 168),
-            Color::Rgb(168, 192, 216),
-            Color::Rgb(168, 212, 212),
-        ),
-    };
-
     let color_selected_bg = Color::Rgb(60, 60, 80);
 
     let visible_iter = tree.iter_visible();
@@ -402,24 +378,12 @@ fn render_file_tree(app: &App) -> Vec<Line<'static>> {
             let is_selected = Some(path) == selected.map(|p| p.as_path());
 
             let icon = if is_dir {
-                if expanded {
-                    "▾"
-                } else {
-                    "▸"
-                }
+                if expanded { "▾" } else { "▸" }
             } else {
                 " "
             };
 
-            let text_color = if is_dir {
-                if depth == 0 {
-                    color_folder
-                } else {
-                    color_nested
-                }
-            } else {
-                color_file
-            };
+            let text_color = explorer_color(app.theme, is_dir, depth, name);
 
             let mut style = Style::default().fg(text_color);
             if is_selected {
@@ -473,12 +437,12 @@ fn tab_fg_color(theme: Theme) -> Color {
 fn render_keybinding_popup(frame: &mut Frame, app: &App) {
     let area = centered_rect(50, 30, frame.area());
     let modes = ["Vim (Modal)", "Easy (VS Code)"];
-    
+
     // Ambil warna dari tema aktif
     let accent = theme_accent_color(app.theme);
     let bg = theme_bg_color(app.theme);
     let fg = theme_fg_color(app.theme);
-    
+
     let items: Vec<ListItem> = modes
         .iter()
         .enumerate()
@@ -495,18 +459,92 @@ fn render_keybinding_popup(frame: &mut Frame, app: &App) {
         })
         .collect();
 
-    let list = List::new(items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_style(Style::default().fg(accent))
-                .title(" Select Keybinding Mode ")
-                .title_style(Style::default().fg(accent).add_modifier(Modifier::BOLD))
-                .style(Style::default().bg(bg))
-        );
-    
+    let list = List::new(items).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(accent))
+            .title(" Select Keybinding Mode ")
+            .title_style(Style::default().fg(accent).add_modifier(Modifier::BOLD))
+            .style(Style::default().bg(bg)),
+    );
+
     frame.render_widget(Clear, area);
     frame.render_widget(list, area);
+}
+
+fn mix_color(c1: Color, c2: Color, t: f32) -> Color {
+    let t = t.clamp(0.0, 1.0);
+    match (c1, c2) {
+        (Color::Rgb(r1, g1, b1), Color::Rgb(r2, g2, b2)) => {
+            let r = (r1 as f32 * (1.0 - t) + r2 as f32 * t) as u8;
+            let g = (g1 as f32 * (1.0 - t) + g2 as f32 * t) as u8;
+            let b = (b1 as f32 * (1.0 - t) + b2 as f32 * t) as u8;
+            Color::Rgb(r, g, b)
+        }
+        _ => c1,
+    }
+}
+
+fn explorer_color(theme: Theme, is_dir: bool, depth: usize, name: &str) -> Color {
+    // Palet warna harmonis untuk setiap level kedalaman folder sesuai tema
+    let folder_palette: &[Color] = match theme {
+        Theme::Vesper => &[
+            Color::Rgb(120, 160, 255), // L0: Bright Blue
+            Color::Rgb(170, 140, 255), // L1: Soft Purple
+            Color::Rgb(100, 200, 220), // L2: Cyan/Teal
+            Color::Rgb(140, 150, 180), // L3+: Muted Slate
+        ],
+        Theme::Gruvbox => &[
+            Color::Rgb(215, 153, 33),  // L0: Yellow
+            Color::Rgb(214, 93, 14),   // L1: Orange
+            Color::Rgb(184, 187, 38),  // L2: Green
+            Color::Rgb(168, 153, 132), // L3+: Beige/Gray
+        ],
+        Theme::Dracula => &[
+            Color::Rgb(189, 147, 249), // L0: Purple
+            Color::Rgb(255, 121, 198), // L1: Pink
+            Color::Rgb(139, 233, 253), // L2: Cyan
+            Color::Rgb(120, 140, 180), // L3+: Muted Blue
+        ],
+        Theme::Nord => &[
+            Color::Rgb(136, 192, 208), // L0: Cyan
+            Color::Rgb(129, 161, 193), // L1: Light Blue
+            Color::Rgb(94, 129, 172),  // L2: Deep Blue
+            Color::Rgb(120, 130, 150), // L3+: Muted Gray
+        ],
+    };
+
+    let depth_idx = depth.min(folder_palette.len() - 1);
+    let folder_color = folder_palette[depth_idx];
+
+    if is_dir {
+        return folder_color;
+    }
+
+    // Untuk file: Gunakan warna ekstensi, lalu campur dengan warna folder induknya (25%)
+    // agar terlihat menyatu dengan hierarki.
+    let base_file_color = match theme {
+        Theme::Vesper => Color::Rgb(197, 209, 192),
+        Theme::Gruvbox => Color::Rgb(213, 196, 161),
+        Theme::Dracula => Color::Rgb(216, 216, 224),
+        Theme::Nord => Color::Rgb(200, 208, 220),
+    };
+
+    let ext_color = match name.rsplit('.').next().unwrap_or("") {
+        "rs" => Color::Rgb(222, 165, 132), // Rust Orange
+        "md" => Color::Rgb(81, 154, 186),  // Markdown Blue
+        "toml" | "yml" | "yaml" => Color::Rgb(180, 140, 200), // Config Purple
+        "json" => Color::Rgb(210, 210, 100), // JSON Yellow
+        "gitignore" | "lock" => Color::Rgb(120, 120, 120), // Gray
+        _ => base_file_color,
+    };
+
+    if depth == 0 {
+        ext_color
+    } else {
+        // Campur warna ekstensi dengan warna folder tempat file itu berada
+        mix_color(ext_color, folder_color, 0.25)
+    }
 }
 
 fn theme_accent_color(theme: Theme) -> Color {

@@ -82,7 +82,7 @@ impl Widget for &Editor {
                     buf.set_string(
                         area.left(),
                         draw_y,
-                        &format!("{:>width$}", "...", width = line_number_digits),
+                        format!("{:>width$}", "...", width = line_number_digits),
                         line_number_style,
                     );
                 }
@@ -124,13 +124,18 @@ impl Widget for &Editor {
                     } else {
                         use std::fmt::Write;
                         line_num_buf.clear();
-                        let _ = write!(line_num_buf, "{:>width$}", line_idx + 1, width = line_number_digits);
+                        let _ = write!(
+                            line_num_buf,
+                            "{:>width$}",
+                            line_idx + 1,
+                            width = line_number_digits
+                        );
                         &line_num_buf
                     };
-                    buf.set_string(area.left(), draw_y, &line_number, line_number_style);
+                    buf.set_string(area.left(), draw_y, line_number, line_number_style);
                 }
-                if !is_ghost {
-                    if let Some(collapsed) = self.code_fold_indicator(line_idx) {
+                if !is_ghost
+                    && let Some(collapsed) = self.code_fold_indicator(line_idx) {
                         let indicator = if collapsed {
                             &self.code_folding_options.indicators.collapsed
                         } else {
@@ -143,7 +148,6 @@ impl Widget for &Editor {
                             line_number_style,
                         );
                     }
-                }
 
                 let text_x = area.left() + line_number_width as u16;
                 let width = (area.width as usize).saturating_sub(line_number_width);
@@ -214,7 +218,7 @@ impl Widget for &Editor {
                     let start_x = text_x + x as u16;
 
                     // Check if current character falls within an intra-line highlight range
-                    let is_word_highlight = intra_highlights.as_ref().map_or(false, |ranges| {
+                    let is_word_highlight = intra_highlights.as_ref().is_some_and(|ranges| {
                         ranges
                             .iter()
                             .any(|&(start, end)| char_col >= start && char_col < end)
@@ -301,7 +305,7 @@ impl Widget for &Editor {
                     buf.set_string(
                         fill_x,
                         draw_y,
-                        &" ".repeat(fill_width),
+                        " ".repeat(fill_width),
                         Style::default().bg(bg),
                     );
                 }

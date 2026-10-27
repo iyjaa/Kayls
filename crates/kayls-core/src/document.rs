@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use ropey::Rope;
 use crate::cursor::Cursor;
+use ropey::Rope;
 
 #[derive(Debug)]
 pub struct Document {
@@ -43,7 +43,10 @@ impl Document {
 
     pub fn current_line_len(&self) -> usize {
         if self.cursor.line < self.rope.len_lines() {
-            self.rope.line(self.cursor.line).len_chars().saturating_sub(1)
+            self.rope
+                .line(self.cursor.line)
+                .len_chars()
+                .saturating_sub(1)
         } else {
             0
         }

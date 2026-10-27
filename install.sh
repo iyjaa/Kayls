@@ -2,18 +2,19 @@
 
 set -eo pipefail
 
-# --- Palet Warna Vesper ---
-BLUE='\033[38;5;111m'
-GREEN='\033[38;5;114m'
-CYAN='\033[38;5;116m'
-GRAY='\033[38;5;242m'
-YELLOW='\033[38;5;222m'
-BOLD='\033[1m'
-NC='\033[0m'
+# --- Palet Warna (Menggunakan $'\033' agar pasti diproses) ---
+ESC=$'\033'
+BLUE="${ESC}[38;5;111m"
+GREEN="${ESC}[38;5;114m"
+CYAN="${ESC}[38;5;116m"
+GRAY="${ESC}[38;5;242m"
+YELLOW="${ESC}[38;5;222m"
+BOLD="${ESC}[1m"
+NC="${ESC}[0m"
 
 info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 success() { echo -e "${GREEN}[ OK ]${NC} $1"; }
-error() { echo -e "${RED}[FAIL]${NC} $1" >&2; exit 1; }
+error() { echo -e "${ESC}[38;5;203m[FAIL]${NC} $1" >&2; exit 1; }
 
 progress_bar() {
     local current=$1
@@ -23,19 +24,19 @@ progress_bar() {
     local filled=$(( percent * width / 100 ))
     local empty=$(( width - filled ))
 
-    printf "${CYAN}["
+    echo -ne "${CYAN}["
     printf "%${filled}s" | tr ' ' '█'
     printf "%${empty}s" | tr ' ' '-'
-    printf "]${NC} %3d%% (${GRAY}%d/%d bytes${NC})\r" "$percent" "$current" "$total"
+    echo -ne "]${NC} ${percent}%\r"
 }
 
 download_file() {
     local url=$1
     local output=$2
-    local total_size=$(curl -sI "$url" | grep -i "content-length:" | tail -1 | tr -dc '0-9')
+    local total_size=$(curl -sIL "$url" | grep -i "content-length:" | tail -1 | tr -dc '0-9')
     
     if [ -z "$total_size" ] || [ "$total_size" -eq 0 ]; then
-        info "Downloading (unknown size)..."
+        info "Downloading..."
         curl -fsSL "$url" -o "$output"
         return
     fi
@@ -56,22 +57,8 @@ download_file() {
     echo ""
 }
 
-spinner() {
-    local text=$1
-    local pid=$!
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " ${CYAN}[%c]${NC} %s\r" "$spinstr" "$text"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep 0.1
-    done
-    printf "\r\033[K"
-}
-
 REPO="iyjaa/Kayls"
 BINARY_NAME="kayls"
-INSTALL_DIR=""
 
 detect_platform() {
     local os arch target install_dir
@@ -117,7 +104,8 @@ main() {
     echo -e "${CYAN}${BOLD}      Kayls Installer                 ${NC}"
     echo -e "${CYAN}${BOLD}======================================${NC}"
     echo ""
-    echo -e "  ${YELLOW}${BOLD}Kayls-Terminal-Editor${NC}"
+    echo -e "  ${YELLOW}${BOLD}Terminal Studio Code${NC}"
+    echo -e "  ${GRAY}Lightweight • Fast • Rust-powered${NC}"
     echo ""
     echo -e "${GRAY}──────────────────────────────────────${NC}"
     echo ""
@@ -147,8 +135,8 @@ main() {
     echo ""
 
     info "Extracting binary..."
-    (tar xzf "$tmp_dir/$archive" -C "$tmp_dir") &
-    spinner "Extracting..."
+    tar xzf "$tmp_dir/$archive" -C "$tmp_dir"
+    chmod +x "$tmp_dir/$BINARY_NAME"
     success "Extracted."
     echo ""
 
@@ -168,7 +156,7 @@ main() {
     echo ""
 
     echo -e "${GRAY}──────────────────────────────────────${NC}"
-    echo -e "${GREEN}${BOLD} Installation Complete!${NC}"
+    echo -e "${GREEN}${BOLD}🎉 Installation Complete!${NC}"
     echo ""
     if command -v "$BINARY_NAME" >/dev/null 2>&1; then
         echo -e "  Run ${BOLD}kayls --help${NC} to get started."

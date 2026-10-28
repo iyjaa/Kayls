@@ -13,6 +13,7 @@ Issues that have been reported but not yet fixed.
 
 | ID | Title | Type | Reported |
 |----|-------|------|----------|
+| #4 | [UI] Add tab bar for multiple files | Other | 2026-10-28 |
 | #3 | [Editor Core] Implement multiple cursors (Ctrl+D) | Other | 2026-10-28 |
 | #1 | testing for workflow | Other | 2026-10-14 |
 

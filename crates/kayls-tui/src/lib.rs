@@ -10,16 +10,15 @@ use ratatui::DefaultTerminal;
 use ratatui::layout::Rect;
 use std::time::Duration;
 
-pub fn run(version: &str, document: Option<Document>) -> Result<()> {
+pub fn run(document: Option<Document>) -> Result<()> {
     let mut terminal = ratatui::init();
-    let result = run_loop(&mut terminal, version, document);
+    let result = run_loop(&mut terminal, document);
     ratatui::restore();
     result
 }
 
 fn run_loop(
     terminal: &mut DefaultTerminal,
-    version: &str,
     document: Option<Document>,
 ) -> Result<()> {
     let mut app = App::new(document);
@@ -49,7 +48,7 @@ fn run_loop(
 
         app.tick();
 
-        terminal.draw(|frame| ui::render(frame, &app, version))?;
+        terminal.draw(|frame| ui::render(frame, &app))?;
 
         if event::poll(Duration::from_millis(100))? {
             match event::read()? {

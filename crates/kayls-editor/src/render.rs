@@ -24,7 +24,7 @@ impl Widget for &Editor {
         let code = self.code_ref();
         let total_lines = code.len_lines();
         let max_line_number = total_lines.max(1);
-        let line_number_digits = max_line_number.to_string().len().max(5);
+        let line_number_digits = max_line_number.to_string().len().max(3);
         let line_number_width = self.get_line_number_width();
         let fold_gutter_width = self.fold_gutter_width();
         let total_visual_lines = self.visual_len_lines();
@@ -153,12 +153,27 @@ impl Widget for &Editor {
                 let width = (area.width as usize).saturating_sub(line_number_width);
 
                 let line_len = source_code.line_len(line_idx);
-                let start_col = self.offset_x.min(line_len);
+                let start_col = self.offset_x;
                 let end_col = (start_col + width).min(line_len);
 
                 let line_start_char = source_code.line_to_char(line_idx);
-                let char_slice_start = line_start_char + start_col;
-                let char_slice_end = line_start_char + end_col;
+                let max_chars = source_code.len_chars();
+                
+                // Pastikan char_slice_start dan char_slice_end tidak melebihi len_chars
+                let char_slice_start = (line_start_char + start_col).min(max_chars);
+                let char_slice_end = (line_start_char + end_col).min(max_chars);
+                
+                // Jika start_col sudah melewati panjang baris, skip render teks
+                // (hanya gambar nomor baris)
+                if start_col >= line_len {
+                    if self.show_line_numbers {
+                        let line_number = format!("{:>width$}", line_idx + 1, width = line_number_digits);
+                        buf.set_string(area.left(), draw_y, &line_number, line_number_style);
+                    }
+                    draw_y += 1;
+                    continue;
+                }
+                
                 let visible_chars = source_code.char_slice(char_slice_start, char_slice_end);
 
                 let start_byte = source_code.char_to_byte(char_slice_start);

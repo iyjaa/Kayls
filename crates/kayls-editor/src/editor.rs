@@ -115,7 +115,7 @@ impl Editor {
             word_highlight_cache: RefCell::new(None),
             show_line_numbers: true,
             code_folding_options: CodeFoldingOptions::default(),
-            left_code_padding: 2,
+            left_code_padding: 1,
             view_mode: ViewMode::Plain,
             original_code: None,
             diff_options: DiffOptions::default(),
@@ -154,7 +154,7 @@ impl Editor {
             word_highlight_cache: RefCell::new(None),
             show_line_numbers: true,
             code_folding_options: CodeFoldingOptions::default(),
-            left_code_padding: 2,
+            left_code_padding: 1,
             view_mode: ViewMode::Plain,
             original_code: None,
             diff_options: DiffOptions::default(),
@@ -167,7 +167,7 @@ impl Editor {
         if self.show_line_numbers {
             let total_lines = self.code.len_lines();
             let max_line_number = total_lines.max(1);
-            let line_number_digits = max_line_number.to_string().len().max(4);
+            let line_number_digits = max_line_number.to_string().len().max(1);
             line_number_digits + self.left_code_padding + fold_gutter_width
         } else {
             self.left_code_padding + fold_gutter_width
@@ -192,6 +192,7 @@ impl Editor {
         let visible_height = height;
 
         // ── Horizontal: smooth scroll dengan margin ──
+        // Izinkan offset_x melebihi line_len (ruang kosong di kanan)
         let margin_x = 1.min(visible_width / 4);
         let left_limit = self.offset_x + margin_x;
         let right_limit = self.offset_x + visible_width.saturating_sub(margin_x + 1);
@@ -201,6 +202,10 @@ impl Editor {
         } else if col > right_limit {
             self.offset_x = col + margin_x + 1 - visible_width;
         }
+        
+        // Batasi offset_x agar tidak melebihi panjang baris (mencegah panic)
+        let max_col = self.code.line_len(line).saturating_sub(1);
+        self.offset_x = self.offset_x.min(max_col);
 
         // ── Vertical ──
         let visual_line = self.visual_line_idx(line);
@@ -544,9 +549,9 @@ impl Editor {
         self.reset_highlight_cache();
     }
 
-    pub fn set_cursor(&mut self, cursor: usize) {
-        self.cursor = cursor;
-        self.fit_cursor();
+        pub fn set_cursor(&mut self, cursor: usize) {
+        let max = self.code.len_chars().saturating_sub(1);
+        self.cursor = cursor.min(max);
     }
 
     /// Toggles the Rust Tree-sitter fold that begins on `line_idx`.

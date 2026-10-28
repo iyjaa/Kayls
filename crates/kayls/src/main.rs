@@ -23,5 +23,5 @@ fn main() -> Result<()> {
         None => None,
     };
 
-    kayls_tui::run(env!("KAYL_VERSION"), document)
+    kayls_tui::run(document)
 }

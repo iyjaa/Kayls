@@ -9,7 +9,7 @@ use ratatui::{
 
 use crate::app::{App, Focus, Mode, Theme};
 
-pub fn render(frame: &mut Frame, app: &App, version: &str) {
+pub fn render(frame: &mut Frame, app: &App) {
     let rows = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -134,7 +134,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                 Line::from("       ( -   - )       ").style(Style::default().fg(accent)),
                 Line::from("        >  w  <        ").style(Style::default().fg(accent)),
                 Line::from(""),
-                Line::from(format!("      Kayls v{}", version)).style(Style::default().add_modifier(Modifier::BOLD).fg(accent)),
+                Line::from(format!(" Kayls v{}", version)).style(Style::default().add_modifier(Modifier::BOLD).fg(accent)),
                 Line::from("  Terminal Studio Code").style(Style::default().fg(dim_color)),
                 Line::from(""),
                 Line::from(" ────────────────────────── ").style(Style::default().fg(dim_color)),
@@ -164,6 +164,29 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             };
             menu_items.push(Line::from(format!("  Active: {}", mode_str)).style(Style::default().fg(dim_color)));
 
+            // Beri margin vertikal agar konten berada di tengah secara visual
+
+            // Hitung tinggi konten
+            let content_height = menu_items.len() as u16;
+            let total_height = editor_area.height;
+            
+            // Hitung margin atas agar konten berada di tengah
+            let top_margin = if total_height > content_height {
+                (total_height - content_height) / 2
+            } else {
+                0
+            };
+            
+            // Buat layout: margin atas, konten, margin bawah
+            let v_layout = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints([
+                    Constraint::Length(top_margin),
+                    Constraint::Length(content_height),
+                    Constraint::Min(0),
+                ])
+                .split(editor_area);
+
             frame.render_widget(
                 Paragraph::new(menu_items)
                     .alignment(Alignment::Center)
@@ -173,7 +196,7 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                             .title(editor_title)
                             .border_style(editor_border_style),
                     ),
-                editor_area,
+                v_layout[1],
             );
         }
     }
@@ -202,9 +225,8 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             } else {
                 (
                     format!(
-                        " EASY [{}]   {}   {}   v:{} h:{} ",
+                        " EASY [{}]   {}   v:{} h:{} ",
                         focus_label,
-                        version,
                         cursor_info,
                         app.scroll_offset,
                         app.scroll_offset_x
@@ -226,9 +248,8 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             } else {
                 (
                     format!(
-                        " NORMAL [{}]   {}   {}   v:{} h:{} ",
+                        " NORMAL [{}]   {}   v:{} h:{} ",
                         focus_label,
-                        version,
                         cursor_info,
                         app.scroll_offset,
                         app.scroll_offset_x

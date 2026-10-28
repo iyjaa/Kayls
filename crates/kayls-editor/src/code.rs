@@ -572,7 +572,7 @@ impl Code {
         theme: &HashMap<String, T>,
     ) -> Vec<(usize, usize, T)> {
         if start > end {
-            panic!("Invalid range")
+            return Vec::new();
         }
 
         let Some(query) = &self.query else {

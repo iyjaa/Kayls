@@ -10,7 +10,7 @@ Kayls is a lightweight, fast terminal-based IDE written in Rust. It runs in any 
 
 ## Status
 
-**Kayls-v1.0.4** — Improved performance, dynamic Explorer colors, and new Welcome Screen.
+**Kayls-v1.0.5** — Improved performance, dynamic Explorer colors, and new Welcome Screen.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for feature progress and [docs/VERSIONING.md](docs/VERSIONING.md) for versioning.
 
@@ -20,6 +20,8 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for feature progress and [docs/VERSIONING
 - **Auto-pair & Auto-indent** — brackets and quotes auto-close.
 - **File tree** — recursive, lazy-loaded, with dynamic theme-aware gradient colors.
 - **Keybinding Modes** — Easy Mode (VS Code-style) and Command Mode (Vim-inspired) via Esc then m.
+- **Search** — In-file search with `Ctrl+F`.
+- **Read Mode** — `Ctrl+R` to scroll freely without cursor interference.
 - **Themes** — Vesper (default), Gruvbox, Dracula, Nord.
 - **Welcome Screen** — native ASCII mascot, centered and themed.
 
@@ -61,11 +63,5 @@ Kayls supports two distinct modes, switchable via Esc then m:
 
 For a complete list, see [KEYBINDS.md](KEYBINDS.md).
 
-## The Story
-
-Kayls is named after **Kayla**, my partner. The orange cat in the logo is a tribute to her love of cats.
-Like a cat, Kayls is designed to be lightweight, calm, and always nearby.
-
-## License
 
 [MIT](LICENSE)

@@ -42,3 +42,21 @@ Kayls is a Rust workspace with the following crates:
 By contributing to Kayls, you agree that your contributions will be licensed under the [MIT License](LICENSE).
 
 Every contribution matters — code, docs, bug reports, or feedback. Thank you for helping make Kayls better.
+
+## Branching Strategy
+
+The repository is divided into three main branches. Do not open PRs directly against main unless your change spans multiple areas.
+
+| Branch | Scope | Key Directories |
+|---|---|---|
+| `feat/editor-core` | Buffer logic, Rope, tree-sitter, cursor, selection. | `crates/kayls-editor`, `crates/kayls-core` |
+| `feat/ui-integration` | Ratatui widgets, layout, rendering, input routing. | `crates/kayls-tui` |
+| `docs/improvement` | Documentation, branding, tutorials. | `docs/`, `*.md`, `assets/` |
+
+## Integration Contract
+
+The UI and Editor teams communicate through the API contract in `crates/kayls-editor/FEATURES.md`.
+
+1. **Editor Team:** Update `FEATURES.md` when adding or changing public methods.
+2. **UI Team:** Read `FEATURES.md` to discover new capabilities. Never access private fields directly.
+3. **Breaking Changes:** Notify the UI team via GitHub issue if a method signature changes.

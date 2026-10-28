@@ -3,7 +3,7 @@
 > Summary of issues from [GitHub Issues](https://github.com/iyjaa/Kayls/issues).
 > For the full list, see GitHub.
 
-**Last updated**: 2026-10-15
+**Last updated**: 2026-10-28
 
 ---
 
@@ -13,6 +13,7 @@ Issues that have been reported but not yet fixed.
 
 | ID | Title | Type | Reported |
 |----|-------|------|----------|
+| #3 | [Editor Core] Implement multiple cursors (Ctrl+D) | Other | 2026-10-28 |
 | #1 | testing for workflow | Other | 2026-10-14 |
 
 ---

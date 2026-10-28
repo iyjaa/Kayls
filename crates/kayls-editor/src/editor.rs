@@ -647,6 +647,15 @@ impl Editor {
         }
     }
 
+    pub fn scroll_to_cursor(&mut self, area_height: usize) {
+        let (row, _) = self.code.point(self.cursor);
+        if row < self.offset_y {
+            self.offset_y = row;
+        } else if row >= self.offset_y + area_height {
+            self.offset_y = row.saturating_sub(area_height / 2);
+        }
+    }
+
     pub fn build_theme(theme: &Vec<(&str, &str)>) -> Theme {
         theme
             .iter()

@@ -282,6 +282,12 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
                     .fg(Color::Rgb(240, 200, 200)),
             )
         }
+        Mode::Search => (
+            format!(" /{}_  ({} matches) ", app.search_query, app.search_matches.len()),
+            Style::default()
+                .bg(Color::Rgb(90, 80, 40))
+                .fg(Color::Rgb(230, 220, 180)),
+        ),
         Mode::SelectKeybinding => (
             " Select Keybinding Mode — ↑↓ navigate, Enter confirm, Esc cancel ".to_string(),
             Style::default()

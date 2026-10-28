@@ -12,6 +12,7 @@ pub enum Mode {
     Easy,
     Command,
     Prompt,
+    Search,
     PromptNewFile,
     PromptNewFolder,
     ConfirmDelete,
@@ -56,6 +57,9 @@ pub struct App {
     pub editor_height: u16,
     pub clipboard: String,
     pub editor_width: u16,
+    pub search_query: String,
+    pub search_matches: Vec<usize>,
+    pub search_current_idx: usize,
     pub mode: Mode,
     pub input_buffer: String,
     pub pending_delete: Option<PathBuf>,
@@ -99,6 +103,9 @@ impl App {
             editor_height: 0,
             clipboard: String::new(),
             editor_width: 0,
+            search_query: String::new(),
+            search_matches: Vec::new(),
+            search_current_idx: 0,
             mode: if config.editor.keybinding.to_lowercase() == "easy" {
                 Mode::Easy
             } else {
@@ -178,6 +185,7 @@ impl App {
             Mode::ConfirmDelete => self.handle_confirm_delete(key),
             Mode::SelectTheme => self.handle_select_theme(key),
             Mode::SelectKeybinding => self.handle_select_keybinding(key),
+            Mode::Search => self.handle_search(key),
         }
     }
 
@@ -279,6 +287,66 @@ impl App {
         }
     }
 
+    fn handle_search(&mut self, key: KeyEvent) {
+        match key.code {
+            KeyCode::Esc => {
+                self.mode = Mode::Normal;
+                self.search_query.clear();
+                self.search_matches.clear();
+            }
+            KeyCode::Enter => {
+                if !self.search_matches.is_empty() {
+                    // Jika ini Enter pertama, langsung ke hasil pertama (idx 0).
+                    // Jika bukan, baru maju ke hasil berikutnya.
+                    if self.search_query.len() > 0 && self.search_matches.len() > 1 {
+                        self.search_current_idx = (self.search_current_idx + 1) % self.search_matches.len();
+                    }
+                    
+                    let match_char_idx = self.search_matches[self.search_current_idx];
+                    let h = self.editor_height as usize;
+                    if let Some(editor) = &mut self.editor {
+                        editor.set_cursor(match_char_idx);
+                        editor.scroll_to_cursor(h);
+                    }
+                    self.status_message = Some(format!("Match {}/{}", self.search_current_idx + 1, self.search_matches.len()));
+                    self.status_time = Some(Instant::now());
+                }
+            }
+            KeyCode::Char(c) => {
+                self.search_query.push(c);
+                self.perform_search();
+            }
+            KeyCode::Backspace => {
+                self.search_query.pop();
+                self.perform_search();
+            }
+            _ => {}
+        }
+    }
+
+    fn perform_search(&mut self) {
+        self.search_matches.clear();
+        self.search_current_idx = 0;
+        
+        if self.search_query.is_empty() { return; }
+        
+        if let Some(editor) = &self.editor {
+            let code = editor.get_content(); // Mengembalikan String
+            let query_lower = self.search_query.to_lowercase();
+            let code_lower = code.to_lowercase();
+            
+            // Gunakan pencarian char-based, bukan byte-based
+            let mut byte_start = 0;
+            while let Some(byte_pos) = code_lower[byte_start..].find(&query_lower) {
+                let abs_byte_pos = byte_start + byte_pos;
+                // Konversi byte offset ke char offset
+                let char_pos = code[..abs_byte_pos].chars().count();
+                self.search_matches.push(char_pos);
+                byte_start = abs_byte_pos + query_lower.len();
+            }
+        }
+    }
+
     fn handle_normal(&mut self, key: KeyEvent) {
         if let KeyCode::Esc = key.code {
             self.mode = Mode::Command;
@@ -296,6 +364,15 @@ impl App {
     fn handle_editor_keys(&mut self, key: KeyEvent) {
         if let Some(editor) = self.editor.as_mut() {
             let area = self.editor_area;
+
+            // Ctrl+F untuk Search
+            if key.code == KeyCode::Char('f') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                self.mode = Mode::Search;
+                self.search_query.clear();
+                self.search_matches.clear();
+                self.search_current_idx = 0;
+                return;
+            }
 
             // Ctrl+Y untuk Copy ke App.clipboard (antar-file)
             if key.code == KeyCode::Char('y') && key.modifiers.contains(KeyModifiers::CONTROL) {

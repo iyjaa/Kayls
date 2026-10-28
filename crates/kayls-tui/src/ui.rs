@@ -112,24 +112,70 @@ pub fn render(frame: &mut Frame, app: &App, version: &str) {
             }
     } else {
         // Fallback kalau editor belum di-load
-        let content = match &app.document {
-            Some(doc) => doc.content_as_string(),
-            None => {
-                "
-                Welcome to Kayls!\n\nOpen a Editor: Esc then q\nOpen a Explorer: Esc then e\nOpen a file: Esc then o\nPress Alt+Q to quit.
-                ".to_string()
-            }
-        };
+        if let Some(doc) = &app.document {
+            frame.render_widget(
+                Paragraph::new(doc.content_as_string()).block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .title(editor_title)
+                        .border_style(editor_border_style),
+                ),
+                editor_area,
+            );
+        } else {
+            let accent = theme_accent_color(app.theme);
+            let text_color = theme_fg_color(app.theme);
+            let dim_color = Color::Rgb(100, 100, 120);
+            let version = env!("CARGO_PKG_VERSION");
 
-        frame.render_widget(
-            Paragraph::new(content).block(
-                Block::default()
-                    .borders(Borders::ALL)
-                    .title(editor_title)
-                    .border_style(editor_border_style),
-            ),
-            editor_area,
-        );
+            let mut menu_items = vec![
+                Line::from(""),
+                Line::from("        /\\_/\\        ").style(Style::default().fg(accent)),
+                Line::from("       ( -   - )       ").style(Style::default().fg(accent)),
+                Line::from("        >  w  <        ").style(Style::default().fg(accent)),
+                Line::from(""),
+                Line::from(format!("      Kayls v{}", version)).style(Style::default().add_modifier(Modifier::BOLD).fg(accent)),
+                Line::from("  Terminal Studio Code").style(Style::default().fg(dim_color)),
+                Line::from(""),
+                Line::from(" ────────────────────────── ").style(Style::default().fg(dim_color)),
+                Line::from(""),
+            ];
+
+            let shortcuts = vec![
+                ("Open File", "Esc then o"),
+                ("New File", "Esc then n"),
+                ("Explorer", "Esc then e"),
+                ("Theme", "Esc then t"),
+                ("Mode", "Esc then m"),
+                ("Quit", "Alt+Q"),
+            ];
+
+            for (label, key) in shortcuts {
+                menu_items.push(Line::from(vec![
+                    Span::styled(format!("  {:<12}", label), Style::default().fg(text_color)),
+                    Span::styled(key, Style::default().fg(accent).add_modifier(Modifier::BOLD)),
+                ]));
+            }
+            
+            menu_items.push(Line::from(""));
+            let mode_str = match app.mode {
+                Mode::Easy => "Easy Mode",
+                _ => "Command Mode",
+            };
+            menu_items.push(Line::from(format!("  Active: {}", mode_str)).style(Style::default().fg(dim_color)));
+
+            frame.render_widget(
+                Paragraph::new(menu_items)
+                    .alignment(Alignment::Center)
+                    .block(
+                        Block::default()
+                            .borders(Borders::ALL)
+                            .title(editor_title)
+                            .border_style(editor_border_style),
+                    ),
+                editor_area,
+            );
+        }
     }
 
     // Status bar

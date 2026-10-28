@@ -108,7 +108,9 @@ pub fn render(frame: &mut Frame, app: &App) {
         // Set posisi cursor terminal
         if editor_focused
             && let Some((cx, cy)) = editor.get_visible_cursor(&inner_area) {
-                frame.set_cursor_position((cx, cy));
+                if !app.read_mode {
+                    frame.set_cursor_position((cx, cy));
+                }
             }
     } else {
         // Fallback kalau editor belum di-load

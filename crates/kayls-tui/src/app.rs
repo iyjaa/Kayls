@@ -60,6 +60,7 @@ pub struct App {
     pub search_query: String,
     pub search_matches: Vec<usize>,
     pub search_current_idx: usize,
+    pub read_mode: bool,
     pub mode: Mode,
     pub input_buffer: String,
     pub pending_delete: Option<PathBuf>,
@@ -106,6 +107,7 @@ impl App {
             search_query: String::new(),
             search_matches: Vec::new(),
             search_current_idx: 0,
+            read_mode: false,
             mode: if config.editor.keybinding.to_lowercase() == "easy" {
                 Mode::Easy
             } else {
@@ -365,6 +367,12 @@ impl App {
         if let Some(editor) = self.editor.as_mut() {
             let area = self.editor_area;
 
+            // Ctrl+R untuk Read Mode
+            if key.code == KeyCode::Char('r') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                self.read_mode = !self.read_mode;
+                return;
+            }
+
             // Ctrl+F untuk Search
             if key.code == KeyCode::Char('f') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 self.mode = Mode::Search;
@@ -393,6 +401,33 @@ impl App {
                     });
                 }
                 return;
+            }
+
+            // Jika Read Mode aktif, semua panah hanya scroll layar (tidak menyentuh kursor)
+            if self.read_mode {
+                match key.code {
+                    KeyCode::Up => {
+                        editor.scroll_up();
+                        return;
+                    }
+                    KeyCode::Down => {
+                        editor.scroll_down(self.editor_height as usize);
+                        return;
+                    }
+                    KeyCode::Left => {
+                        let current_x = editor.get_offset_x();
+                        if current_x > 0 {
+                            editor.set_offset_x(current_x - 1);
+                        }
+                        return;
+                    }
+                    KeyCode::Right => {
+                        let current_x = editor.get_offset_x();
+                        editor.set_offset_x(current_x + 1);
+                        return;
+                    }
+                    _ => {}
+                }
             }
 
             if let Err(e) = editor.input(key, &area) {

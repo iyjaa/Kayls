@@ -83,4 +83,4 @@ Typing any of these automatically inserts the matching closing character:
 
 Typing a closing character when one is already ahead will skip over it (no duplicate).
 
-**Note**: A VS Code keybinding mode (`Ctrl+S`, `Ctrl+O`, `Ctrl+B`, etc.) is planned. See [docs/ROADMAP.md](docs/ROADMAP.md).
+**Note**: A VS Code keybinding mode (`Ctrl+S`, `Ctrl+O`, `Ctrl+B`, etc.) is planned. See [ROADMAP.md](ROADMAP.md).

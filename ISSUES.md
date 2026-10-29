@@ -75,7 +75,7 @@ Thanks to everyone who has contributed to Kayls:
    - **Environment** — OS, terminal, Kayls version
 3. Wait for maintainer triage
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow.
+See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for contribution workflow.
 
 ---
 

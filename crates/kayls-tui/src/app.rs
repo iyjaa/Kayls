@@ -62,6 +62,7 @@ pub struct App {
     pub read_mode: bool,
     pub picker: crate::picker::PickerState,
     pub mode: Mode,
+    pub prev_mode: Option<Mode>,
     pub input_buffer: String,
     pub pending_delete: Option<PathBuf>,
     pub status_message: Option<String>,
@@ -115,6 +116,7 @@ impl App {
                 Mode::Normal
             },
             input_buffer: String::new(),
+            prev_mode: None,
             pending_delete: None,
             status_message: None,
             status_time: None,
@@ -198,13 +200,13 @@ impl App {
                     .unwrap_or_else(|| std::path::PathBuf::from("."));
 
                 if let Some(path) = self.picker.handle_key(key, &root) {
-                    self.mode = Mode::Normal;
+                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                     if let Ok(doc) = Document::open(&path) {
                         self.document = Some(doc);
                         self.load_editor();
                     }
                 } else if key.code == KeyCode::Esc {
-                    self.mode = Mode::Normal;
+                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 }
             }
         }
@@ -224,18 +226,17 @@ impl App {
         if key.modifiers.contains(KeyModifiers::CONTROL) {
             match key.code {
                 KeyCode::Char('s') => {
-                    // Save
-                    if let Some(editor) = &self.editor {
-                        let _ = editor.get_content(); // just a placeholder, save logic is in Command mode
-                    }
+                    self.prev_mode = Some(Mode::Easy);
                     self.mode = Mode::Command;
                     self.handle_command(KeyEvent::new(KeyCode::Char('w'), KeyModifiers::NONE));
                     return;
                 }
                 KeyCode::Char('o') => {
-                    // Open file
+                    self.prev_mode = Some(Mode::Easy);
                     self.mode = Mode::Prompt;
-                    self.handle_prompt(KeyEvent::new(KeyCode::Char('/'), KeyModifiers::NONE));
+                    self.input_buffer.clear();
+                    self.status_message = Some("Open file:".to_string());
+                    self.status_time = Some(Instant::now());
                     return;
                 }
                 KeyCode::Char('q') => {
@@ -254,8 +255,14 @@ impl App {
                     return;
                 }
                 KeyCode::Char('n') => {
-                    // New file
+                    // New file (sementara ke Mode::PromptNewFile)
+                    let old_mode = self.mode;
                     self.mode = Mode::PromptNewFile;
+                    // PromptNewFile akan menangani input selanjutnya, mode akan dikembalikan di handle_prompt_new_file
+                    // Tapi kita tidak bisa memanggil handler-nya sekarang (karena butuh input user).
+                    // Jadi kita biarkan mode PromptNewFile aktif, dan setelah user selesai, kita perlu mengembalikan ke Easy.
+                    // Solusi: simpan old_mode di App (misal `prev_mode`).
+                    self.prev_mode = Some(old_mode);
                     return;
                 }
                 _ => {}
@@ -302,7 +309,7 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Esc => {
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
             }
             _ => {}
         }
@@ -311,7 +318,7 @@ impl App {
     fn handle_search(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.search_query.clear();
                 self.search_matches.clear();
             }
@@ -595,7 +602,7 @@ impl App {
     fn handle_command(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.status_message = None;
                 self.status_time = None;
             }
@@ -652,7 +659,7 @@ impl App {
                         }
                     }
                 }
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('e') => {
@@ -660,7 +667,7 @@ impl App {
                 self.show_explorer = true;
                 self.focus = Focus::Explorer;
                 self.status_message = Some("Explorer ON".to_string());
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('m') => {
@@ -673,11 +680,11 @@ impl App {
                 self.show_explorer = false;
                 self.focus = Focus::Editor;
                 self.status_message = Some("Focus: Editor".to_string());
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.status_time = Some(Instant::now());
             }
             _ => {
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.status_message = None;
                 self.status_time = None;
             }
@@ -687,7 +694,7 @@ impl App {
     fn handle_prompt(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.input_buffer.clear();
                 self.status_message = None;
                 self.status_time = None;
@@ -706,7 +713,7 @@ impl App {
                         self.status_message = Some(format!("Error: {}", e));
                     }
                 }
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.input_buffer.clear();
                 self.status_time = Some(Instant::now());
             }
@@ -723,7 +730,7 @@ impl App {
     fn handle_prompt_new_file(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.input_buffer.clear();
                 self.status_message = None;
                 self.status_time = None;
@@ -733,7 +740,7 @@ impl App {
                 if name.is_empty() {
                     self.status_message = Some("Empty name".to_string());
                     self.status_time = Some(Instant::now());
-                    self.mode = Mode::Normal;
+                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                     self.input_buffer.clear();
                     return;
                 }
@@ -764,7 +771,7 @@ impl App {
                     }
                 }
 
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.input_buffer.clear();
                 self.status_time = Some(Instant::now());
             }
@@ -781,7 +788,7 @@ impl App {
     fn handle_prompt_new_folder(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = Mode::Normal;
+                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                 self.input_buffer.clear();
                 self.status_message = None;
                 self.status_time = None;
@@ -791,7 +798,7 @@ impl App {
                 if name.is_empty() {
                     self.status_message = Some("Empty name".to_string());
                     self.status_time = Some(Instant::now());
-                    self.mode = Mode::Normal;
+                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
                     self.input_buffer.clear();
                     return;
                 }

@@ -31,6 +31,14 @@ impl Editor {
             KeyCode::Backspace => self.apply(Delete {}),
             KeyCode::Enter => self.apply(InsertNewline {}),
             KeyCode::Char(c) => {
+                if c.is_control()
+                    || c == '\u{200B}'
+                    || c == '\u{200C}'
+                    || c == '\u{200D}'
+                    || c == '\u{FEFF}'
+                {
+                    return Ok(());
+                }
                 // Try auto-pair first
                 if !crate::auto_pair::try_auto_pair(self, c) {
                     // Not a pair — insert normally

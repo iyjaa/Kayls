@@ -550,7 +550,8 @@ impl Editor {
     }
 
     pub fn set_cursor(&mut self, cursor: usize) {
-        let max = self.code.len_chars().saturating_sub(1);
+        // Izinkan kursor berada di akhir baris (len_chars)
+        let max = self.code.len_chars();
         self.cursor = cursor.min(max);
     }
 

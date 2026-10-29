@@ -62,7 +62,7 @@ pub struct App {
     pub read_mode: bool,
     pub picker: crate::picker::PickerState,
     pub mode: Mode,
-    pub prev_mode: Option<Mode>,
+    pub saved_mode: Mode,
     pub input_buffer: String,
     pub pending_delete: Option<PathBuf>,
     pub status_message: Option<String>,
@@ -115,8 +115,12 @@ impl App {
             } else {
                 Mode::Normal
             },
+            saved_mode: if config.editor.keybinding.to_lowercase() == "easy" {
+                Mode::Easy
+            } else {
+                Mode::Normal
+            },
             input_buffer: String::new(),
-            prev_mode: None,
             pending_delete: None,
             status_message: None,
             status_time: None,
@@ -177,6 +181,14 @@ impl App {
         if key.modifiers.contains(KeyModifiers::ALT)
             && let KeyCode::Char('q') = key.code
         {
+            // Cek dirty sebelum quit
+            if let Some(editor) = &self.editor {
+                if editor.dirty {
+                    self.status_message = Some("Unsaved changes! Save first (Ctrl+S / Esc w).".to_string());
+                    self.status_time = Some(Instant::now());
+                    return;
+                }
+            }
             self.should_quit = true;
             return;
         }
@@ -200,13 +212,13 @@ impl App {
                     .unwrap_or_else(|| std::path::PathBuf::from("."));
 
                 if let Some(path) = self.picker.handle_key(key, &root) {
-                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                    self.mode = self.saved_mode;
                     if let Ok(doc) = Document::open(&path) {
                         self.document = Some(doc);
                         self.load_editor();
                     }
                 } else if key.code == KeyCode::Esc {
-                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                    self.mode = self.saved_mode;
                 }
             }
         }
@@ -226,13 +238,13 @@ impl App {
         if key.modifiers.contains(KeyModifiers::CONTROL) {
             match key.code {
                 KeyCode::Char('s') => {
-                    self.prev_mode = Some(Mode::Easy);
+                    self.saved_mode = Mode::Easy;
                     self.mode = Mode::Command;
                     self.handle_command(KeyEvent::new(KeyCode::Char('w'), KeyModifiers::NONE));
                     return;
                 }
                 KeyCode::Char('o') => {
-                    self.prev_mode = Some(Mode::Easy);
+                    self.saved_mode = Mode::Easy;
                     self.mode = Mode::Prompt;
                     self.input_buffer.clear();
                     self.status_message = Some("Open file:".to_string());
@@ -241,6 +253,13 @@ impl App {
                 }
                 KeyCode::Char('q') => {
                     // Quit
+                    if let Some(editor) = &self.editor {
+                        if editor.dirty {
+                            self.status_message = Some("Unsaved changes! Save first (Ctrl+S).".to_string());
+                            self.status_time = Some(Instant::now());
+                            return;
+                        }
+                    }
                     self.should_quit = true;
                     return;
                 }
@@ -256,13 +275,7 @@ impl App {
                 }
                 KeyCode::Char('n') => {
                     // New file (sementara ke Mode::PromptNewFile)
-                    let old_mode = self.mode;
                     self.mode = Mode::PromptNewFile;
-                    // PromptNewFile akan menangani input selanjutnya, mode akan dikembalikan di handle_prompt_new_file
-                    // Tapi kita tidak bisa memanggil handler-nya sekarang (karena butuh input user).
-                    // Jadi kita biarkan mode PromptNewFile aktif, dan setelah user selesai, kita perlu mengembalikan ke Easy.
-                    // Solusi: simpan old_mode di App (misal `prev_mode`).
-                    self.prev_mode = Some(old_mode);
                     return;
                 }
                 _ => {}
@@ -290,6 +303,7 @@ impl App {
                     Mode::Normal
                 };
                 self.mode = new_mode;
+                self.saved_mode = new_mode;
                 // Update config
                 let mut config = Config::load();
                 config.editor.keybinding = if self.keybinding_cursor == 1 {
@@ -309,7 +323,7 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Esc => {
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
             }
             _ => {}
         }
@@ -318,7 +332,7 @@ impl App {
     fn handle_search(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.search_query.clear();
                 self.search_matches.clear();
             }
@@ -602,7 +616,7 @@ impl App {
     fn handle_command(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.status_message = None;
                 self.status_time = None;
             }
@@ -652,6 +666,9 @@ impl App {
 
                     match std::fs::write(&path, content) {
                         Ok(_) => {
+                            if let Some(editor) = self.editor.as_mut() {
+                                editor.dirty = false;
+                            }
                             self.status_message = Some(format!("Saved: {}", path.display()));
                         }
                         Err(e) => {
@@ -659,7 +676,7 @@ impl App {
                         }
                     }
                 }
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('e') => {
@@ -667,7 +684,7 @@ impl App {
                 self.show_explorer = true;
                 self.focus = Focus::Explorer;
                 self.status_message = Some("Explorer ON".to_string());
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('m') => {
@@ -680,11 +697,11 @@ impl App {
                 self.show_explorer = false;
                 self.focus = Focus::Editor;
                 self.status_message = Some("Focus: Editor".to_string());
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.status_time = Some(Instant::now());
             }
             _ => {
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.status_message = None;
                 self.status_time = None;
             }
@@ -694,8 +711,8 @@ impl App {
     fn handle_prompt(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
-                self.input_buffer.clear();
+                                self.mode = self.saved_mode;
+                                self.input_buffer.clear();
                 self.status_message = None;
                 self.status_time = None;
             }
@@ -713,7 +730,7 @@ impl App {
                         self.status_message = Some(format!("Error: {}", e));
                     }
                 }
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.input_buffer.clear();
                 self.status_time = Some(Instant::now());
             }
@@ -730,7 +747,7 @@ impl App {
     fn handle_prompt_new_file(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.input_buffer.clear();
                 self.status_message = None;
                 self.status_time = None;
@@ -740,7 +757,7 @@ impl App {
                 if name.is_empty() {
                     self.status_message = Some("Empty name".to_string());
                     self.status_time = Some(Instant::now());
-                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                    self.mode = self.saved_mode;
                     self.input_buffer.clear();
                     return;
                 }
@@ -771,7 +788,7 @@ impl App {
                     }
                 }
 
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.input_buffer.clear();
                 self.status_time = Some(Instant::now());
             }
@@ -788,7 +805,7 @@ impl App {
     fn handle_prompt_new_folder(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                self.mode = self.saved_mode;
                 self.input_buffer.clear();
                 self.status_message = None;
                 self.status_time = None;
@@ -798,7 +815,7 @@ impl App {
                 if name.is_empty() {
                     self.status_message = Some("Empty name".to_string());
                     self.status_time = Some(Instant::now());
-                    self.mode = self.prev_mode.take().unwrap_or(Mode::Normal);
+                    self.mode = self.saved_mode;
                     self.input_buffer.clear();
                     return;
                 }
@@ -823,7 +840,7 @@ impl App {
                     }
                 }
 
-                self.mode = Mode::Normal;
+                self.mode = self.saved_mode;
                 self.input_buffer.clear();
                 self.status_time = Some(Instant::now());
             }
@@ -841,7 +858,7 @@ impl App {
         match key.code {
             KeyCode::Char('y') | KeyCode::Char('Y') => {
                 let Some(path) = self.pending_delete.take() else {
-                    self.mode = Mode::Normal;
+                    self.mode = self.saved_mode;
                     return;
                 };
 
@@ -872,12 +889,12 @@ impl App {
                     }
                 }
 
-                self.mode = Mode::Normal;
+                self.mode = self.saved_mode;
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('n') | KeyCode::Char('N') | KeyCode::Esc => {
                 self.pending_delete = None;
-                self.mode = Mode::Normal;
+                self.mode = self.saved_mode;
                 self.status_message = Some("Cancelled".to_string());
                 self.status_time = Some(Instant::now());
             }
@@ -907,7 +924,7 @@ impl App {
             KeyCode::Char('4') => Some(Theme::Nord),
             KeyCode::Enter => Some(THEMES[self.theme_cursor]),
             KeyCode::Esc => {
-                self.mode = Mode::Normal;
+                self.mode = self.saved_mode;
                 self.status_message = Some("Cancelled".to_string());
                 self.status_time = Some(Instant::now());
                 return;
@@ -936,7 +953,7 @@ impl App {
                 self.status_message = Some(format!("Theme: {}", name));
             }
 
-            self.mode = Mode::Normal;
+            self.mode = self.saved_mode;
             self.status_time = Some(Instant::now());
         }
     }

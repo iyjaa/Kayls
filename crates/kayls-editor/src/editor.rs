@@ -26,6 +26,7 @@ pub struct Editor {
 
     /// Current cursor position as a character index in the document
     pub(crate) cursor: usize,
+    pub dirty: bool,
 
     /// Vertical scroll offset: index of the first visible line
     pub(crate) offset_y: usize,
@@ -101,6 +102,7 @@ impl Editor {
         Ok(Self {
             code,
             cursor: 0,
+            dirty: false,
             offset_y: 0,
             offset_x: 0,
             theme,
@@ -140,6 +142,7 @@ impl Editor {
         Ok(Self {
             code,
             cursor: 0,
+            dirty: false,
             offset_y: 0,
             offset_x: 0,
             theme,

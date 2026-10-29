@@ -166,9 +166,10 @@ impl Code {
 
     fn get_highlights(&self, lang: &str) -> anyhow::Result<String> {
         if let Some(highlights_map) = &self.custom_highlights
-            && let Some(highlights) = highlights_map.get(lang) {
-                return Ok(highlights.clone());
-            }
+            && let Some(highlights) = highlights_map.get(lang)
+        {
+            return Ok(highlights.clone());
+        }
         let p = format!("langs/{}/highlights.scm", lang);
         let highlights_bytes =
             LangAssets::get(&p).ok_or_else(|| anyhow!("No highlights found for {}", lang))?;
@@ -795,7 +796,7 @@ impl Code {
         }
 
         let count_units = count_indent_units(line, &indent_unit, Some(c));
-        
+
         count_units * indent_unit.chars().count() >= c
     }
 

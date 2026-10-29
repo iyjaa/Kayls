@@ -12,6 +12,7 @@ pub enum Mode {
     Easy,
     Command,
     Prompt,
+    FilePicker,
     Search,
     PromptNewFile,
     PromptNewFolder,
@@ -26,8 +27,7 @@ pub enum Focus {
     Explorer,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub enum Theme {
     #[default]
     Vesper,
@@ -35,7 +35,6 @@ pub enum Theme {
     Dracula,
     Nord,
 }
-
 
 pub struct App {
     pub should_quit: bool,
@@ -61,6 +60,7 @@ pub struct App {
     pub search_matches: Vec<usize>,
     pub search_current_idx: usize,
     pub read_mode: bool,
+    pub picker: crate::picker::PickerState,
     pub mode: Mode,
     pub input_buffer: String,
     pub pending_delete: Option<PathBuf>,
@@ -108,6 +108,7 @@ impl App {
             search_matches: Vec::new(),
             search_current_idx: 0,
             read_mode: false,
+            picker: crate::picker::PickerState::new(),
             mode: if config.editor.keybinding.to_lowercase() == "easy" {
                 Mode::Easy
             } else {
@@ -172,10 +173,11 @@ impl App {
         }
 
         if key.modifiers.contains(KeyModifiers::ALT)
-            && let KeyCode::Char('q') = key.code {
-                self.should_quit = true;
-                return;
-            }
+            && let KeyCode::Char('q') = key.code
+        {
+            self.should_quit = true;
+            return;
+        }
 
         match self.mode {
             Mode::Normal => self.handle_normal(key),
@@ -188,6 +190,23 @@ impl App {
             Mode::SelectTheme => self.handle_select_theme(key),
             Mode::SelectKeybinding => self.handle_select_keybinding(key),
             Mode::Search => self.handle_search(key),
+            Mode::FilePicker => {
+                let root = self
+                    .file_tree
+                    .as_ref()
+                    .map(|t| t.root.clone())
+                    .unwrap_or_else(|| std::path::PathBuf::from("."));
+
+                if let Some(path) = self.picker.handle_key(key, &root) {
+                    self.mode = Mode::Normal;
+                    if let Ok(doc) = Document::open(&path) {
+                        self.document = Some(doc);
+                        self.load_editor();
+                    }
+                } else if key.code == KeyCode::Esc {
+                    self.mode = Mode::Normal;
+                }
+            }
         }
     }
 
@@ -300,17 +319,22 @@ impl App {
                 if !self.search_matches.is_empty() {
                     // Jika ini Enter pertama, langsung ke hasil pertama (idx 0).
                     // Jika bukan, baru maju ke hasil berikutnya.
-                    if self.search_query.len() > 0 && self.search_matches.len() > 1 {
-                        self.search_current_idx = (self.search_current_idx + 1) % self.search_matches.len();
+                    if !self.search_query.is_empty() && self.search_matches.len() > 1 {
+                        self.search_current_idx =
+                            (self.search_current_idx + 1) % self.search_matches.len();
                     }
-                    
+
                     let match_char_idx = self.search_matches[self.search_current_idx];
                     let h = self.editor_height as usize;
                     if let Some(editor) = &mut self.editor {
                         editor.set_cursor(match_char_idx);
                         editor.scroll_to_cursor(h);
                     }
-                    self.status_message = Some(format!("Match {}/{}", self.search_current_idx + 1, self.search_matches.len()));
+                    self.status_message = Some(format!(
+                        "Match {}/{}",
+                        self.search_current_idx + 1,
+                        self.search_matches.len()
+                    ));
                     self.status_time = Some(Instant::now());
                 }
             }
@@ -329,14 +353,16 @@ impl App {
     fn perform_search(&mut self) {
         self.search_matches.clear();
         self.search_current_idx = 0;
-        
-        if self.search_query.is_empty() { return; }
-        
+
+        if self.search_query.is_empty() {
+            return;
+        }
+
         if let Some(editor) = &self.editor {
             let code = editor.get_content(); // Mengembalikan String
             let query_lower = self.search_query.to_lowercase();
             let code_lower = code.to_lowercase();
-            
+
             // Gunakan pencarian char-based, bukan byte-based
             let mut byte_start = 0;
             while let Some(byte_pos) = code_lower[byte_start..].find(&query_lower) {
@@ -350,6 +376,21 @@ impl App {
     }
 
     fn handle_normal(&mut self, key: KeyEvent) {
+        // Ctrl+P untuk File Picker (bisa diakses dari mana saja, termasuk Welcome View)
+        if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            self.mode = Mode::FilePicker;
+            self.picker.query.clear();
+            self.picker.selected = 0;
+            self.picker.scroll = 0;
+            let root = self
+                .file_tree
+                .as_ref()
+                .map(|t| t.root.clone())
+                .unwrap_or_else(|| std::path::PathBuf::from("."));
+            self.picker.update_matches(&root);
+            return;
+        }
+
         if let KeyCode::Esc = key.code {
             self.mode = Mode::Command;
             self.status_message = Some("-- COMMAND --".to_string());
@@ -392,8 +433,8 @@ impl App {
                 }
                 return;
             }
-            // Ctrl+P untuk Paste dari App.clipboard (antar-file)
-            if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            // Ctrl+V untuk Paste dari App.clipboard (antar-file)
+            if key.code == KeyCode::Char('v') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 if !self.clipboard.is_empty() {
                     use kayls_editor::actions::InsertText;
                     editor.apply(InsertText {
@@ -578,12 +619,13 @@ impl App {
             }
             KeyCode::Char('d') => {
                 if let Some(tree) = self.file_tree.as_ref()
-                    && let Some(entry) = tree.selected_entry() {
-                        self.pending_delete = Some(entry.path.clone());
-                        self.mode = Mode::ConfirmDelete;
-                        self.status_message = Some(format!("Delete '{}'? (y/n)", entry.name));
-                        self.status_time = Some(Instant::now());
-                    }
+                    && let Some(entry) = tree.selected_entry()
+                {
+                    self.pending_delete = Some(entry.path.clone());
+                    self.mode = Mode::ConfirmDelete;
+                    self.status_message = Some(format!("Delete '{}'? (y/n)", entry.name));
+                    self.status_time = Some(Instant::now());
+                }
             }
             KeyCode::Char('t') => {
                 self.mode = Mode::SelectTheme;
@@ -810,10 +852,11 @@ impl App {
                         self.status_message = Some(format!("Deleted: {}", deleted.display()));
 
                         if let Some(doc) = self.document.as_ref()
-                            && doc.path == path {
-                                self.document = None;
-                                self.editor = None;
-                            }
+                            && doc.path == path
+                        {
+                            self.document = None;
+                            self.editor = None;
+                        }
 
                         self.ensure_explorer_visible();
                     }
@@ -893,10 +936,11 @@ impl App {
 
     pub fn tick(&mut self) {
         if let Some(t) = self.status_time
-            && t.elapsed().as_secs() >= 2 {
-                self.status_message = None;
-                self.status_time = None;
-            }
+            && t.elapsed().as_secs() >= 2
+        {
+            self.status_message = None;
+            self.status_time = None;
+        }
     }
 }
 

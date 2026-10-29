@@ -1,4 +1,5 @@
 mod app;
+mod picker;
 mod ui;
 
 pub use app::App;
@@ -17,10 +18,7 @@ pub fn run(document: Option<Document>) -> Result<()> {
     result
 }
 
-fn run_loop(
-    terminal: &mut DefaultTerminal,
-    document: Option<Document>,
-) -> Result<()> {
+fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Result<()> {
     let mut app = App::new(document);
 
     while !app.should_quit {

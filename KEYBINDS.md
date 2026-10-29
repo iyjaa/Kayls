@@ -20,7 +20,7 @@
 | Primary | Alternatives |
 |---|---|
 | `Ctrl+Y` (Copy) | `Ctrl+C`, `Ctrl+Shift+C`, `Ctrl+Insert`, `Alt+C` |
-| `Ctrl+P` (Paste) | `Ctrl+V`, `Ctrl+Shift+V`, `Shift+Insert`, `Alt+V` |
+| `Ctrl+V` (Paste) | `Ctrl+V`, `Ctrl+Shift+V`, `Shift+Insert`, `Alt+V` |
 
 **Note:** To paste from the system clipboard on Android/Termux, use the **PASTE** button on the Termux keyboard (this triggers Bracketed Paste).
 
@@ -52,6 +52,7 @@
 | `Alt+Q` | Quit |
 | `Ctrl+F` | Search in file |
 | `Ctrl+R` | Toggle Read Mode |
+| `Ctrl+P` | Open File Picker |
 
 ## Auto-pair
 

@@ -107,11 +107,11 @@ pub fn render(frame: &mut Frame, app: &App) {
 
         // Set posisi cursor terminal
         if editor_focused
-            && let Some((cx, cy)) = editor.get_visible_cursor(&inner_area) {
-                if !app.read_mode {
-                    frame.set_cursor_position((cx, cy));
-                }
-            }
+            && let Some((cx, cy)) = editor.get_visible_cursor(&inner_area)
+            && !app.read_mode
+        {
+            frame.set_cursor_position((cx, cy));
+        }
     } else {
         // Fallback kalau editor belum di-load
         if let Some(doc) = &app.document {
@@ -136,7 +136,8 @@ pub fn render(frame: &mut Frame, app: &App) {
                 Line::from("       ( -   - )       ").style(Style::default().fg(accent)),
                 Line::from("        >  w  <        ").style(Style::default().fg(accent)),
                 Line::from(""),
-                Line::from(format!(" Kayls v{}", version)).style(Style::default().add_modifier(Modifier::BOLD).fg(accent)),
+                Line::from(format!(" Kayls v{}", version))
+                    .style(Style::default().add_modifier(Modifier::BOLD).fg(accent)),
                 Line::from("  Terminal Studio Code").style(Style::default().fg(dim_color)),
                 Line::from(""),
                 Line::from(" ────────────────────────── ").style(Style::default().fg(dim_color)),
@@ -155,30 +156,35 @@ pub fn render(frame: &mut Frame, app: &App) {
             for (label, key) in shortcuts {
                 menu_items.push(Line::from(vec![
                     Span::styled(format!("  {:<12}", label), Style::default().fg(text_color)),
-                    Span::styled(key, Style::default().fg(accent).add_modifier(Modifier::BOLD)),
+                    Span::styled(
+                        key,
+                        Style::default().fg(accent).add_modifier(Modifier::BOLD),
+                    ),
                 ]));
             }
-            
+
             menu_items.push(Line::from(""));
             let mode_str = match app.mode {
                 Mode::Easy => "Easy Mode",
                 _ => "Command Mode",
             };
-            menu_items.push(Line::from(format!("  Active: {}", mode_str)).style(Style::default().fg(dim_color)));
+            menu_items.push(
+                Line::from(format!("  Active: {}", mode_str)).style(Style::default().fg(dim_color)),
+            );
 
             // Beri margin vertikal agar konten berada di tengah secara visual
 
             // Hitung tinggi konten
             let content_height = menu_items.len() as u16;
             let total_height = editor_area.height;
-            
+
             // Hitung margin atas agar konten berada di tengah
             let top_margin = if total_height > content_height {
                 (total_height - content_height) / 2
             } else {
                 0
             };
-            
+
             // Buat layout: margin atas, konten, margin bawah
             let v_layout = Layout::default()
                 .direction(Direction::Vertical)
@@ -305,6 +311,12 @@ pub fn render(frame: &mut Frame, app: &App) {
                     .fg(Color::Rgb(240, 200, 200)),
             )
         }
+        Mode::FilePicker => (
+            format!(" Open file: {}_ ", app.picker.query),
+            Style::default()
+                .bg(Color::Rgb(50, 70, 90))
+                .fg(Color::Rgb(200, 220, 240)),
+        ),
         Mode::Search => (
             format!(" /{}_  ({} matches) ", app.search_query, app.search_matches.len()),
             Style::default()
@@ -333,6 +345,9 @@ pub fn render(frame: &mut Frame, app: &App) {
     }
     if let Mode::SelectKeybinding = app.mode {
         render_keybinding_popup(frame, app);
+    }
+    if let Mode::FilePicker = app.mode {
+        app.picker.render(frame, editor_area, app.theme);
     }
 }
 
@@ -622,7 +637,7 @@ fn explorer_color(theme: Theme, is_dir: bool, depth: usize, name: &str) -> Color
     }
 }
 
-fn theme_accent_color(theme: Theme) -> Color {
+pub(crate) fn theme_accent_color(theme: Theme) -> Color {
     match theme {
         Theme::Vesper => Color::Rgb(212, 184, 150),
         Theme::Gruvbox => Color::Rgb(215, 153, 33),
@@ -631,7 +646,7 @@ fn theme_accent_color(theme: Theme) -> Color {
     }
 }
 
-fn theme_bg_color(theme: Theme) -> Color {
+pub(crate) fn theme_bg_color(theme: Theme) -> Color {
     match theme {
         Theme::Vesper => Color::Rgb(42, 42, 62),
         Theme::Gruvbox => Color::Rgb(50, 48, 47),
@@ -640,7 +655,7 @@ fn theme_bg_color(theme: Theme) -> Color {
     }
 }
 
-fn theme_fg_color(theme: Theme) -> Color {
+pub(crate) fn theme_fg_color(theme: Theme) -> Color {
     match theme {
         Theme::Vesper => Color::Rgb(197, 209, 192),
         Theme::Gruvbox => Color::Rgb(213, 196, 161),

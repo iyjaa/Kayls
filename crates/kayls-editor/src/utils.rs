@@ -67,9 +67,10 @@ pub fn count_indent_units(
         }
         count += 1;
         if let Some(max) = max_col
-            && col >= max {
-                break;
-            }
+            && col >= max
+        {
+            break;
+        }
     }
 
     count

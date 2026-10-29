@@ -159,16 +159,18 @@ impl FileTree {
 
     pub fn move_up(&mut self) {
         if let Some(idx) = self.selected_index()
-            && idx > 0 {
-                self.selected_path = Some(self.flat[idx - 1].clone());
-            }
+            && idx > 0
+        {
+            self.selected_path = Some(self.flat[idx - 1].clone());
+        }
     }
 
     pub fn move_down(&mut self) {
         if let Some(idx) = self.selected_index()
-            && idx + 1 < self.flat.len() {
-                self.selected_path = Some(self.flat[idx + 1].clone());
-            }
+            && idx + 1 < self.flat.len()
+        {
+            self.selected_path = Some(self.flat[idx + 1].clone());
+        }
     }
 
     /// Toggle expand pada folder yang dipilih

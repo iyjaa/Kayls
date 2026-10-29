@@ -134,20 +134,19 @@ impl Widget for &Editor {
                     };
                     buf.set_string(area.left(), draw_y, line_number, line_number_style);
                 }
-                if !is_ghost
-                    && let Some(collapsed) = self.code_fold_indicator(line_idx) {
-                        let indicator = if collapsed {
-                            &self.code_folding_options.indicators.collapsed
-                        } else {
-                            &self.code_folding_options.indicators.expanded
-                        };
-                        buf.set_string(
-                            area.left() + (line_number_width - fold_gutter_width) as u16,
-                            draw_y,
-                            indicator,
-                            line_number_style,
-                        );
-                    }
+                if !is_ghost && let Some(collapsed) = self.code_fold_indicator(line_idx) {
+                    let indicator = if collapsed {
+                        &self.code_folding_options.indicators.collapsed
+                    } else {
+                        &self.code_folding_options.indicators.expanded
+                    };
+                    buf.set_string(
+                        area.left() + (line_number_width - fold_gutter_width) as u16,
+                        draw_y,
+                        indicator,
+                        line_number_style,
+                    );
+                }
 
                 let text_x = area.left() + line_number_width as u16;
                 let width = (area.width as usize).saturating_sub(line_number_width);
@@ -158,22 +157,23 @@ impl Widget for &Editor {
 
                 let line_start_char = source_code.line_to_char(line_idx);
                 let max_chars = source_code.len_chars();
-                
+
                 // Pastikan char_slice_start dan char_slice_end tidak melebihi len_chars
                 let char_slice_start = (line_start_char + start_col).min(max_chars);
                 let char_slice_end = (line_start_char + end_col).min(max_chars);
-                
+
                 // Jika start_col sudah melewati panjang baris, skip render teks
                 // (hanya gambar nomor baris)
                 if start_col >= line_len {
                     if self.show_line_numbers {
-                        let line_number = format!("{:>width$}", line_idx + 1, width = line_number_digits);
+                        let line_number =
+                            format!("{:>width$}", line_idx + 1, width = line_number_digits);
                         buf.set_string(area.left(), draw_y, &line_number, line_number_style);
                     }
                     draw_y += 1;
                     continue;
                 }
-                
+
                 let visible_chars = source_code.char_slice(char_slice_start, char_slice_end);
 
                 let start_byte = source_code.char_to_byte(char_slice_start);

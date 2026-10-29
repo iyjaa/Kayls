@@ -202,7 +202,7 @@ impl Editor {
         } else if col > right_limit {
             self.offset_x = col + margin_x + 1 - visible_width;
         }
-        
+
         // Batasi offset_x agar tidak melebihi panjang baris (mencegah panic)
         let max_col = self.code.line_len(line).saturating_sub(1);
         self.offset_x = self.offset_x.min(max_col);
@@ -549,7 +549,7 @@ impl Editor {
         self.reset_highlight_cache();
     }
 
-        pub fn set_cursor(&mut self, cursor: usize) {
+    pub fn set_cursor(&mut self, cursor: usize) {
         let max = self.code.len_chars().saturating_sub(1);
         self.cursor = cursor.min(max);
     }
@@ -852,9 +852,10 @@ impl Editor {
 
         let mut cache = self.word_highlight_cache.borrow_mut();
         if let Some((cached_cursor, cached_ranges)) = &*cache
-            && *cached_cursor == self.cursor {
-                return cached_ranges.clone();
-            }
+            && *cached_cursor == self.cursor
+        {
+            return cached_ranges.clone();
+        }
 
         let (start, end) = self.code.word_boundaries(self.cursor);
         if start == end {

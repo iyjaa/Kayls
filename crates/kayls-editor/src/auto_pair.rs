@@ -47,12 +47,13 @@ pub fn try_auto_pair(editor: &mut Editor, c: char) -> bool {
         // Special case: quotes — check if closing quote already ahead
         if c == closing
             && let Some(next) = char_at_cursor(editor)
-                && next == closing {
-                    // Skip — just move cursor forward
-                    let cursor = editor.get_cursor();
-                    editor.set_cursor(cursor + 1);
-                    return true;
-                }
+            && next == closing
+        {
+            // Skip — just move cursor forward
+            let cursor = editor.get_cursor();
+            editor.set_cursor(cursor + 1);
+            return true;
+        }
 
         // Insert pair
         let cursor = editor.get_cursor();
@@ -75,12 +76,13 @@ pub fn try_auto_pair(editor: &mut Editor, c: char) -> bool {
     // Case 2: Closing character — check if already ahead
     if is_closing(c)
         && let Some(next) = char_at_cursor(editor)
-            && next == c {
-                // Skip — just move cursor forward
-                let cursor = editor.get_cursor();
-                editor.set_cursor(cursor + 1);
-                return true;
-            }
+        && next == c
+    {
+        // Skip — just move cursor forward
+        let cursor = editor.get_cursor();
+        editor.set_cursor(cursor + 1);
+        return true;
+    }
 
     false
 }

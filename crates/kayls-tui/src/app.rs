@@ -244,6 +244,14 @@ impl App {
                     return;
                 }
                 KeyCode::Char('o') => {
+                    // Cek dirty sebelum membuka file baru
+                    if let Some(editor) = &self.editor {
+                        if editor.dirty {
+                            self.status_message = Some("Unsaved changes! Save first (Ctrl+S).".to_string());
+                            self.status_time = Some(Instant::now());
+                            return;
+                        }
+                    }
                     self.saved_mode = Mode::Easy;
                     self.mode = Mode::Prompt;
                     self.input_buffer.clear();
@@ -621,6 +629,14 @@ impl App {
                 self.status_time = None;
             }
             KeyCode::Char('o') => {
+                // Cek dirty sebelum membuka file baru
+                if let Some(editor) = &self.editor {
+                    if editor.dirty {
+                        self.status_message = Some("Unsaved changes! Save first (Esc w).".to_string());
+                        self.status_time = Some(Instant::now());
+                        return;
+                    }
+                }
                 self.mode = Mode::Prompt;
                 self.input_buffer.clear();
                 self.status_message = Some("Open file:".to_string());
@@ -972,18 +988,20 @@ fn detect_language(path: &std::path::Path) -> &'static str {
     match path.extension().and_then(|e| e.to_str()) {
         Some("rs") => "rust",
         Some("py") => "python",
-        Some("js") => "javascript",
-        Some("ts") => "typescript",
+        Some("js") | Some("jsx") => "javascript",
+        Some("ts") | Some("tsx") => "typescript",
         Some("go") => "go",
+        Some("java") => "java",
         Some("c") => "c",
-        Some("cpp") | Some("cc") | Some("cxx") => "cpp",
-        Some("h") | Some("hpp") => "cpp",
+        Some("cpp") | Some("cc") | Some("cxx") | Some("h") | Some("hpp") => "cpp",
+        Some("cs") => "c_sharp",
         Some("toml") => "toml",
         Some("json") => "json",
+        Some("yaml") | Some("yml") => "yaml",
         Some("md") => "markdown",
         Some("html") => "html",
         Some("css") => "css",
-        Some("sh") | Some("bash") => "bash",
+        Some("sh") | Some("bash") => "shell",
         _ => "text",
     }
 }

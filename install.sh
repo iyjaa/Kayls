@@ -141,9 +141,9 @@ main() {
     success "Downloaded."
 
     # Verifikasi checksum (jika tersedia)
-    local checksum_url="https://github.com/${REPO}/releases/download/${version}/checksums.sha256"
-    if curl -fsSL "$checksum_url" -o "$tmp_dir/checksums.sha256" 2>/dev/null; then
-        local expected=$(grep "$archive" "$tmp_dir/checksums.sha256" | awk '{print $1}')
+    local checksum_url="https://github.com/${REPO}/releases/download/${version}/${archive}.sha256"
+    if curl -fsSL "$checksum_url" -o "$tmp_dir/${archive}.sha256" 2>/dev/null; then
+        local expected=$(awk '{print $1}' "$tmp_dir/${archive}.sha256")
         if [ -n "$expected" ]; then
             # Gunakan sha256sum (Linux) atau shasum -a 256 (macOS)
             if command -v sha256sum >/dev/null 2>&1; then

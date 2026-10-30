@@ -124,15 +124,17 @@ jobs:
       - name: Generate checksums
         run: |
           cd artifacts
-          sha256sum *.tar.gz > checksums.sha256
-          cat checksums.sha256
+          for file in *.tar.gz; do
+            sha256sum "$file" > "$file.sha256"
+          done
+          ls *.sha256
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/**/*.tar.gz
-            artifacts/checksums.sha256
+            artifacts/**/*.sha256
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

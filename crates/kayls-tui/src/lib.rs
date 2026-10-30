@@ -16,6 +16,14 @@ use std::time::Duration;
 pub const EXPLORER_WIDTH: u16 = 20;
 
 pub fn run(document: Option<Document>) -> Result<()> {
+    // Pastikan mouse capture dimatikan dan terminal di-restore saat panic
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        let _ = execute!(std::io::stdout(), DisableMouseCapture);
+        ratatui::restore();
+        default_hook(info);
+    }));
+
     let mut terminal = ratatui::init();
     execute!(std::io::stdout(), EnableMouseCapture)?;
     let result = run_loop(&mut terminal, document);
@@ -33,7 +41,7 @@ fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Resul
         let size = terminal.size()?;
         let editor_height = size.height.saturating_sub(4);
         let editor_width = if app.show_explorer {
-            size.width.saturating_sub(EXPLORER_WIDTH + 5)
+            size.width.saturating_sub(EXPLORER_WIDTH + 2)
         } else {
             size.width.saturating_sub(2)
         };

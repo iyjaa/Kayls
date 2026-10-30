@@ -12,6 +12,9 @@
 
 ## Next Up (v1.1.x)
 
+- [ ] **Multi-Cursor** — Edit multiple lines simultaneously (Ctrl+D).
+- [ ] **Tutorial Termux** — Step-by-step guide for Android users.
+
 
 - [ ] **Multi-Tabs**: Open and switch between multiple files.
 - [ ] **Responsive Layout**: Automatically hide/overlay Explorer on narrow screens.

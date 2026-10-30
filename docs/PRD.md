@@ -18,7 +18,7 @@
 
 ### 3.2 File Management
 - Recursive file tree (lazy-loaded).
-- Create, delete, and rename files/folders.
+- Create and delete files/folders.
 - Fuzzy file picker (future).
 
 ### 3.3 UI/UX
@@ -27,7 +27,7 @@
 - Responsive layout for narrow screens (mobile).
 
 ### 3.4 Performance
-- Fast startup (<50ms).
+- Fast startup (<100ms).
 - Efficient memory usage via `ropey`.
 - Smooth scrolling, even for large files.
 

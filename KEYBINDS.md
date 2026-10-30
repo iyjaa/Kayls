@@ -10,7 +10,6 @@
 | Enter | New line (auto-indent) |
 | Tab | Indent |
 | `Ctrl+Z` | Undo |
-| `Ctrl+Y` | Redo |
 | `Ctrl+D` | Duplicate line |
 | `Ctrl+K` | Delete line |
 | `Ctrl+A` | Select all |

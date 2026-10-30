@@ -4,7 +4,6 @@ Thanks for your interest in contributing to Kayls! This document explains how to
 
 ## Versioning
 
-**Important**: Kayls uses a custom versioning scheme. In `Kayls-v` versions, **no new features** are allowed — only bug fixes. New features start after `Kayls-s`. See [VERSIONING.md](VERSIONING.md) for details.
 
 ## Workflow
 

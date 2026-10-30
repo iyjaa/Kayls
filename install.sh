@@ -137,6 +137,23 @@ main() {
     printf "${C_INFO}[INFO]${C_RESET} Downloading %s\n" "$archive"
     download_file "$url" "$tmp_dir/$archive"
     success "Downloaded."
+
+    # Verifikasi checksum (jika tersedia)
+    local checksum_url="https://github.com/${REPO}/releases/download/${version}/checksums.sha256"
+    if curl -fsSL "$checksum_url" -o "$tmp_dir/checksums.sha256" 2>/dev/null; then
+        local expected=$(grep "$archive" "$tmp_dir/checksums.sha256" | awk '{print $1}')
+        if [ -n "$expected" ]; then
+            local actual=$(sha256sum "$tmp_dir/$archive" | awk '{print $1}')
+            if [ "$expected" != "$actual" ]; then
+                error "Checksum mismatch for $archive!"
+            fi
+            success "Checksum verified."
+        else
+            warn "Checksum not found for $archive, skipping verification."
+        fi
+    else
+        warn "Checksums file not available, skipping verification."
+    fi
     printf "\n"
 
     printf "${C_INFO}[INFO]${C_RESET} Extracting binary...\n"

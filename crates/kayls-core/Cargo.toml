@@ -11,3 +11,9 @@ ropey = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
 toml = { workspace = true }
+[[bench]]
+name = "find_matches"
+harness = false
+
+[dev-dependencies]
+criterion = { workspace = true }

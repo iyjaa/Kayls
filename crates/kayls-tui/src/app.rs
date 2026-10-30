@@ -185,7 +185,7 @@ impl App {
         {
             // Cek dirty sebelum quit
             if let Some(editor) = &self.editor
-                && editor.dirty
+                && editor.is_dirty()
             {
                 self.status_message =
                     Some("Unsaved changes! Save first (Ctrl+S / Esc w).".to_string());
@@ -258,7 +258,7 @@ impl App {
                 KeyCode::Char('o') => {
                     // Cek dirty sebelum membuka file baru
                     if let Some(editor) = &self.editor
-                        && editor.dirty
+                        && editor.is_dirty()
                     {
                         self.status_message =
                             Some("Unsaved changes! Save first (Ctrl+S).".to_string());
@@ -275,7 +275,7 @@ impl App {
                 KeyCode::Char('q') => {
                     // Quit
                     if let Some(editor) = &self.editor
-                        && editor.dirty
+                        && editor.is_dirty()
                     {
                         self.status_message =
                             Some("Unsaved changes! Save first (Ctrl+S).".to_string());
@@ -409,18 +409,23 @@ impl App {
 
         if let Some(editor) = &self.editor {
             let code = editor.get_content();
-            let query_lower = self.search_query.to_lowercase();
 
-            // Iterasi per karakter menggunakan char_indices (aman untuk Unicode)
-            for (char_pos, (byte_pos, _)) in code.char_indices().enumerate() {
-                let remaining = &code[byte_pos..];
-                if remaining.len() >= query_lower.len() {
-                    let snippet = &remaining[..query_lower.len()];
-                    if snippet.to_lowercase() == query_lower {
-                        self.search_matches.push(char_pos);
-                    }
-                }
+            // Lowercase setiap karakter secara aman (tanpa byte slicing)
+            let lower = |c: char| c.to_lowercase().next().unwrap_or(c);
+            let query_chars: Vec<char> = self.search_query.chars().map(lower).collect();
+            let code_chars: Vec<char> = code.chars().map(lower).collect();
+
+            if query_chars.is_empty() || code_chars.len() < query_chars.len() {
+                return;
             }
+
+            // Cari dengan windows (indeks karakter, bukan byte)
+            self.search_matches = code_chars
+                .windows(query_chars.len())
+                .enumerate()
+                .filter(|(_, w)| *w == &query_chars[..])
+                .map(|(i, _)| i)
+                .collect();
         }
     }
 
@@ -689,7 +694,7 @@ impl App {
             KeyCode::Char('o') => {
                 // Cek dirty sebelum membuka file baru
                 if let Some(editor) = &self.editor
-                    && editor.dirty
+                    && editor.is_dirty()
                 {
                     self.status_message = Some("Unsaved changes! Save first (Esc w).".to_string());
                     self.status_time = Some(Instant::now());

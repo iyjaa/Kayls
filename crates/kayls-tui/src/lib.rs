@@ -12,6 +12,9 @@ use ratatui::DefaultTerminal;
 use ratatui::layout::Rect;
 use std::time::Duration;
 
+/// Lebar Explorer dalam kolom (harus sama dengan ui.rs)
+pub const EXPLORER_WIDTH: u16 = 20;
+
 pub fn run(document: Option<Document>) -> Result<()> {
     let mut terminal = ratatui::init();
     execute!(std::io::stdout(), EnableMouseCapture)?;
@@ -30,17 +33,21 @@ fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Resul
         let size = terminal.size()?;
         let editor_height = size.height.saturating_sub(4);
         let editor_width = if app.show_explorer {
-            size.width.saturating_sub(25)
+            size.width.saturating_sub(EXPLORER_WIDTH + 5)
         } else {
             size.width.saturating_sub(5)
         };
         app.editor_height = editor_height;
         app.editor_width = editor_width;
         app.explorer_height = editor_height;
-        app.explorer_width = 23;
+        app.explorer_width = EXPLORER_WIDTH;
 
         let area = Rect {
-            x: if app.show_explorer { 24 } else { 4 },
+            x: if app.show_explorer {
+                EXPLORER_WIDTH + 1
+            } else {
+                4
+            },
             y: 2,
             width: editor_width,
             height: editor_height,
@@ -51,7 +58,15 @@ fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Resul
 
         terminal.draw(|frame| ui::render(frame, &app))?;
 
-        if event::poll(Duration::from_millis(500))? {
+        // Adaptive poll: 100ms jika ada status message (agar bisa hilang),
+        // 1000ms jika idle (hemat baterai).
+        let poll_duration = if app.status_message.is_some() {
+            Duration::from_millis(100)
+        } else {
+            Duration::from_millis(1000)
+        };
+
+        if event::poll(poll_duration)? {
             match event::read()? {
                 Event::Paste(text) => {
                     app.paste(&text);

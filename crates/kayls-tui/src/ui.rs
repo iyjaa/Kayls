@@ -44,7 +44,10 @@ pub fn render(frame: &mut Frame, app: &App) {
     let editor_area: Rect = if app.show_explorer {
         let cols = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([Constraint::Length(20), Constraint::Min(0)])
+            .constraints([
+                Constraint::Length(crate::EXPLORER_WIDTH),
+                Constraint::Min(0),
+            ])
             .split(rows[1]);
 
         // Render file tree

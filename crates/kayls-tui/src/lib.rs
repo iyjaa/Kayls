@@ -17,18 +17,27 @@ use std::time::Duration;
 pub const EXPLORER_WIDTH: u16 = 20;
 
 pub fn run(document: Option<Document>) -> Result<()> {
+    let config = kayls_core::Config::load();
+    let mouse_capture = config.editor.mouse_capture;
+
     // Pastikan mouse capture dimatikan dan terminal di-restore saat panic
     let default_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |info| {
-        let _ = execute!(std::io::stdout(), DisableMouseCapture);
+        if mouse_capture {
+            let _ = execute!(std::io::stdout(), DisableMouseCapture);
+        }
         ratatui::restore();
         default_hook(info);
     }));
 
     let mut terminal = ratatui::init();
-    execute!(std::io::stdout(), EnableMouseCapture)?;
+    if mouse_capture {
+        execute!(std::io::stdout(), EnableMouseCapture)?;
+    }
     let result = run_loop(&mut terminal, document);
-    let _ = execute!(std::io::stdout(), DisableMouseCapture);
+    if mouse_capture {
+        let _ = execute!(std::io::stdout(), DisableMouseCapture);
+    }
     ratatui::restore();
     result
 }

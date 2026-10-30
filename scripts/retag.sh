@@ -10,6 +10,23 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
+# Pastikan di branch main
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" != "main" ]; then
+    echo "ERROR: Must be on 'main' branch (currently on '$BRANCH')."
+    exit 1
+fi
+
+# Pastikan sinkron dengan origin/main
+git fetch origin main
+LOCAL=$(git rev-parse HEAD)
+REMOTE=$(git rev-parse origin/main)
+if [ "$LOCAL" != "$REMOTE" ]; then
+    echo "ERROR: Local main is not synced with origin/main."
+    echo "Run: git pull origin main"
+    exit 1
+fi
+
 TAG="Kayls-v$VERSION"
 
 echo "Deleting old tag $TAG (local and remote)..."

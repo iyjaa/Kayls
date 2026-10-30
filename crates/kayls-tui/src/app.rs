@@ -56,12 +56,9 @@ pub struct App {
     pub editor_height: u16,
     pub clipboard: String,
     pub editor_width: u16,
-    pub search_query: String,
-    pub search_matches: Vec<usize>,
-    pub search_current_idx: usize,
-    pub search_entered: bool,
     pub read_mode: bool,
     pub picker: crate::picker::PickerState,
+    pub search: crate::search::SearchState,
     pub mode: Mode,
     pub saved_mode: Mode,
     pub input_buffer: String,
@@ -106,12 +103,9 @@ impl App {
             editor_height: 0,
             clipboard: String::new(),
             editor_width: 0,
-            search_query: String::new(),
-            search_matches: Vec::new(),
-            search_current_idx: 0,
-            search_entered: false,
             read_mode: false,
             picker: crate::picker::PickerState::new(),
+            search: crate::search::SearchState::new(),
             mode: if config.editor.keybinding.to_lowercase() == "easy" {
                 Mode::Easy
             } else {
@@ -355,61 +349,57 @@ impl App {
         match key.code {
             KeyCode::Esc => {
                 self.mode = self.saved_mode;
-                self.search_query.clear();
-                self.search_matches.clear();
+                self.search.reset();
             }
             KeyCode::Enter => {
-                if !self.search_matches.is_empty() {
-                    // Jika ini Enter pertama, langsung ke match ke-0.
-                    // Jika bukan, baru maju ke match berikutnya.
-                    if self.search_entered {
-                        if !self.search_query.is_empty() && self.search_matches.len() > 1 {
-                            self.search_current_idx =
-                                (self.search_current_idx + 1) % self.search_matches.len();
+                if let Some(editor) = &self.editor {
+                    let code = editor.get_content();
+                    // Jika belum ada match dan belum selesai scan, lanjutkan
+                    if self.search.matches.is_empty() && !self.search.scan_complete {
+                        self.search.continue_search(&code);
+                    }
+                    // Dapatkan match berikutnya
+                    if let Some(match_idx) = self.search.next_match() {
+                        let h = self.editor_height as usize;
+                        if let Some(editor) = &mut self.editor {
+                            editor.set_cursor(match_idx);
+                            editor.scroll_to_cursor(h);
                         }
-                    } else {
-                        self.search_entered = true;
+                        let status = if !self.search.scan_complete {
+                            format!(
+                                "Match {}/{} (scanning...)",
+                                self.search.current_idx + 1,
+                                self.search.matches.len()
+                            )
+                        } else {
+                            format!(
+                                "Match {}/{}",
+                                self.search.current_idx + 1,
+                                self.search.matches.len()
+                            )
+                        };
+                        self.status_message = Some(status);
+                        self.status_time = Some(Instant::now());
                     }
-
-                    let match_char_idx = self.search_matches[self.search_current_idx];
-                    let h = self.editor_height as usize;
-                    if let Some(editor) = &mut self.editor {
-                        editor.set_cursor(match_char_idx);
-                        editor.scroll_to_cursor(h);
-                    }
-                    self.status_message = Some(format!(
-                        "Match {}/{}",
-                        self.search_current_idx + 1,
-                        self.search_matches.len()
-                    ));
-                    self.status_time = Some(Instant::now());
                 }
             }
             KeyCode::Char(c) => {
-                self.search_query.push(c);
-                self.search_entered = false;
-                self.perform_search();
+                self.search.query.push(c);
+                self.search.entered = false;
+                if let Some(editor) = &self.editor {
+                    let code = editor.get_content();
+                    self.search.perform_search(&code);
+                }
             }
             KeyCode::Backspace => {
-                self.search_query.pop();
-                self.search_entered = false;
-                self.perform_search();
+                self.search.query.pop();
+                self.search.entered = false;
+                if let Some(editor) = &self.editor {
+                    let code = editor.get_content();
+                    self.search.perform_search(&code);
+                }
             }
             _ => {}
-        }
-    }
-
-    fn perform_search(&mut self) {
-        self.search_matches.clear();
-        self.search_current_idx = 0;
-
-        if self.search_query.is_empty() {
-            return;
-        }
-
-        if let Some(editor) = &self.editor {
-            let code = editor.get_content();
-            self.search_matches = find_matches(&code, &self.search_query);
         }
     }
 
@@ -466,9 +456,7 @@ impl App {
             // Ctrl+F untuk Search
             if key.code == KeyCode::Char('f') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 self.mode = Mode::Search;
-                self.search_query.clear();
-                self.search_matches.clear();
-                self.search_current_idx = 0;
+                self.search.reset();
                 return;
             }
 
@@ -1046,26 +1034,6 @@ impl App {
             self.status_time = None;
         }
     }
-}
-
-fn find_matches(code: &str, query: &str) -> Vec<usize> {
-    if query.is_empty() {
-        return Vec::new();
-    }
-    let lower = |c: char| c.to_lowercase().next().unwrap_or(c);
-    let query_chars: Vec<char> = query.chars().map(lower).collect();
-    let code_chars: Vec<char> = code.chars().map(lower).collect();
-
-    if query_chars.is_empty() || code_chars.len() < query_chars.len() {
-        return Vec::new();
-    }
-
-    code_chars
-        .windows(query_chars.len())
-        .enumerate()
-        .filter(|(_, w)| *w == &query_chars[..])
-        .map(|(i, _)| i)
-        .collect()
 }
 
 fn detect_language(path: &std::path::Path) -> &'static str {

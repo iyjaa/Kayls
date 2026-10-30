@@ -902,6 +902,7 @@ dependencies = [
 name = "kayls-core"
 version = "1.0.10"
 dependencies = [
+ "criterion",
  "ropey",
  "serde",
  "thiserror 2.0.21",

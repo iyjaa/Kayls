@@ -1,5 +1,6 @@
 mod app;
 mod picker;
+mod search;
 mod ui;
 
 pub use app::App;

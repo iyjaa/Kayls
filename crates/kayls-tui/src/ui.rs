@@ -321,7 +321,7 @@ pub fn render(frame: &mut Frame, app: &App) {
                 .fg(Color::Rgb(200, 220, 240)),
         ),
         Mode::Search => (
-            format!(" /{}_  ({} matches) ", app.search_query, app.search_matches.len()),
+            format!(" /{}_  ({} matches) ", app.search.query, app.search.matches.len()),
             Style::default()
                 .bg(Color::Rgb(90, 80, 40))
                 .fg(Color::Rgb(230, 220, 180)),

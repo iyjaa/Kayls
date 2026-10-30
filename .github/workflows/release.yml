@@ -325,7 +325,7 @@ jobs:
           for file in $(find . -name "*.tar.gz"); do
             sha256sum "$file" > "$file.sha256"
           done
-          ls *.sha256
+          find . -name '*.sha256' -print
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

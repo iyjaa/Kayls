@@ -69,6 +69,7 @@ pub struct FoldRange {
 
 pub struct Code {
     pub(crate) content: ropey::Rope,
+    pub revision: u64,
     lang: String,
     tree: Option<Tree>,
     parser: Option<Parser>,
@@ -93,6 +94,7 @@ impl Code {
     ) -> Result<Self> {
         let mut code = Self {
             content: Rope::from_str(text),
+            revision: 0,
             lang: lang.to_string(),
             tree: None,
             parser: None,
@@ -478,6 +480,7 @@ impl Code {
             self.notify_changes(&self.current_batch.edits);
             self.history.push(self.current_batch.clone());
             self.current_batch = EditBatch::new();
+            self.revision += 1;
         }
     }
 

@@ -27,6 +27,7 @@ pub struct Editor {
     /// Current cursor position as a character index in the document
     pub(crate) cursor: usize,
     pub dirty: bool,
+    pub saved_revision: u64,
 
     /// Vertical scroll offset: index of the first visible line
     pub(crate) offset_y: usize,
@@ -103,6 +104,7 @@ impl Editor {
             code,
             cursor: 0,
             dirty: false,
+            saved_revision: 0,
             offset_y: 0,
             offset_x: 0,
             theme,
@@ -143,6 +145,7 @@ impl Editor {
             code,
             cursor: 0,
             dirty: false,
+            saved_revision: 0,
             offset_y: 0,
             offset_x: 0,
             theme,
@@ -427,6 +430,15 @@ impl Editor {
 
     pub fn apply<A: Action>(&mut self, mut action: A) {
         action.apply(self);
+    }
+
+    pub fn is_dirty(&self) -> bool {
+        self.code.revision != self.saved_revision
+    }
+
+    pub fn mark_saved(&mut self) {
+        self.saved_revision = self.code.revision;
+        self.dirty = false;
     }
 
     pub fn set_content(&mut self, content: &str) {

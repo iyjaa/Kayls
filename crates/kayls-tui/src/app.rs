@@ -233,7 +233,7 @@ impl App {
             editor.apply(InsertText {
                 text: text.to_string(),
             });
-            editor.dirty = true;
+            // dirty dihitung otomatis
         }
     }
 
@@ -484,6 +484,26 @@ impl App {
                 }
                 return;
             }
+
+            // Ctrl+C untuk Copy (sinkronkan ke App.clipboard)
+            if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                use kayls_editor::actions::Copy;
+                editor.apply(Copy {});
+                if let Ok(text) = editor.get_clipboard() {
+                    self.clipboard = text;
+                }
+                return;
+            }
+
+            // Ctrl+X untuk Cut (sinkronkan ke App.clipboard)
+            if key.code == KeyCode::Char('x') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                use kayls_editor::actions::Cut;
+                editor.apply(Cut {});
+                if let Ok(text) = editor.get_clipboard() {
+                    self.clipboard = text;
+                }
+                return;
+            }
             // Ctrl+V untuk Paste dari App.clipboard (antar-file)
             if key.code == KeyCode::Char('v') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 if !self.clipboard.is_empty() {
@@ -705,7 +725,7 @@ impl App {
                     match std::fs::write(&path, content) {
                         Ok(_) => {
                             if let Some(editor) = self.editor.as_mut() {
-                                editor.dirty = false;
+                                editor.mark_saved();
                             }
                             self.status_message = Some(format!("Saved: {}", path.display()));
                         }

@@ -10,6 +10,7 @@
 | Enter | New line (auto-indent) |
 | Tab | Indent |
 | `Ctrl+Z` | Undo |
+| `Ctrl+Y` | Redo |
 | `Ctrl+D` | Duplicate line |
 | `Ctrl+K` | Delete line |
 | `Ctrl+A` | Select all |
@@ -18,8 +19,8 @@
 
 | Primary | Alternatives |
 |---|---|
-| `Ctrl+Y` (Copy) | `Ctrl+C`, `Ctrl+Shift+C`, `Ctrl+Insert`, `Alt+C` |
-| `Ctrl+V` (Paste) | `Ctrl+V`, `Ctrl+Shift+V`, `Shift+Insert`, `Alt+V` |
+| `Alt+C` (Copy) | `Ctrl+C`, `Ctrl+Insert` |
+| `Ctrl+V` (Paste) | `Shift+Insert` |
 
 **Note:** To paste from the system clipboard on Android/Termux, use the **PASTE** button on the Termux keyboard (this triggers Bracketed Paste).
 

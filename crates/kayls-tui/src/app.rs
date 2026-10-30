@@ -417,6 +417,10 @@ impl App {
     }
 
     pub fn handle_mouse(&mut self, mouse: crossterm::event::MouseEvent) {
+        // Hanya proses mouse jika tidak ada popup/prompt yang terbuka
+        if self.mode != Mode::Normal && self.mode != Mode::Easy {
+            return;
+        }
         if let Some(editor) = &mut self.editor {
             let area = self.editor_area;
             let _ = editor.mouse(mouse, &area);

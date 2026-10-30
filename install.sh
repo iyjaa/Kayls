@@ -5,6 +5,7 @@ set -eo pipefail
 C_INFO="\033[38;5;111m"
 C_OK="\033[38;5;114m"
 C_ERR="\033[38;5;203m"
+C_WARN="\033[38;5;222m"
 C_TITLE="\033[38;5;222m"
 C_DIM="\033[38;5;242m"
 C_RESET="\033[0m"
@@ -12,6 +13,7 @@ C_RESET="\033[0m"
 info() { printf "${C_INFO}[INFO]${C_RESET} %s\n" "$1"; }
 success() { printf "${C_OK}[ OK ]${C_RESET} %s\n" "$1"; }
 error() { printf "${C_ERR}[FAIL]${C_RESET} %s\n" "$1" >&2; exit 1; }
+warn() { printf "${C_WARN}[WARN]${C_RESET} %s\n" "$1"; }
 
 progress_bar() {
     local current=$1

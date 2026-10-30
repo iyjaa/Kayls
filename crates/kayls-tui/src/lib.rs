@@ -51,7 +51,7 @@ fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Resul
 
         terminal.draw(|frame| ui::render(frame, &app))?;
 
-        if event::poll(Duration::from_millis(100))? {
+        if event::poll(Duration::from_millis(500))? {
             match event::read()? {
                 Event::Paste(text) => {
                     app.paste(&text);

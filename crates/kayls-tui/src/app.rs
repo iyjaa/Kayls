@@ -712,9 +712,9 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('m') => {
-                // Buka popup pilih mode
+                // Buka popup pilih mode (cek saved_mode, bukan mode yang sudah ditimpa)
+                self.keybinding_cursor = if self.saved_mode == Mode::Easy { 1 } else { 0 };
                 self.mode = Mode::SelectKeybinding;
-                self.keybinding_cursor = if self.mode == Mode::Easy { 1 } else { 0 };
             }
             KeyCode::Char('q') => {
                 // Sembunyikan explorer dan fokus ke editor

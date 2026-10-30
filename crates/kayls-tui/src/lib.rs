@@ -5,7 +5,7 @@ mod ui;
 pub use app::App;
 
 use anyhow::Result;
-use crossterm::event::{self, Event, EnableMouseCapture, DisableMouseCapture};
+use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event};
 use crossterm::execute;
 use kayls_core::Document;
 use ratatui::DefaultTerminal;

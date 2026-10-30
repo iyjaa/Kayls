@@ -186,7 +186,8 @@ impl App {
             // Cek dirty sebelum quit
             if let Some(editor) = &self.editor {
                 if editor.dirty {
-                    self.status_message = Some("Unsaved changes! Save first (Ctrl+S / Esc w).".to_string());
+                    self.status_message =
+                        Some("Unsaved changes! Save first (Ctrl+S / Esc w).".to_string());
                     self.status_time = Some(Instant::now());
                     return;
                 }
@@ -249,7 +250,8 @@ impl App {
                     // Cek dirty sebelum membuka file baru
                     if let Some(editor) = &self.editor {
                         if editor.dirty {
-                            self.status_message = Some("Unsaved changes! Save first (Ctrl+S).".to_string());
+                            self.status_message =
+                                Some("Unsaved changes! Save first (Ctrl+S).".to_string());
                             self.status_time = Some(Instant::now());
                             return;
                         }
@@ -265,7 +267,8 @@ impl App {
                     // Quit
                     if let Some(editor) = &self.editor {
                         if editor.dirty {
-                            self.status_message = Some("Unsaved changes! Save first (Ctrl+S).".to_string());
+                            self.status_message =
+                                Some("Unsaved changes! Save first (Ctrl+S).".to_string());
                             self.status_time = Some(Instant::now());
                             return;
                         }
@@ -647,7 +650,8 @@ impl App {
                 // Cek dirty sebelum membuka file baru
                 if let Some(editor) = &self.editor {
                     if editor.dirty {
-                        self.status_message = Some("Unsaved changes! Save first (Esc w).".to_string());
+                        self.status_message =
+                            Some("Unsaved changes! Save first (Esc w).".to_string());
                         self.status_time = Some(Instant::now());
                         return;
                     }
@@ -742,8 +746,8 @@ impl App {
     fn handle_prompt(&mut self, key: KeyEvent) {
         match key.code {
             KeyCode::Esc => {
-                                self.mode = self.saved_mode;
-                                self.input_buffer.clear();
+                self.mode = self.saved_mode;
+                self.input_buffer.clear();
                 self.status_message = None;
                 self.status_time = None;
             }

@@ -8,10 +8,14 @@ use ratatui_core::layout::Rect;
 impl Editor {
     pub fn input(&mut self, key: KeyEvent, area: &Rect) -> Result<()> {
         use crossterm::event::KeyCode;
-        
+
         // Tandai dirty jika tombol yang mengubah teks
         match key.code {
-            KeyCode::Char(_) | KeyCode::Backspace | KeyCode::Enter | KeyCode::Delete | KeyCode::Tab => {
+            KeyCode::Char(_)
+            | KeyCode::Backspace
+            | KeyCode::Enter
+            | KeyCode::Delete
+            | KeyCode::Tab => {
                 self.dirty = true;
             }
             _ => {}

@@ -233,6 +233,7 @@ impl App {
             editor.apply(InsertText {
                 text: text.to_string(),
             });
+            editor.dirty = true;
         }
     }
 

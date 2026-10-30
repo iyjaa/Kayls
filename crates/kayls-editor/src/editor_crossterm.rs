@@ -9,21 +9,23 @@ impl Editor {
     pub fn input(&mut self, key: KeyEvent, area: &Rect) -> Result<()> {
         use crossterm::event::KeyCode;
 
-        // Tandai dirty jika tombol yang mengubah teks
-        match key.code {
-            KeyCode::Char(_)
-            | KeyCode::Backspace
-            | KeyCode::Enter
-            | KeyCode::Delete
-            | KeyCode::Tab => {
-                self.dirty = true;
-            }
-            _ => {}
-        }
-
         let shift = key.modifiers.contains(KeyModifiers::SHIFT);
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
-        let _alt = key.modifiers.contains(KeyModifiers::ALT);
+        let alt = key.modifiers.contains(KeyModifiers::ALT);
+
+        // Tandai dirty hanya jika tombol benar-benar mengubah teks
+        let is_edit = match key.code {
+            KeyCode::Char(_) => !ctrl && !alt,
+            KeyCode::Backspace
+            | KeyCode::Enter
+            | KeyCode::Delete
+            | KeyCode::Tab
+            | KeyCode::BackTab => true,
+            _ => false,
+        };
+        if is_edit {
+            self.dirty = true;
+        }
 
         match key.code {
             KeyCode::Char('÷') => self.apply(ToggleComment {}),

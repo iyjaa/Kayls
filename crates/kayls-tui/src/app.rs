@@ -312,31 +312,19 @@ impl App {
                 }
             }
             KeyCode::Enter => {
-                // Simpan pilihan
-                let new_mode = if self.keybinding_cursor == 1 {
-                    Mode::Easy
-                } else {
-                    Mode::Normal
-                };
-                self.mode = new_mode;
-                self.saved_mode = new_mode;
-                // Update config
-                let mut config = Config::load();
-                config.editor.keybinding = if self.keybinding_cursor == 1 {
-                    "easy".to_string()
-                } else {
-                    "vim".to_string()
-                };
-                let _ = config.save();
-                self.status_message = Some(format!(
-                    "Mode: {}",
-                    if self.keybinding_cursor == 1 {
-                        "Easy"
-                    } else {
-                        "Vim"
+                if let Some(match_idx) = self.search.next_match() {
+                    let h = self.editor_height as usize;
+                    if let Some(editor) = &mut self.editor {
+                        editor.set_cursor(match_idx);
+                        editor.scroll_to_cursor(h);
                     }
-                ));
-                self.status_time = Some(Instant::now());
+                    self.status_message = Some(format!(
+                        "Match {}/{}",
+                        self.search.current_idx + 1,
+                        self.search.matches.len()
+                    ));
+                    self.status_time = Some(Instant::now());
+                }
             }
             KeyCode::Esc => {
                 self.mode = self.saved_mode;
@@ -352,35 +340,18 @@ impl App {
                 self.search.reset();
             }
             KeyCode::Enter => {
-                if let Some(editor) = &self.editor {
-                    let code = editor.get_content();
-                    // Jika belum ada match dan belum selesai scan, lanjutkan
-                    if self.search.matches.is_empty() && !self.search.scan_complete {
-                        self.search.continue_search(&code);
+                if let Some(match_idx) = self.search.next_match() {
+                    let h = self.editor_height as usize;
+                    if let Some(editor) = &mut self.editor {
+                        editor.set_cursor(match_idx);
+                        editor.scroll_to_cursor(h);
                     }
-                    // Dapatkan match berikutnya
-                    if let Some(match_idx) = self.search.next_match() {
-                        let h = self.editor_height as usize;
-                        if let Some(editor) = &mut self.editor {
-                            editor.set_cursor(match_idx);
-                            editor.scroll_to_cursor(h);
-                        }
-                        let status = if !self.search.scan_complete {
-                            format!(
-                                "Match {}/{} (scanning...)",
-                                self.search.current_idx + 1,
-                                self.search.matches.len()
-                            )
-                        } else {
-                            format!(
-                                "Match {}/{}",
-                                self.search.current_idx + 1,
-                                self.search.matches.len()
-                            )
-                        };
-                        self.status_message = Some(status);
-                        self.status_time = Some(Instant::now());
-                    }
+                    self.status_message = Some(format!(
+                        "Match {}/{}",
+                        self.search.current_idx + 1,
+                        self.search.matches.len()
+                    ));
+                    self.status_time = Some(Instant::now());
                 }
             }
             KeyCode::Char(c) => {

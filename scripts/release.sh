@@ -3,6 +3,7 @@
 set -eo pipefail
 
 VERSION=$1
+REPO="iyjaa/Kayls"
 
 if [ -z "$VERSION" ]; then
     echo "Usage: $0 <version>"
@@ -24,22 +25,14 @@ if ! cargo update -w; then
     exit 1
 fi
 
-# 3. Commit
+# Buat branch rilis SEBELUM commit
+BRANCH="release/v$VERSION"
+git checkout -b "$BRANCH"
+
+# Commit
 echo "Committing version bump..."
 git add Cargo.toml VERSION Cargo.lock
 git commit -m "chore: release v$VERSION"
-
-# Konfirmasi sebelum push
-read -p "Push to main and create tag v$VERSION? (y/n) " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Aborted."
-    exit 1
-fi
-
-# Buat branch rilis
-BRANCH="release/v$VERSION"
-git checkout -b "$BRANCH"
 git push origin "$BRANCH"
 
 # Buat PR (menggunakan gh)

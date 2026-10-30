@@ -650,12 +650,11 @@ impl App {
                 // Cek dirty sebelum membuka file baru
                 if let Some(editor) = &self.editor
                     && editor.dirty
-                    {
-                        self.status_message =
-                            Some("Unsaved changes! Save first (Esc w).".to_string());
-                        self.status_time = Some(Instant::now());
-                        return;
-                    }
+                {
+                    self.status_message = Some("Unsaved changes! Save first (Esc w).".to_string());
+                    self.status_time = Some(Instant::now());
+                    return;
+                }
                 self.mode = Mode::Prompt;
                 self.input_buffer.clear();
                 self.status_message = Some("Open file:".to_string());

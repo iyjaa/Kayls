@@ -10,7 +10,7 @@ Kayls is a lightweight, fast terminal-based IDE written in Rust. It runs in any 
 
 ## Status
 
-**Kayls-v1.0.9** — Stability and polish: fixed layout offsets, added release script with checksum, unified CI for Android release, macOS checksum fallback, and Unicode-safe search tests.
+**Kayls-v1.0.10** — Progressive search with 10k-line scanning for instant feedback, search logic refactored into `search.rs`, release script now creates PR, and installer strict checksum mode.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for feature progress and [docs/VERSIONING.md](docs/VERSIONING.md) for versioning.
 

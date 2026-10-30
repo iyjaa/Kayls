@@ -17,6 +17,10 @@ sed -i "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
 # 2. Update VERSION file
 echo "Kayls-v$VERSION" > VERSION
 
+# 3. Update Cargo.lock
+echo "Updating Cargo.lock..."
+cargo update -w 2>/dev/null || cargo check --workspace 2>/dev/null || true
+
 # 3. Commit
 echo "Committing version bump..."
 git add Cargo.toml VERSION Cargo.lock

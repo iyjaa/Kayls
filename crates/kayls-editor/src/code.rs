@@ -480,7 +480,6 @@ impl Code {
             self.notify_changes(&self.current_batch.edits);
             self.history.push(self.current_batch.clone());
             self.current_batch = EditBatch::new();
-            self.revision += 1;
         }
     }
 
@@ -489,6 +488,7 @@ impl Code {
         let byte_len: usize = text.chars().map(|ch| ch.len_utf8()).sum();
 
         self.content.insert(from, text);
+        self.revision += 1;
 
         if self.applying_history {
             self.current_batch.edits.push(Edit {
@@ -516,6 +516,7 @@ impl Code {
         let removed_text = self.content.slice(from..to).to_string();
 
         self.content.remove(from..to);
+        self.revision += 1;
 
         if self.applying_history {
             self.current_batch.edits.push(Edit {

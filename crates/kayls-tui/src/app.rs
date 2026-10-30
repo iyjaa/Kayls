@@ -409,23 +409,7 @@ impl App {
 
         if let Some(editor) = &self.editor {
             let code = editor.get_content();
-
-            // Lowercase setiap karakter secara aman (tanpa byte slicing)
-            let lower = |c: char| c.to_lowercase().next().unwrap_or(c);
-            let query_chars: Vec<char> = self.search_query.chars().map(lower).collect();
-            let code_chars: Vec<char> = code.chars().map(lower).collect();
-
-            if query_chars.is_empty() || code_chars.len() < query_chars.len() {
-                return;
-            }
-
-            // Cari dengan windows (indeks karakter, bukan byte)
-            self.search_matches = code_chars
-                .windows(query_chars.len())
-                .enumerate()
-                .filter(|(_, w)| *w == &query_chars[..])
-                .map(|(i, _)| i)
-                .collect();
+            self.search_matches = find_matches(&code, &self.search_query);
         }
     }
 
@@ -1062,6 +1046,26 @@ impl App {
             self.status_time = None;
         }
     }
+}
+
+fn find_matches(code: &str, query: &str) -> Vec<usize> {
+    if query.is_empty() {
+        return Vec::new();
+    }
+    let lower = |c: char| c.to_lowercase().next().unwrap_or(c);
+    let query_chars: Vec<char> = query.chars().map(lower).collect();
+    let code_chars: Vec<char> = code.chars().map(lower).collect();
+
+    if query_chars.is_empty() || code_chars.len() < query_chars.len() {
+        return Vec::new();
+    }
+
+    code_chars
+        .windows(query_chars.len())
+        .enumerate()
+        .filter(|(_, w)| *w == &query_chars[..])
+        .map(|(i, _)| i)
+        .collect()
 }
 
 fn detect_language(path: &std::path::Path) -> &'static str {

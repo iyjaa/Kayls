@@ -22,12 +22,15 @@
 - [x] Release waits for CI check
 - [x] `scripts/release.sh` for version sync
 
-### v1.0.9 — Layout & Release Polish
-- [x] Fixed editor layout offsets when Explorer is hidden (x=1, width-2)
-- [x] `release.sh` now stages `Cargo.lock` and asks for confirmation
-- [x] `release-android.yml` waits for `check` and generates checksum
-- [x] Installer supports `shasum` (macOS) fallback
-- [x] Added tests for Unicode-safe search and dirty tracking
+### v1.0.9 — Layout, Release & Test Polish
+- [x] Fixed editor layout offsets (Explorer hidden: x=1, width-2; Explorer shown: W-(EXPLORER_WIDTH+2))
+- [x] `release.sh` stages `Cargo.lock`, runs `cargo update`, and asks for confirmation
+- [x] `release-android.yml` waits for `check` and generates per-file checksums
+- [x] Per-file checksums (`<archive>.sha256`) to avoid conflicts between workflows
+- [x] Installer supports `shasum` (macOS) fallback and downloads `<archive>.sha256`
+- [x] Panic hook disables mouse capture and restores terminal
+- [x] Undo/Redo now increment revision (dirty tracking catches all edits)
+- [x] Real tests for Unicode-safe search (`find_matches`) and dirty tracking
 
 ## Next Up (v1.1.x)
 

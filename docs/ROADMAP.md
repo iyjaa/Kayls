@@ -1,6 +1,6 @@
 # Kayls Roadmap
 
-## Current Status: v1.0.9 (Stable)
+## Current Status: v1.0.10 (Stable)
 
 - [x] Performance: migrate Document to ropey, optimize FileTree, remove blocking I/O.
 - [x] UI: dynamic theme-aware gradient colors for nested folders and files.
@@ -21,6 +21,14 @@
 - [x] CI for `feat/*` and `docs/*` branches
 - [x] Release waits for CI check
 - [x] `scripts/release.sh` for version sync
+
+### v1.0.10 — Progressive Search
+- [x] Search logic moved to `search.rs` (app.rs is leaner)
+- [x] Progressive search: 10k lines per scan, instant feedback
+- [x] `release.yml` uses `find` (fixes macOS/Linux release)
+- [x] `release.sh` fails loudly on `cargo update` error
+- [x] `scripts/retag.sh` for re-releasing the same version
+- [x] Installer supports `KAYLS_STRICT_CHECKSUM=1` for strict mode
 
 ### v1.0.9 — Layout, Release & Test Polish
 - [x] Fixed editor layout offsets (Explorer hidden: x=1, width-2; Explorer shown: W-(EXPLORER_WIDTH+2))

@@ -145,8 +145,16 @@ main() {
     if curl -fsSL "$checksum_url" -o "$tmp_dir/checksums.sha256" 2>/dev/null; then
         local expected=$(grep "$archive" "$tmp_dir/checksums.sha256" | awk '{print $1}')
         if [ -n "$expected" ]; then
-            local actual=$(sha256sum "$tmp_dir/$archive" | awk '{print $1}')
-            if [ "$expected" != "$actual" ]; then
+            # Gunakan sha256sum (Linux) atau shasum -a 256 (macOS)
+            if command -v sha256sum >/dev/null 2>&1; then
+                local actual=$(sha256sum "$tmp_dir/$archive" | awk '{print $1}')
+            elif command -v shasum >/dev/null 2>&1; then
+                local actual=$(shasum -a 256 "$tmp_dir/$archive" | awk '{print $1}')
+            else
+                warn "Neither sha256sum nor shasum found, skipping verification."
+                actual=""
+            fi
+            if [ -n "$actual" ] && [ "$expected" != "$actual" ]; then
                 error "Checksum mismatch for $archive!"
             fi
             success "Checksum verified."

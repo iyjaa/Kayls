@@ -3,7 +3,7 @@
 > Summary of issues from [GitHub Issues](https://github.com/iyjaa/Kayls/issues).
 > For the full list, see GitHub.
 
-**Last updated**: 2026-10-28
+**Last updated**: 2026-10-30
 
 ---
 
@@ -16,7 +16,6 @@ Issues that have been reported but not yet fixed.
 | #5 | [Docs] Create a tutorial for installing Kayls on Android/Termux | Other | 2026-10-28 |
 | #4 | [UI] Add tab bar for multiple files | Other | 2026-10-28 |
 | #3 | [Editor Core] Implement multiple cursors (Ctrl+D) | Other | 2026-10-28 |
-| #1 | testing for workflow | Other | 2026-10-14 |
 
 ---
 
@@ -36,7 +35,7 @@ Issues that have been fixed and merged. Contributors are credited below.
 
 | ID | Title | Type | Fixed by | Version |
 |----|-------|------|----------|---------|
-| — | No issues fixed yet | — | — | — |
+| #1 | testing for workflow | Other |  | 2026-10-30 |
 
 ---
 
@@ -75,7 +74,7 @@ Thanks to everyone who has contributed to Kayls:
    - **Environment** — OS, terminal, Kayls version
 3. Wait for maintainer triage
 
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for contribution workflow.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow.
 
 ---
 

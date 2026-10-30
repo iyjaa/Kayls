@@ -471,11 +471,10 @@ impl App {
                 return;
             }
 
-            // Ctrl+Y untuk Copy ke App.clipboard (antar-file)
-            if key.code == KeyCode::Char('y') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            // Alt+C untuk Copy (karena Shift tidak ada di Termux)
+            if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::ALT) {
                 use kayls_editor::actions::Copy;
                 editor.apply(Copy {});
-                // Simpan ke clipboard App
                 if let Ok(text) = editor.get_clipboard() {
                     self.clipboard = text;
                 }

@@ -17,6 +17,13 @@ sed -i "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
 # 2. Update VERSION file
 echo "Kayls-v$VERSION" > VERSION
 
+# 3. Update Cargo.lock
+echo "Updating Cargo.lock..."
+if ! cargo update -w; then
+    echo "ERROR: cargo update -w failed. Cargo.lock may be stale."
+    exit 1
+fi
+
 # 3. Commit
 echo "Committing version bump..."
 git add Cargo.toml VERSION Cargo.lock
@@ -30,12 +37,21 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-git push origin main
+# Buat branch rilis
+BRANCH="release/v$VERSION"
+git checkout -b "$BRANCH"
+git push origin "$BRANCH"
 
-# 4. Create tag
-echo "Creating tag Kayls-v$VERSION..."
-git tag "Kayls-v$VERSION"
-git push origin "Kayls-v$VERSION"
+# Buat PR (menggunakan gh)
+if command -v gh >/dev/null 2>&1; then
+    gh pr create --title "chore: release v$VERSION" --body "Release v$VERSION" --base main --head "$BRANCH"
+    echo "PR created. Merge it to trigger the release."
+else
+    echo "gh CLI not found. Please create PR manually: https://github.com/$REPO/compare/main...$BRANCH"
+fi
 
-echo "✅ Release v$VERSION triggered!"
+# Tag tetap dibuat di main setelah PR di-merge (manual)
+echo "After merging, run: git tag Kayls-v$VERSION && git push origin Kayls-v$VERSION"
+
+echo "✅ PR created for v$VERSION. Merge it, then tag manually."
 echo "Monitor at: https://github.com/iyjaa/Kayls/actions"

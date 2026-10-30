@@ -323,16 +323,16 @@ jobs:
         run: |
           cd artifacts
           for file in $(find . -name "*.tar.gz"); do
-            sha256sum "$file" >> checksums.sha256
+            sha256sum "$file" > "$file.sha256"
           done
-          cat checksums.sha256
+          find . -name '*.sha256' -print
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/**/*.tar.gz
-            artifacts/checksums.sha256
+            artifacts/**/*.sha256
           generate_release_notes: true
           draft: false
           prerelease: false

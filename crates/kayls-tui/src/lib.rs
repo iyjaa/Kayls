@@ -35,7 +35,7 @@ fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Resul
         let editor_width = if app.show_explorer {
             size.width.saturating_sub(EXPLORER_WIDTH + 5)
         } else {
-            size.width.saturating_sub(5)
+            size.width.saturating_sub(2)
         };
         app.editor_height = editor_height;
         app.editor_width = editor_width;
@@ -46,7 +46,7 @@ fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Resul
             x: if app.show_explorer {
                 EXPLORER_WIDTH + 1
             } else {
-                4
+                1
             },
             y: 2,
             width: editor_width,

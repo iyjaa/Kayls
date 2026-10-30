@@ -19,8 +19,17 @@ echo "Kayls-v$VERSION" > VERSION
 
 # 3. Commit
 echo "Committing version bump..."
-git add Cargo.toml VERSION
+git add Cargo.toml VERSION Cargo.lock
 git commit -m "chore: release v$VERSION"
+
+# Konfirmasi sebelum push
+read -p "Push to main and create tag v$VERSION? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 1
+fi
+
 git push origin main
 
 # 4. Create tag

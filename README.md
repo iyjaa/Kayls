@@ -53,6 +53,19 @@ echo "deb [signed-by=/etc/apt/keyrings/kayls.gpg] https://iyjaa.github.io/Kayls-
 apt update && apt install -y kayls
 ```
 
+
+## Configuration
+
+Kayls reads settings from `~/.config/kayls/config.toml`. The file is created automatically when you change the theme or keybinding mode.
+
+```toml
+[editor]
+theme = "vesper"
+show_explorer = true
+keybinding = "vim" # or "easy"
+mouse_capture = false # set to true for desktop mouse support
+```
+
 ## Keybindings & Modes
 
 Kayls supports two distinct modes, switchable via Esc then m:

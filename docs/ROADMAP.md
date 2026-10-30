@@ -12,7 +12,7 @@
 
 ## Next Up (v1.1.x)
 
-- [ ] **Multi-Cursor** — Edit multiple lines simultaneously (Ctrl+D).
+- [ ] **Multi-Cursor** — Edit multiple lines simultaneously (Alt+D).
 - [ ] **Tutorial Termux** — Step-by-step guide for Android users.
 
 

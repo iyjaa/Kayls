@@ -12,9 +12,9 @@
 
 ### v1.0.8 — Stability & Data Safety
 - [x] Fixed theme switch data loss (`set_theme` instead of `load_editor`)
-- [x] Revision-based dirty tracking (no false positives)
+- [x] Revision-based dirty tracking (now catches undo/redo, Ctrl+X/K/D)
 - [x] Unified clipboard (Ctrl+C/X sync to App.clipboard)
-- [x] Unicode-safe search (`char_indices`)
+- [x] Unicode-safe search (character-based via `windows()`)
 - [x] Installer checksum verification
 - [x] Adaptive polling (100ms with status, 1000ms idle)
 - [x] Unified `EXPLORER_WIDTH` constant

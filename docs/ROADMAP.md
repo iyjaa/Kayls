@@ -1,6 +1,6 @@
 # Kayls Roadmap
 
-## Current Status: v1.0.8 (Stable)
+## Current Status: v1.0.9 (Stable)
 
 - [x] Performance: migrate Document to ropey, optimize FileTree, remove blocking I/O.
 - [x] UI: dynamic theme-aware gradient colors for nested folders and files.
@@ -21,6 +21,13 @@
 - [x] CI for `feat/*` and `docs/*` branches
 - [x] Release waits for CI check
 - [x] `scripts/release.sh` for version sync
+
+### v1.0.9 — Layout & Release Polish
+- [x] Fixed editor layout offsets when Explorer is hidden (x=1, width-2)
+- [x] `release.sh` now stages `Cargo.lock` and asks for confirmation
+- [x] `release-android.yml` waits for `check` and generates checksum
+- [x] Installer supports `shasum` (macOS) fallback
+- [x] Added tests for Unicode-safe search and dirty tracking
 
 ## Next Up (v1.1.x)
 

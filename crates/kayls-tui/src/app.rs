@@ -968,7 +968,16 @@ impl App {
 
         if let Some(theme) = new_theme {
             self.theme = theme;
-            self.load_editor();
+            // Hanya ganti tema, JANGAN bangun ulang editor dari Document
+            let theme_colors = match theme {
+                Theme::Vesper => vesper(),
+                Theme::Gruvbox => gruvbox(),
+                Theme::Dracula => dracula(),
+                Theme::Nord => nord(),
+            };
+            if let Some(editor) = &mut self.editor {
+                editor.set_theme(theme_colors);
+            }
 
             let name = match theme {
                 Theme::Vesper => "Vesper",

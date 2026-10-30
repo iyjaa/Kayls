@@ -552,6 +552,12 @@ impl Editor {
         self.reset_highlight_cache();
     }
 
+    pub fn set_theme(&mut self, theme: Vec<(&'static str, &'static str)>) {
+        self.theme = Self::build_theme(&theme);
+        // Invalidate highlight cache karena warna berubah
+        self.highlights_cache.borrow_mut().clear();
+    }
+
     pub fn set_cursor(&mut self, cursor: usize) {
         // Izinkan kursor berada di akhir baris (len_chars)
         let max = self.code.len_chars();

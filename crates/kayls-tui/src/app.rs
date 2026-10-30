@@ -1085,3 +1085,7 @@ fn detect_language(path: &std::path::Path) -> &'static str {
         _ => "text",
     }
 }
+
+#[cfg(test)]
+#[path = "app_tests.rs"]
+mod app_tests;

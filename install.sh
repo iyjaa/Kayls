@@ -159,9 +159,15 @@ main() {
             fi
             success "Checksum verified."
         else
+            if [ "${KAYLS_STRICT_CHECKSUM:-0}" = "1" ]; then
+                error "Checksum not found for $archive!"
+            fi
             warn "Checksum not found for $archive, skipping verification."
         fi
     else
+        if [ "${KAYLS_STRICT_CHECKSUM:-0}" = "1" ]; then
+            error "Checksums file not available for $archive!"
+        fi
         warn "Checksums file not available, skipping verification."
     fi
     printf "\n"

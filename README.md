@@ -10,7 +10,7 @@ Kayls is a lightweight, fast terminal-based IDE written in Rust. It runs in any 
 
 ## Status
 
-**Kayls-v1.0.6** — Improved performance, dynamic Explorer colors, and new Welcome Screen.
+**Kayls-v1.0.7** — Improved performance, dynamic Explorer colors, and new Welcome Screen.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for feature progress and [docs/VERSIONING.md](docs/VERSIONING.md) for versioning.
 

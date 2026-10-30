@@ -1,6 +1,6 @@
 # Kayls Roadmap
 
-## Current Status: v1.0.6 (Stable)
+## Current Status: v1.0.7 (Stable)
 
 - [x] Performance: migrate Document to ropey, optimize FileTree, remove blocking I/O.
 - [x] UI: dynamic theme-aware gradient colors for nested folders and files.

@@ -16,6 +16,8 @@ pub struct EditorConfig {
     pub show_explorer: bool,
     #[serde(default = "default_keybinding")]
     pub keybinding: String,
+    #[serde(default = "default_mouse_capture")]
+    pub mouse_capture: bool,
 }
 
 fn default_theme() -> String {
@@ -24,6 +26,10 @@ fn default_theme() -> String {
 
 fn default_keybinding() -> String {
     "vim".to_string()
+}
+
+fn default_mouse_capture() -> bool {
+    false
 }
 
 fn default_show_explorer() -> bool {
@@ -36,6 +42,7 @@ impl Default for EditorConfig {
             theme: default_theme(),
             show_explorer: default_show_explorer(),
             keybinding: default_keybinding(),
+            mouse_capture: default_mouse_capture(),
         }
     }
 }

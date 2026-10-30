@@ -5,7 +5,8 @@ mod ui;
 pub use app::App;
 
 use anyhow::Result;
-use crossterm::event::{self, Event};
+use crossterm::event::{self, Event, EnableMouseCapture, DisableMouseCapture};
+use crossterm::execute;
 use kayls_core::Document;
 use ratatui::DefaultTerminal;
 use ratatui::layout::Rect;
@@ -13,7 +14,9 @@ use std::time::Duration;
 
 pub fn run(document: Option<Document>) -> Result<()> {
     let mut terminal = ratatui::init();
+    execute!(std::io::stdout(), EnableMouseCapture)?;
     let result = run_loop(&mut terminal, document);
+    let _ = execute!(std::io::stdout(), DisableMouseCapture);
     ratatui::restore();
     result
 }
@@ -57,6 +60,9 @@ fn run_loop(terminal: &mut DefaultTerminal, document: Option<Document>) -> Resul
                     app.handle_key(key);
                 }
                 Event::Resize(_, _) => {}
+                Event::Mouse(mouse_event) => {
+                    app.handle_mouse(mouse_event);
+                }
                 _ => {}
             }
         }

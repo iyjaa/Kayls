@@ -412,6 +412,13 @@ impl App {
         }
     }
 
+    pub fn handle_mouse(&mut self, mouse: crossterm::event::MouseEvent) {
+        if let Some(editor) = &mut self.editor {
+            let area = self.editor_area;
+            let _ = editor.mouse(mouse, &area);
+        }
+    }
+
     fn handle_normal(&mut self, key: KeyEvent) {
         // Ctrl+P untuk File Picker (bisa diakses dari mana saja, termasuk Welcome View)
         if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {

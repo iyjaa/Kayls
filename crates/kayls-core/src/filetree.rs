@@ -361,21 +361,22 @@ impl FileTree {
             stack.push((child, 0));
         }
         std::iter::from_fn(move || {
-            while let Some((entry, depth)) = stack.pop() {
+            if let Some((entry, depth)) = stack.pop() {
                 if entry.is_dir && entry.expanded {
                     for child in entry.children.iter().rev() {
                         stack.push((child, depth + 1));
                     }
                 }
-                return Some((
+                Some((
                     entry.path.as_path(),
                     entry.name.as_str(),
                     entry.is_dir,
                     depth,
                     entry.expanded,
-                ));
+                ))
+            } else {
+                None
             }
-            None
         })
     }
 }

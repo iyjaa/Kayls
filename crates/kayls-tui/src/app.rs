@@ -216,6 +216,14 @@ impl App {
 
                 if let Some(path) = self.picker.handle_key(key, &root) {
                     self.mode = self.saved_mode;
+                    // Cek dirty sebelum membuka file baru
+                    if let Some(editor) = &self.editor
+                        && editor.is_dirty()
+                    {
+                        self.status_message = Some("Unsaved changes! Save first.".to_string());
+                        self.status_time = Some(Instant::now());
+                        return;
+                    }
                     if let Ok(doc) = Document::open(&path) {
                         self.document = Some(doc);
                         self.load_editor();
@@ -400,18 +408,18 @@ impl App {
         }
 
         if let Some(editor) = &self.editor {
-            let code = editor.get_content(); // Mengembalikan String
+            let code = editor.get_content();
             let query_lower = self.search_query.to_lowercase();
-            let code_lower = code.to_lowercase();
 
-            // Gunakan pencarian char-based, bukan byte-based
-            let mut byte_start = 0;
-            while let Some(byte_pos) = code_lower[byte_start..].find(&query_lower) {
-                let abs_byte_pos = byte_start + byte_pos;
-                // Konversi byte offset ke char offset
-                let char_pos = code[..abs_byte_pos].chars().count();
-                self.search_matches.push(char_pos);
-                byte_start = abs_byte_pos + query_lower.len();
+            // Iterasi per karakter menggunakan char_indices (aman untuk Unicode)
+            for (char_pos, (byte_pos, _)) in code.char_indices().enumerate() {
+                let remaining = &code[byte_pos..];
+                if remaining.len() >= query_lower.len() {
+                    let snippet = &remaining[..query_lower.len()];
+                    if snippet.to_lowercase() == query_lower {
+                        self.search_matches.push(char_pos);
+                    }
+                }
             }
         }
     }
@@ -584,6 +592,14 @@ impl App {
                 } else {
                     let path = tree.selected_entry().map(|e| e.path.clone());
                     if let Some(path) = path {
+                        // Cek dirty sebelum membuka file baru
+                        if let Some(editor) = &self.editor
+                            && editor.is_dirty()
+                        {
+                            self.status_message = Some("Unsaved changes! Save first.".to_string());
+                            self.status_time = Some(Instant::now());
+                            return;
+                        }
                         self.open_file_from_path(path);
                     }
                 }
@@ -685,6 +701,14 @@ impl App {
                 self.status_time = Some(Instant::now());
             }
             KeyCode::Char('n') => {
+                // Cek dirty sebelum membuat file baru
+                if let Some(editor) = &self.editor
+                    && editor.is_dirty()
+                {
+                    self.status_message = Some("Unsaved changes! Save first (Esc w).".to_string());
+                    self.status_time = Some(Instant::now());
+                    return;
+                }
                 self.mode = Mode::PromptNewFile;
                 self.input_buffer.clear();
                 self.status_message = Some("New file:".to_string());

@@ -59,6 +59,7 @@ pub struct App {
     pub search_query: String,
     pub search_matches: Vec<usize>,
     pub search_current_idx: usize,
+    pub search_entered: bool,
     pub read_mode: bool,
     pub picker: crate::picker::PickerState,
     pub mode: Mode,
@@ -108,6 +109,7 @@ impl App {
             search_query: String::new(),
             search_matches: Vec::new(),
             search_current_idx: 0,
+            search_entered: false,
             read_mode: false,
             picker: crate::picker::PickerState::new(),
             mode: if config.editor.keybinding.to_lowercase() == "easy" {
@@ -346,11 +348,15 @@ impl App {
             }
             KeyCode::Enter => {
                 if !self.search_matches.is_empty() {
-                    // Jika ini Enter pertama, langsung ke hasil pertama (idx 0).
-                    // Jika bukan, baru maju ke hasil berikutnya.
-                    if !self.search_query.is_empty() && self.search_matches.len() > 1 {
-                        self.search_current_idx =
-                            (self.search_current_idx + 1) % self.search_matches.len();
+                    // Jika ini Enter pertama, langsung ke match ke-0.
+                    // Jika bukan, baru maju ke match berikutnya.
+                    if self.search_entered {
+                        if !self.search_query.is_empty() && self.search_matches.len() > 1 {
+                            self.search_current_idx =
+                                (self.search_current_idx + 1) % self.search_matches.len();
+                        }
+                    } else {
+                        self.search_entered = true;
                     }
 
                     let match_char_idx = self.search_matches[self.search_current_idx];
@@ -369,10 +375,12 @@ impl App {
             }
             KeyCode::Char(c) => {
                 self.search_query.push(c);
+                self.search_entered = false;
                 self.perform_search();
             }
             KeyCode::Backspace => {
                 self.search_query.pop();
+                self.search_entered = false;
                 self.perform_search();
             }
             _ => {}

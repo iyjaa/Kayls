@@ -1,3 +1,10 @@
+#![allow(
+    clippy::empty_line_after_doc_comments,
+    clippy::type_complexity,
+    clippy::too_many_arguments,
+    clippy::needless_range_loop,
+    clippy::len_without_is_empty
+)]
 pub mod actions;
 pub mod auto_pair;
 pub mod click;

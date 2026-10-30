@@ -184,13 +184,13 @@ impl App {
             && let KeyCode::Char('q') = key.code
         {
             // Cek dirty sebelum quit
-            if let Some(editor) = &self.editor {
-                if editor.dirty {
-                    self.status_message =
-                        Some("Unsaved changes! Save first (Ctrl+S / Esc w).".to_string());
-                    self.status_time = Some(Instant::now());
-                    return;
-                }
+            if let Some(editor) = &self.editor
+                && editor.dirty
+            {
+                self.status_message =
+                    Some("Unsaved changes! Save first (Ctrl+S / Esc w).".to_string());
+                self.status_time = Some(Instant::now());
+                return;
             }
             self.should_quit = true;
             return;
@@ -248,13 +248,13 @@ impl App {
                 }
                 KeyCode::Char('o') => {
                     // Cek dirty sebelum membuka file baru
-                    if let Some(editor) = &self.editor {
-                        if editor.dirty {
-                            self.status_message =
-                                Some("Unsaved changes! Save first (Ctrl+S).".to_string());
-                            self.status_time = Some(Instant::now());
-                            return;
-                        }
+                    if let Some(editor) = &self.editor
+                        && editor.dirty
+                    {
+                        self.status_message =
+                            Some("Unsaved changes! Save first (Ctrl+S).".to_string());
+                        self.status_time = Some(Instant::now());
+                        return;
                     }
                     self.saved_mode = Mode::Easy;
                     self.mode = Mode::Prompt;
@@ -265,13 +265,13 @@ impl App {
                 }
                 KeyCode::Char('q') => {
                     // Quit
-                    if let Some(editor) = &self.editor {
-                        if editor.dirty {
-                            self.status_message =
-                                Some("Unsaved changes! Save first (Ctrl+S).".to_string());
-                            self.status_time = Some(Instant::now());
-                            return;
-                        }
+                    if let Some(editor) = &self.editor
+                        && editor.dirty
+                    {
+                        self.status_message =
+                            Some("Unsaved changes! Save first (Ctrl+S).".to_string());
+                        self.status_time = Some(Instant::now());
+                        return;
                     }
                     self.should_quit = true;
                     return;
@@ -648,14 +648,14 @@ impl App {
             }
             KeyCode::Char('o') => {
                 // Cek dirty sebelum membuka file baru
-                if let Some(editor) = &self.editor {
-                    if editor.dirty {
+                if let Some(editor) = &self.editor
+                    && editor.dirty
+                    {
                         self.status_message =
                             Some("Unsaved changes! Save first (Esc w).".to_string());
                         self.status_time = Some(Instant::now());
                         return;
                     }
-                }
                 self.mode = Mode::Prompt;
                 self.input_buffer.clear();
                 self.status_message = Some("Open file:".to_string());

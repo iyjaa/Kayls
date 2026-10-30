@@ -1,3 +1,4 @@
+#![allow(clippy::empty_line_after_doc_comments, clippy::never_loop)]
 pub mod config;
 pub mod cursor;
 pub mod document;

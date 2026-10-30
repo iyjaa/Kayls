@@ -58,6 +58,8 @@ apt update && apt install -y kayls
 
 Kayls reads settings from `~/.config/kayls/config.toml`. The file is created automatically when you change the theme or keybinding mode.
 
+**The easiest way to edit:** Press `Ctrl+P`, type `config.toml`, press `Enter`, edit, then `Ctrl+S`. No terminal needed.
+
 ```toml
 [editor]
 theme = "vesper"

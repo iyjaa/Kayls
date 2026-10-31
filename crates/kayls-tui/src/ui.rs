@@ -607,8 +607,14 @@ fn explorer_color(theme: Theme, is_dir: bool, depth: usize, name: &str) -> Color
         ],
     };
 
-    let depth_idx = depth.min(folder_palette.len() - 1);
-    let folder_color = folder_palette[depth_idx];
+    // Gunakan modulo untuk warna dasar (siklus 4 warna)
+    let depth_idx = depth % folder_palette.len();
+    let base_color = folder_palette[depth_idx];
+
+    // Campur dengan hitam berdasarkan kedalaman (semakin dalam, semakin gelap)
+    // depth / 4 menentukan seberapa gelap (0 = terang, 1 = agak gelap, dst)
+    let darkness = (depth / folder_palette.len()) as f32 * 0.15; // 15% lebih gelap per siklus
+    let folder_color = mix_color(base_color, Color::Rgb(0, 0, 0), darkness.min(0.6)); // maksimal 60% gelap
 
     if is_dir {
         return folder_color;

@@ -79,5 +79,14 @@ Kayls supports two distinct modes, switchable via Esc then m:
 
 For a complete list, see [KEYBINDS.md](KEYBINDS.md).
 
+## Documentation
+
+- [Roadmap](docs/ROADMAP.md) — Feature progress.
+- [Versioning](docs/VERSIONING.md) — Version scheme.
+- [Keybindings](KEYBINDS.md) — Complete shortcut list.
+- [AI Context](docs/AI_CONTEXT.md) — Context pack for AI assistants.
+- [Contributing](docs/CONTRIBUTING.md) — Branching and integration contract.
+
+## License
 
 [MIT](LICENSE)

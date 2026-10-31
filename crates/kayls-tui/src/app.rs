@@ -705,7 +705,7 @@ impl App {
                     let content = editor.get_content();
                     let path = doc.path.clone();
 
-                    match std::fs::write(&path, content) {
+                    match kayls_core::fs_util::save_atomic(&path, &content) {
                         Ok(_) => {
                             if let Some(editor) = self.editor.as_mut() {
                                 editor.mark_saved();

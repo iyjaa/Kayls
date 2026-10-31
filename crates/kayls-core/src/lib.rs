@@ -3,6 +3,7 @@ pub mod config;
 pub mod cursor;
 pub mod document;
 pub mod filetree;
+pub mod fs_util;
 
 pub use config::Config;
 pub use cursor::Cursor;
